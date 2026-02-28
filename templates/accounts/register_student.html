@@ -1,0 +1,649 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inscription Étudiant - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================
+       ENHANCED REGISTRATION FORM STYLES
+       ============================================ */
+    
+    /* Typography for Headings */
+    .registration-page h1,
+    .registration-page h2,
+    .registration-page h3 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+    
+    /* Form Step Cards */
+    .form-step {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s;
+    }
+    
+    .form-step:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+    
+    /* Step Badge - Bigger & Clearer (Blue Theme) */
+    .step-badge {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    }
+    
+    /* Section Titles - Bigger & Bolder */
+    .section-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.01em;
+    }
+    
+    /* Form Labels - Clear & Readable */
+    .form-label {
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.75rem;
+        display: block;
+        letter-spacing: -0.01em;
+    }
+    
+    .form-label .required {
+        color: #ef4444;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    
+    /* Form Inputs - Enhanced */
+    .form-input {
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        font-weight: 500;
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        transition: all 0.3s;
+        background: #f9fafb;
+        color: #1f2937;
+    }
+    
+    .form-input:focus {
+        border-color: #3b82f6;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+    
+    .form-input::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+        font-size: 0.95rem;
+    }
+    
+    /* Select styling */
+    select.form-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 1rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 3rem;
+    }
+    
+    /* Input with Icon */
+    .input-icon-wrapper {
+        position: relative;
+    }
+    
+    .input-icon-wrapper .form-input {
+        padding-left: 3rem;
+    }
+    
+    .input-icon-wrapper .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 1.1rem;
+        transition: color 0.3s;
+    }
+    
+    .input-icon-wrapper:focus-within .input-icon {
+        color: #3b82f6;
+    }
+    
+    /* Error Messages - Readable */
+    .error-text {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #ef4444;
+        margin-top: 0.5rem;
+    }
+    
+    /* Info Banner */
+    .info-banner {
+        background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        border-radius: 1rem;
+        padding: 1.5rem 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .info-banner i {
+        font-size: 2rem;
+        color: white;
+    }
+    
+    .info-banner p {
+        margin: 0;
+        color: white;
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+    
+    /* Submit Button - Professional */
+    .btn-submit {
+        width: 100%;
+        padding: 1.25rem 2rem;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.125rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        color: white;
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        transition: all 0.3s;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5);
+    }
+    
+    .btn-submit:active {
+        transform: translateY(-1px);
+    }
+    
+    /* Cancel Button */
+    .btn-cancel {
+        padding: 1.25rem 2rem;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        background: white;
+        color: #6b7280;
+        border: 2px solid #e5e7eb;
+        border-radius: 1rem;
+        transition: all 0.3s;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        display: block;
+    }
+    
+    .btn-cancel:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+    
+    /* Login Section */
+    .login-section {
+        text-align: center;
+        padding: 1.5rem;
+        background: #f9fafb;
+        border-radius: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .login-section p {
+        font-size: 1rem;
+        color: #6b7280;
+        margin: 0 0 1rem 0;
+    }
+    
+    .btn-login {
+        padding: 0.875rem 2rem;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 0.75rem;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-login:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    }
+    .btn-login:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    }
+
+    /* ==========================================
+       DARK MODE SUPPORT
+       ========================================== */
+    .dark .form-step {
+        background: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .dark .step-badge {
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+    }
+    
+    .dark .section-title {
+        color: #f1f5f9;
+    }
+    
+    .dark .form-label {
+        color: #e2e8f0;
+    }
+    
+    .dark .form-input {
+        background: #1e293b;
+        border-color: #334155;
+        color: #f8fafc;
+    }
+    
+    .dark .form-input:focus {
+        border-color: #3b82f6;
+        background: #0f172a;
+    }
+    
+    .dark .form-input::placeholder {
+        color: #64748b;
+    }
+    
+    .dark .login-section {
+        background: rgba(15, 23, 42, 0.6);
+    }
+    
+    .dark .login-section p {
+        color: #94a3b8;
+    }
+    
+    .dark .glass-card {
+        background: rgba(15, 23, 42, 0.7);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .dark .text-blue-100\/80 {
+        color: rgba(219, 234, 254, 0.8);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="registration-page container mx-auto px-4 py-16 max-w-4xl relative">
+    <!-- Background Decor -->
+    <div class="absolute -top-20 -right-20 w-96 h-96 bg-blue-50 rounded-full blur-[100px] -z-10"></div>
+    <div class="absolute top-1/2 -left-20 w-80 h-80 bg-indigo-50 rounded-full blur-[100px] -z-10"></div>
+
+    <!-- Registration Card -->
+    <div class="glass-card rounded-[3rem] shadow-2xl overflow-hidden animate-fadeIn border border-white/60 bg-white/40 backdrop-blur-3xl">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 p-12 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+            
+            <div class="relative z-10">
+                <div class="w-28 h-28 bg-white/10 backdrop-blur-2xl rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 border border-white/20 shadow-2xl">
+                    <i class="fas fa-graduation-cap text-white text-5xl"></i>
+                </div>
+                <h1 class="text-4xl font-black text-white tracking-tight" style="font-family: 'Poppins', sans-serif;">Espace Étudiant</h1>
+                <p class="text-blue-100/80 font-semibold text-lg mt-3">Rejoignez la communauté FSTTIME</p>
+            </div>
+        </div>
+        
+        <!-- Form Content -->
+        <div class="p-10 lg:p-14">
+            
+            <!-- Info Banner -->
+            <div class="info-banner">
+                <i class="fas fa-info-circle"></i>
+                <p>Accès exclusif aux étudiants de l'établissement pour la gestion automatisée des séances.</p>
+            </div>
+            
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                <!-- Display Non-Field Errors (password validation, etc.) -->
+                {% if form.non_field_errors %}
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                        </div>
+                        <div>
+                            {% for error in form.non_field_errors %}
+                            <p class="text-red-600 font-semibold">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- STEP 01: Personal Identity -->
+                <div class="form-step animate-fadeIn" style="animation-delay: 100ms">
+                    <div class="step-badge">01</div>
+                    <h2 class="section-title">Identité Personnelle</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">
+                                Prénom <span class="required">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-input" 
+                                   name="first_name" 
+                                   value="{{ form.first_name.value|default:'' }}"
+                                   placeholder="Ex: Ahmed"
+                                   required>
+                            {% if form.first_name.errors %}
+                            <p class="error-text">{{ form.first_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">
+                                Nom <span class="required">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-input" 
+                                   name="last_name" 
+                                   value="{{ form.last_name.value|default:'' }}"
+                                   placeholder="Ex: Alami"
+                                   required>
+                            {% if form.last_name.errors %}
+                            <p class="error-text">{{ form.last_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Email Field -->
+                    <div class="mt-6">
+                        <label class="form-label">
+                            <i class="fas fa-envelope" style="color: #3b82f6; margin-right: 0.5rem;"></i>
+                            Email Étudiant <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="fas fa-at input-icon"></i>
+                            <input type="email" 
+                                   class="form-input" 
+                                   name="email" 
+                                   value="{{ form.email.value|default:'' }}"
+                                   placeholder="Ex: ahmed.alami@etudiant.univ.ma"
+                                   required>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Utilisez votre email institutionnel</p>
+                        {% if form.email.errors %}
+                        <p class="error-text">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- STEP 02: Academic Curriculum -->
+                <div class="form-step animate-fadeIn" style="animation-delay: 200ms">
+                    <div class="step-badge">02</div>
+                    <h2 class="section-title">Cursus Académique</h2>
+                    
+                    <div class="mb-6">
+                        <label class="form-label">
+                            Code Étudiant (CNE) <span class="required">*</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <i class="fas fa-id-card input-icon"></i>
+                            <input type="text" 
+                                   class="form-input" 
+                                   name="student_id" 
+                                   value="{{ form.student_id.value|default:'' }}"
+                                   placeholder="Ex: R123456789"
+                                   style="font-family: monospace; text-transform: uppercase;"
+                                   required>
+                        </div>
+                        {% if form.student_id.errors %}
+                        <p class="error-text">{{ form.student_id.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">
+                                Filière <span class="required">*</span>
+                            </label>
+                            <select name="program" id="program-select" class="form-input" required>
+                                <option value="">Sélectionner...</option>
+                                {% for value, label in form.fields.program.choices %}
+                                {% if value %}
+                                <option value="{{ value }}" {% if form.program.value == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">
+                                Groupe d'étude <span class="required">*</span>
+                            </label>
+                            <select name="group" id="group-select" class="form-input" required>
+                                <option value="">Sélectionner...</option>
+                                {% for value, label in form.fields.group.choices %}
+                                {% if value %}
+                                <option value="{{ value }}" {% if form.group.value == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                            <p class="text-sm mt-2" id="group-status">
+                                <span class="text-gray-500" id="group-help">
+                                    <i class="fas fa-info-circle"></i> Sélectionnez d'abord une filière
+                                </span>
+                                <span class="text-blue-500 hidden" id="group-loading">
+                                    <i class="fas fa-spinner fa-spin"></i> Chargement des groupes...
+                                </span>
+                                <span class="text-green-500 hidden" id="group-success">
+                                    <i class="fas fa-check-circle"></i> <span id="group-count"></span>
+                                </span>
+                                <span class="text-red-500 hidden" id="group-error">
+                                    <i class="fas fa-exclamation-triangle"></i> Aucun groupe disponible
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 03: Account Security -->
+                <div class="form-step animate-fadeIn" style="animation-delay: 300ms">
+                    <div class="step-badge">03</div>
+                    <h2 class="section-title">Sécurité du Compte</h2>
+                    
+                    <div class="mb-6">
+                        <label class="form-label">
+                            Identifiant Unique <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-input" 
+                               name="username" 
+                               value="{{ form.username.value|default:'' }}"
+                               placeholder="Choisissez un pseudo"
+                               required>
+                        {% if form.username.errors %}
+                        <p class="error-text">{{ form.username.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">
+                                Mot de passe <span class="required">*</span>
+                            </label>
+                            <div class="input-icon-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" 
+                                       class="form-input" 
+                                       name="password1" 
+                                       placeholder="••••••••"
+                                       required>
+                            </div>
+                            {% if form.password1.errors %}
+                            <p class="error-text">{{ form.password1.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">
+                                Confirmation <span class="required">*</span>
+                            </label>
+                            <div class="input-icon-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" 
+                                       class="form-input" 
+                                       name="password2" 
+                                       placeholder="••••••••"
+                                       required>
+                            </div>
+                            {% if form.password2.errors %}
+                            <p class="error-text">{{ form.password2.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 mt-8 animate-fadeInUp" style="animation-delay: 400ms">
+                    <button type="submit" class="btn-submit flex-[3]">
+                        <i class="fas fa-check-circle"></i> Finaliser l'Inscription
+                    </button>
+                    <a href="{% url 'register' %}" class="btn-cancel flex-1">
+                        Annuler
+                    </a>
+                </div>
+            </form>
+            
+            <!-- Login Link -->
+            <div class="login-section">
+                <p>Déjà collaborateur ?</p>
+                <a href="{% url 'login' %}" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Se Connecter
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const programSelect = document.getElementById('program-select');
+    const groupSelect = document.getElementById('group-select');
+    const groupHelp = document.getElementById('group-help');
+    const groupLoading = document.getElementById('group-loading');
+    const groupSuccess = document.getElementById('group-success');
+    const groupError = document.getElementById('group-error');
+    const groupCount = document.getElementById('group-count');
+    
+    // Hide all status messages
+    function hideAllStatus() {
+        groupHelp.classList.add('hidden');
+        groupLoading.classList.add('hidden');
+        groupSuccess.classList.add('hidden');
+        groupError.classList.add('hidden');
+    }
+    
+    // Dynamic group loading based on program selection
+    programSelect.addEventListener('change', function() {
+        const programId = this.value;
+        
+        // Reset group dropdown
+        groupSelect.innerHTML = '<option value="">Sélectionner...</option>';
+        
+        // Hide all status and show appropriate one
+        hideAllStatus();
+        
+        if (!programId) {
+            groupHelp.classList.remove('hidden');
+            return;
+        }
+        
+        // Show loading
+        groupLoading.classList.remove('hidden');
+        
+        // Fetch groups via AJAX
+        fetch(`/accounts/ajax/groups/?program_id=${programId}`)
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading
+                hideAllStatus();
+                
+                if (data && data.length > 0) {
+                    // Populate groups
+                    data.forEach(group => {
+                        const option = document.createElement('option');
+                        option.value = group.id;
+                        option.textContent = group.name;
+                        groupSelect.appendChild(option);
+                    });
+                    
+                    // Show success
+                    groupCount.textContent = `${data.length} groupe(s) disponible(s)`;
+                    groupSuccess.classList.remove('hidden');
+                } else {
+                    // No groups found
+                    groupError.classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching groups:', error);
+                hideAllStatus();
+                groupError.classList.remove('hidden');
+            });
+    });
+    
+    // Initialize - if program is already selected, load groups
+    if (programSelect.value) {
+        programSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+{% endblock %}

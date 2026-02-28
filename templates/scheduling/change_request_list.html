@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes Demandes - FSTTIME{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-10">
+            <div>
+                <h1 class="text-3xl font-black text-gray-900 mb-2">Mes Demandes</h1>
+                <p class="text-gray-500 font-medium">Suivi de vos demandes de changement d'emploi du temps</p>
+            </div>
+            <div class="flex gap-4">
+                <a href="{% url 'dashboard' %}" class="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-colors shadow-sm">
+                    <i class="fas fa-arrow-left mr-2"></i> Retour
+                </a>
+                <a href="{% url 'change_request_create' %}" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-1 transition-all">
+                    <i class="fas fa-plus mr-2"></i> Nouvelle Demande
+                </a>
+            </div>
+        </div>
+
+        {% if requests %}
+        <div class="space-y-6">
+            {% for req in requests %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+                <!-- Status Stripe -->
+                <div class="absolute left-0 top-0 bottom-0 w-2 
+                    {% if req.status == 'approved' %}bg-emerald-500
+                    {% elif req.status == 'rejected' %}bg-rose-500
+                    {% elif req.status == 'completed' %}bg-blue-500
+                    {% else %}bg-amber-400{% endif %}">
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6 md:items-start pl-4">
+                    <!-- Main Content -->
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
+                                {% if req.status == 'approved' %}bg-emerald-50 text-emerald-700 border-emerald-100
+                                {% elif req.status == 'rejected' %}bg-rose-50 text-rose-700 border-rose-100
+                                {% elif req.status == 'completed' %}bg-blue-50 text-blue-700 border-blue-100
+                                {% else %}bg-amber-50 text-amber-700 border-amber-100{% endif %}">
+                                {{ req.get_status_display }}
+                            </span>
+                            <span class="text-xs text-gray-400 font-bold">
+                                <i class="fas fa-calendar-alt mr-1"></i> {{ req.created_at|date:"d M Y" }}
+                            </span>
+                        </div>
+                        
+                        <h3 class="text-xl font-black text-gray-800 mb-4 group-hover:text-indigo-600 transition-colors">
+                            {{ req.subject.code }} <span class="font-medium text-gray-500 text-lg">- {{ req.subject.name }}</span>
+                        </h3>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-3">
+                                {% if req.current_entry %}
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 flex-shrink-0">
+                                        <i class="fas fa-history"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Actuellement</p>
+                                        <p class="text-sm font-semibold text-gray-700">
+                                            {{ req.current_entry.get_day_of_week_display }} • {{ req.current_entry.time_slot }}
+                                        </p>
+                                        <p class="text-xs text-gray-500">{{ req.current_entry.room.name|default:"Salle indéfinie" }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-500 flex-shrink-0">
+                                        <i class="fas fa-exchange-alt"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-indigo-300 uppercase tracking-wide">Souhait</p>
+                                        <p class="text-sm font-semibold text-gray-800 leading-snug">
+                                            {{ req.desired_change|linebreaksbr }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if req.reason %}
+                            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2"><i class="fas fa-quote-left mr-1"></i> Justification</p>
+                                <p class="text-sm text-gray-600 italic">"{{ req.reason }}"</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Admin Notes Section -->
+                    {% if req.admin_notes %}
+                    <div class="md:w-72 bg-gray-50/80 rounded-xl p-5 border border-gray-200 relative">
+                        <div class="absolute top-0 right-0 -mt-2 -mr-2 w-8 h-8 bg-white rounded-full border border-gray-200 flex items-center justify-center text-gray-400 shadow-sm">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">
+                            Réponse Administration
+                        </h4>
+                        <p class="text-sm text-gray-700 leading-relaxed border-l-2 border-gray-300 pl-3">
+                            {{ req.admin_notes }}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+            <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-400 text-3xl animate-bounce-slow">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <h3 class="text-2xl font-black text-gray-800 mb-2">Aucune demande en cours</h3>
+            <p class="text-gray-500 mb-8 max-w-md mx-auto">Vous n'avez pas encore soumis de demande de changement d'emploi du temps.</p>
+            <a href="{% url 'change_request_create' %}" class="inline-flex items-center gap-2 text-indigo-600 font-bold hover:text-indigo-800 transition-colors">
+                <span class="underline">Créer ma première demande</span> <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

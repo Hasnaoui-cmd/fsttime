@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Message Envoyé - FSTTIME{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-20 flex items-center justify-center min-h-[60vh]">
+    <div class="max-w-md w-full animate-fadeInUp">
+        <div class="glass-card p-12 rounded-[3rem] shadow-2xl border border-white/40 text-center relative overflow-hidden">
+            <!-- Decorative Background Elements -->
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-emerald-100/50 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-100/50 rounded-full blur-3xl"></div>
+            
+            <!-- Success Icon -->
+            <div class="relative z-10 mb-8">
+                <div class="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-[2rem] flex items-center justify-center text-4xl mx-auto shadow-xl shadow-emerald-100/50 animate-bounce">
+                    <i class="fas fa-check-double"></i>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="relative z-10">
+                <h2 class="text-3xl font-black text-gray-800 mb-4 tracking-tight">Message Reçu !</h2>
+                <p class="text-gray-500 font-medium leading-relaxed mb-10">
+                    Votre demande a été transmise avec succès à notre équipe administrative. Nous reviendrons vers vous dans les plus brefs délais.
+                </p>
+
+                <!-- Actions -->
+                <div class="space-y-4">
+                    <a href="{% url 'home' %}" class="block w-full py-5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-200 hover:scale-105 transition-all active:scale-95">
+                        <i class="fas fa-home mr-2"></i> Retour à l'accueil
+                    </a>
+                    
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="block w-full py-5 bg-gray-50 text-gray-400 rounded-2xl font-black uppercase tracking-widest text-[10px] border border-gray-100 hover:bg-white hover:text-gray-600 transition-all">
+                        <i class="fas fa-tachometer-alt mr-2"></i> Tableau de bord
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Info Footer -->
+            <div class="mt-12 pt-8 border-t border-gray-100 relative z-10">
+                <p class="text-[9px] font-black text-gray-300 uppercase tracking-[0.3em]">Confirmation Automatique</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1648 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nouvelle Réservation - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+}
+
+/* Page Container - matches website background */
+.reservation-page {
+    min-height: calc(100vh - 80px);
+    padding: 2rem 1rem;
+}
+
+/* Container */
+.reservation-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Header */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.back-link:hover {
+    color: #764ba2;
+    transform: translateX(-4px);
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+/* Step Sections */
+.step-section {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #667eea;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-gradient);
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.step-title {
+    font-weight: 700;
+    color: #1f2937;
+    color: #1f2937;
+    font-size: 1.125rem;
+}
+
+/* Form Fields */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.form-label i {
+    color: #667eea;
+}
+
+.form-control,
+.form-select,
+select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    color: #1f2937;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus,
+select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Reservation Type Cards */
+.type-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+@media (max-width: 640px) {
+    .type-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.reservation-type-card {
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.reservation-type-card:hover {
+    border-color: #a5b4fc;
+    background: #f5f3ff;
+}
+
+.reservation-type-card.selected {
+    border-color: #667eea;
+    background: #eef2ff;
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+}
+
+.reservation-type-card input[type="radio"] {
+    display: none;
+}
+
+.type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.type-badge.recurring {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.type-badge.one-time {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.type-card-title {
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.375rem;
+    font-size: 0.95rem;
+}
+
+.type-card-desc {
+    color: #6b7280;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+/* Date Time Section */
+.datetime-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+@media (max-width: 768px) {
+    .datetime-section {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+.datetime-field {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.datetime-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.datetime-label i.start { color: #10b981; }
+.datetime-label i.end { color: #ef4444; }
+
+/* Premium Calendar */
+.premium-calendar {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 0.75rem;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding: 0 0.25rem;
+}
+
+.calendar-month {
+    font-weight: 700;
+    color: #1f2937;
+    font-size: 0.9rem;
+}
+
+.calendar-nav {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.calendar-nav button {
+    width: 28px;
+    height: 28px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+}
+
+.calendar-nav button:hover {
+    background: #667eea;
+    border-color: #667eea;
+    color: #fff;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 4px;
+}
+
+.calendar-weekday {
+    text-align: center;
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #9ca3af;
+    padding: 4px 0;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+    color: #374151;
+}
+
+.calendar-day.empty {
+    visibility: hidden;
+}
+
+.calendar-day.past,
+.calendar-day.disabled {
+    color: #d1d5db;
+    cursor: not-allowed;
+    background: transparent;
+}
+
+.calendar-day.available {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+
+.calendar-day.available:hover {
+    background: #bbf7d0;
+    transform: scale(1.05);
+}
+
+.calendar-day.partial {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+}
+
+.calendar-day.partial:hover {
+    background: #fde68a;
+}
+
+.calendar-day.busy {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.calendar-day.selected {
+    background: var(--primary-gradient) !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.calendar-day.today {
+    border: 2px solid #667eea !important;
+}
+
+.calendar-day.sunday {
+    color: #d1d5db;
+    cursor: not-allowed;
+    background: #fef2f2;
+}
+
+/* Calendar Legend */
+.calendar-legend {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e5e7eb;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.65rem;
+    color: #6b7280;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+}
+
+.legend-dot.available { background: #86efac; }
+.legend-dot.partial { background: #fcd34d; }
+.legend-dot.busy { background: #fca5a5; }
+
+/* Time Picker */
+.time-picker-container {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.time-picker-label {
+    font-size: 0.65rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-weight: 600;
+}
+
+.time-picker-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.time-select {
+    flex: 1;
+    padding: 0.5rem;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #1f2937;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+}
+
+.time-select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.time-separator {
+    color: #9ca3af;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* Availability Status */
+.availability-card {
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+}
+
+.availability-card.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.availability-card.checking {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+}
+
+.availability-card.available {
+    background: #dcfce7;
+    border: 1px solid #86efac;
+}
+
+.availability-card.conflict {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+}
+
+.availability-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.checking .availability-icon {
+    background: #e5e7eb;
+    color: #6b7280;
+}
+
+.available .availability-icon {
+    background: #10b981;
+    color: #fff;
+}
+
+.conflict .availability-icon {
+    background: #ef4444;
+    color: #fff;
+}
+
+.availability-content { flex: 1; }
+
+.availability-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 0.125rem;
+}
+
+.checking .availability-title { color: #6b7280; }
+.available .availability-title { color: #166534; }
+.conflict .availability-title { color: #991b1b; }
+
+.availability-desc {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.conflict-list {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+}
+
+.conflict-item {
+    padding: 0.375rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 0.8rem;
+    color: #991b1b;
+}
+
+.conflict-item:last-child { border-bottom: none; }
+
+/* Duration Badge */
+.duration-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    color: #4f46e5;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: all 0.3s ease;
+}
+
+.duration-badge.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.duration-value {
+    font-weight: 700;
+    color: #667eea;
+}
+
+/* Groups Container */
+.groups-container {
+    background: #fff;
+    border: 1.5px dashed #a855f7; /* Made it distinct for confirmation */
+    border-radius: 10px;
+    padding: 0.75rem;
+    max-height: 200px;
+    overflow-y: auto;
+    display: block; /* Forced visible */
+    margin-top: 1rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.groups-container.show { display: block; }
+
+.group-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: #f9fafb;
+    border-radius: 6px;
+    margin-bottom: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.group-checkbox:hover { background: #eef2ff; }
+
+.group-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #667eea;
+}
+
+.group-name {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.group-count {
+    color: #9ca3af;
+    font-size: 0.75rem;
+}
+
+/* Info Alert */
+.info-alert {
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 10px;
+    padding: 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.info-alert i { color: #d97706; margin-top: 2px; }
+
+.info-alert p {
+    color: #92400e;
+    font-size: 0.8rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Exam Checkbox */
+.exam-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.exam-toggle:hover {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+}
+
+.exam-toggle input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #667eea;
+}
+
+.exam-toggle span { color: #374151; }
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    margin-top: 1.5rem;
+}
+
+.submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.submit-note {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.8rem;
+    margin-top: 0.75rem;
+}
+
+/* Form Error */
+.form-error {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    border-radius: 10px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    color: #991b1b;
+    font-size: 0.85rem;
+}
+
+/* End Date Display */
+.end-date-display {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.end-date-display p {
+    color: #6b7280;
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.end-date-display.selected p {
+    color: #667eea;
+    font-weight: 600;
+}
+
+/* Messages */
+.messages-container { margin-bottom: 1.5rem; }
+
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.message.success {
+    background: #dcfce7;
+    border: 1px solid #86efac;
+    color: #166534;
+}
+
+.message.error {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+}
+
+/* Responsive Fixes */
+@media (max-width: 640px) {
+    .reservation-page { padding: 1rem 0.75rem; }
+    
+    .page-title { font-size: 1.5rem; }
+    
+    .step-section { padding: 1rem; }
+    
+    .step-header { 
+        flex-direction: row;
+        gap: 0.75rem;
+    }
+    
+    .step-number {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+    
+    .step-title { font-size: 1rem; }
+    
+    .calendar-day { font-size: 0.65rem; }
+    
+    .calendar-legend { 
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .legend-item { font-size: 0.6rem; }
+    
+    .time-picker-row { gap: 0.25rem; }
+    
+    .time-select { 
+        padding: 0.5rem 0.25rem;
+        font-size: 0.85rem;
+    }
+    
+    .type-card-title { font-size: 0.85rem; }
+    .type-card-desc { font-size: 0.75rem; }
+    .type-badge { font-size: 0.55rem; padding: 0.2rem 0.4rem; }
+    
+    .submit-btn { padding: 0.875rem 1rem; font-size: 0.9rem; }
+}
+
+@media (max-width: 400px) {
+    .calendar-day { 
+        font-size: 0.6rem;
+        border-radius: 4px;
+    }
+    
+    .calendar-weekday { font-size: 0.5rem; }
+    
+    .premium-calendar { padding: 0.5rem; }
+}
+
+/* Dark Mode Overrides */
+.dark .reservation-page {
+    background: linear-gradient(135deg, #09090b 0%, #1c1917 100%);
+}
+
+.dark .page-title {
+    background: linear-gradient(135deg, #a78bfa 0%, #ddd6fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dark .page-subtitle { color: #9ca3af; }
+
+.dark .step-section {
+    background: #18181b;
+    border-color: #27272a;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+.dark .step-title { color: #f3f4f6; }
+.dark .step-desc { color: #9ca3af; }
+
+.dark .form-control {
+    background: #27272a;
+    border-color: #3f3f46;
+    color: #f3f4f6;
+}
+
+.dark .form-control:focus {
+    background: #27272a;
+    border-color: #8b5cf6;
+}
+
+.dark .form-label { color: #d1d5db; }
+
+/* Calendar Dark Mode */
+.dark .premium-calendar {
+    background: #27272a;
+    border: 1px solid #3f3f46;
+}
+
+.dark .calendar-month { color: #f3f4f6; }
+.dark .calendar-nav-btn { color: #9ca3af; }
+.dark .calendar-nav-btn:hover { 
+    background: #3f3f46;
+    color: #fff;
+}
+
+.dark .calendar-weekday { color: #6b7280; }
+.dark .calendar-day { 
+    background: #18181b;
+    color: #e5e7eb;
+}
+
+.dark .calendar-day.past,
+.dark .calendar-day.disabled {
+    background: transparent;
+    color: #4b5563;
+}
+
+.dark .calendar-day.available {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+
+.dark .calendar-day.busy {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+.dark .calendar-day.partial {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.dark .calendar-day.today {
+    border-color: #8b5cf6 !important;
+}
+
+/* Time Picker Dark Mode */
+.dark .time-picker-container {
+    background: #27272a;
+}
+
+.dark .time-picker-label { color: #9ca3af; }
+.dark .time-select {
+    background: #18181b;
+    border-color: #3f3f46;
+    color: #f3f4f6;
+}
+
+/* Reservation Type Cards */
+.dark .reservation-type-card {
+    background: #27272a;
+    border-color: #3f3f46;
+}
+
+.dark .reservation-type-card:hover {
+    border-color: #8b5cf6;
+    background: #2d2d30;
+}
+
+.dark .type-card-title { color: #f3f4f6; }
+.dark .type-card-desc { color: #9ca3af; }
+
+/* Groups Container */
+.dark .groups-container {
+    background: #18181b;
+    border-color: #8b5cf6;
+}
+
+.dark .group-checkbox {
+    background: #27272a;
+    border-color: #3f3f46;
+}
+
+.dark .group-name { color: #f3f4f6; }
+.dark .group-count { color: #9ca3af; }
+
+/* Availability Status */
+.dark .checking .availability-icon {
+    background: #3f3f46;
+    color: #9ca3af;
+}
+
+.dark .checking .availability-title { color: #9ca3af; }
+
+.dark .conflict-list {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.dark .conflict-item {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    color: #fca5a5;
+}
+
+/* Missing Dark Mode Overrides */
+.dark .datetime-field {
+    background: #18181b;
+    border-color: #3f3f46;
+}
+
+.dark .datetime-label { color: #d1d5db; }
+
+.dark .end-date-display {
+    background: #27272a;
+}
+
+.dark .end-date-display p { color: #9ca3af; }
+
+.dark .exam-toggle {
+    background: #18181b;
+    border-color: #3f3f46;
+}
+
+.dark .exam-toggle:hover {
+    background: #27272a;
+    border-color: #8b5cf6;
+}
+
+.dark .exam-toggle span { color: #f3f4f6; }
+
+.dark select option {
+    background: #18181b;
+    color: #f3f4f6;
+}
+
+.dark .form-select {
+    background: #27272a;
+    border-color: #3f3f46;
+    color: #f3f4f6;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reservation-page">
+    <div class="reservation-container">
+        
+        <!-- Header -->
+        <div class="page-header">
+            <a href="{% url 'dashboard' %}" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Retour au tableau de bord
+            </a>
+            <h1 class="page-title">Nouvelle Réservation</h1>
+            <p class="page-subtitle">Réservez une salle pour vos séances de cours</p>
+        </div>
+        
+        <!-- Messages -->
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="message {% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% endif %}">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Form -->
+        <form method="post" id="reservationForm">
+            {% csrf_token %}
+            
+            <!-- STEP 1: Room Selection - FIRST -->
+            <div class="step-section">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <span class="step-title">Sélectionner la Salle</span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-door-open" style="color: #10b981;"></i>
+                        Salle souhaitée *
+                    </label>
+                    {{ form.room }}
+                    {% if form.room.errors %}
+                    <div class="field-error" style="color: #dc2626; font-size: 0.85rem; margin-top: 0.25rem;">
+                        <i class="fas fa-exclamation-circle"></i> {{ form.room.errors|join:", " }}
+                    </div>
+                    {% endif %}
+                    <p style="color: #9ca3af; font-size: 0.75rem; margin-top: 0.375rem;">
+                        Sélectionnez la salle pour votre séance
+                    </p>
+                </div>
+            </div>
+            
+            <!-- STEP 2: Program Selection - OPTIONAL -->
+            <div class="step-section">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <span class="step-title">Filière & Groupes (Optionnel)</span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-graduation-cap"></i>
+                        Filière concernée
+                    </label>
+                    {{ form.program }}
+                    {% if form.program.errors %}
+                    <div class="field-error" style="color: #dc2626; font-size: 0.85rem; margin-top: 0.25rem;">
+                        <i class="fas fa-exclamation-circle"></i> {{ form.program.errors|join:", " }}
+                    </div>
+                    {% endif %}
+                    {% if form.program.help_text %}
+                    <p style="color: #9ca3af; font-size: 0.75rem; margin-top: 0.375rem;">{{ form.program.help_text }}</p>
+                    {% endif %}
+                    <p style="color: #6b7280; font-size: 0.75rem; margin-top: 0.25rem; font-style: italic;">
+                        <i class="fas fa-info-circle"></i> Optionnel pour les séances ponctuelles
+                    </p>
+                </div>
+                
+                <!-- Dynamic Groups -->
+                <div id="groups-container" class="groups-container" style="display: block !important; border: 2px dashed #a855f7; padding: 1rem; border-radius: 12px; margin-top: 1rem; background: #faf5ff;">
+                    <label class="form-label" style="margin-bottom: 0.5rem; font-weight: 700; color: #7c3aed;">
+                        <i class="fas fa-users" style="color: #a855f7;"></i>
+                        Groupes (optionnel)
+                    </label>
+                    <p style="color: #9ca3af; font-size: 0.75rem; margin-bottom: 0.5rem;">
+                        Si aucun groupe n'est sélectionné, la séance concerne toute la filière.
+                    </p>
+                    <div id="groups-list">
+                        <p style="color: #9ca3af; font-size: 0.8rem; font-style: italic; text-align: center; padding: 0.5rem;">— Sélectionnez une filière pour afficher les groupes —</p>
+                    </div>
+                </div>
+                
+                <div class="info-alert">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Si une filière est sélectionnée, le système vérifiera automatiquement les conflits avec les cours existants.</p>
+                </div>
+            </div>
+            
+            <!-- STEP 3: Reservation Type -->
+            <div class="step-section">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <span class="step-title">Type de Réservation</span>
+                </div>
+                
+                <div class="type-cards-grid">
+                    <label class="reservation-type-card" id="card-recurring">
+                        <input type="radio" name="reservation_type" value="recurring" id="type-recurring">
+                        <span class="type-badge recurring">
+                            <i class="fas fa-sync-alt"></i>
+                            Modifie l'emploi du temps
+                        </span>
+                        <h4 class="type-card-title">Séance Hebdomadaire</h4>
+                        <p class="type-card-desc">Répétée chaque semaine et ajoutée à l'emploi du temps officiel.</p>
+                    </label>
+                    
+                    <label class="reservation-type-card selected" id="card-one_time">
+                        <input type="radio" name="reservation_type" value="one_time" id="type-one_time" checked>
+                        <span class="type-badge one-time">
+                            <i class="fas fa-calendar-day"></i>
+                            Ponctuelle
+                        </span>
+                        <h4 class="type-card-title">Séance Ponctuelle</h4>
+                        <p class="type-card-desc">Séance unique (rattrapage, révision, examen).</p>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- STEP 4: Session Details -->
+            <div class="step-section">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <span class="step-title">Détails de la Séance</span>
+                </div>
+                
+                <!-- Subject -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-book" style="color: #a855f7;"></i>
+                        Matière/Sujet *
+                    </label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}
+                    <div class="field-error" style="color: #dc2626; font-size: 0.85rem; margin-top: 0.25rem;">
+                        <i class="fas fa-exclamation-circle"></i> {{ form.subject.errors|join:", " }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Date/Time -->
+                <div class="datetime-section">
+                    <!-- Start DateTime -->
+                    <div class="datetime-field">
+                        <label class="datetime-label">
+                            <i class="fas fa-play start"></i>
+                            Date et heure de début *
+                        </label>
+                        
+                        <input type="hidden" name="start_datetime" id="id_start_datetime" value="{{ form.start_datetime.value|default:'' }}">
+                         {% if form.start_datetime.errors %}
+                        <div class="field-error" style="color: #dc2626; font-size: 0.85rem; margin-top: 0.25rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-exclamation-circle"></i> {{ form.start_datetime.errors|join:", " }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="premium-calendar" id="startCalendar">
+                            <div class="calendar-header">
+                                <span class="calendar-month" id="startMonthLabel">Janvier 2026</span>
+                                <div class="calendar-nav">
+                                    <button type="button" onclick="changeMonth('start', -1)"><i class="fas fa-chevron-left"></i></button>
+                                    <button type="button" onclick="changeMonth('start', 1)"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            <div class="calendar-weekdays">
+                                <span class="calendar-weekday">Dim</span>
+                                <span class="calendar-weekday">Lun</span>
+                                <span class="calendar-weekday">Mar</span>
+                                <span class="calendar-weekday">Mer</span>
+                                <span class="calendar-weekday">Jeu</span>
+                                <span class="calendar-weekday">Ven</span>
+                                <span class="calendar-weekday">Sam</span>
+                            </div>
+                            <div class="calendar-days" id="startCalendarDays"></div>
+                            <div class="calendar-legend">
+                                <div class="legend-item"><span class="legend-dot available"></span> Disponible</div>
+                                <div class="legend-item"><span class="legend-dot partial"></span> Partiel</div>
+                                <div class="legend-item"><span class="legend-dot busy"></span> Occupé</div>
+                            </div>
+                        </div>
+                        
+                        <div class="time-picker-container">
+                            <label class="time-picker-label">Heure de début</label>
+                            <div class="time-picker-row">
+                                <select class="time-select" id="startHour">
+                                    <option value="">--</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                </select>
+                                <span class="time-separator">:</span>
+                                <select class="time-select" id="startMinute">
+                                    <option value="">--</option>
+                                    <option value="00">00</option>
+                                    <option value="15">15</option>
+                                    <option value="30">30</option>
+                                    <option value="45">45</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- End DateTime -->
+                    <div class="datetime-field">
+                        <label class="datetime-label">
+                            <i class="fas fa-stop end"></i>
+                            Date et heure de fin *
+                        </label>
+                        
+                        <input type="hidden" name="end_datetime" id="id_end_datetime" value="{{ form.end_datetime.value|default:'' }}">
+                         {% if form.end_datetime.errors %}
+                        <div class="field-error" style="color: #dc2626; font-size: 0.85rem; margin-top: 0.25rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-exclamation-circle"></i> {{ form.end_datetime.errors|join:", " }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="end-date-display" id="endDateDisplay">
+                            <p><i class="fas fa-info-circle"></i> La date de fin sera la même que la date de début</p>
+                        </div>
+                        
+                        <div class="time-picker-container">
+                            <label class="time-picker-label">Heure de fin</label>
+                            <div class="time-picker-row">
+                                <select class="time-select" id="endHour">
+                                    <option value="">--</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                    <option value="18">18</option>
+                                </select>
+                                <span class="time-separator">:</span>
+                                <select class="time-select" id="endMinute">
+                                    <option value="">--</option>
+                                    <option value="00">00</option>
+                                    <option value="15">15</option>
+                                    <option value="30">30</option>
+                                    <option value="45">45</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p style="color: #9ca3af; font-size: 0.7rem; margin-top: 0.5rem;">Horaires: 9h00 - 18h00</p>
+                    </div>
+                </div>
+                
+                <!-- Duration Display -->
+                <div class="duration-badge" id="duration-display">
+                    <i class="fas fa-clock"></i>
+                    <span>Durée:</span>
+                    <span class="duration-value" id="duration-value">--</span>
+                </div>
+                
+                <!-- Availability Status -->
+                <div class="availability-card checking" id="availability-checking">
+                    <div class="availability-icon"><i class="fas fa-spinner fa-spin"></i></div>
+                    <div class="availability-content">
+                        <div class="availability-title">Vérification en cours...</div>
+                        <div class="availability-desc">Analyse de la disponibilité</div>
+                    </div>
+                </div>
+                
+                <div class="availability-card available" id="availability-ok">
+                    <div class="availability-icon"><i class="fas fa-check"></i></div>
+                    <div class="availability-content">
+                        <div class="availability-title">Créneau Disponible!</div>
+                        <div class="availability-desc">La salle est libre et aucun conflit détecté.</div>
+                    </div>
+                </div>
+                
+                <div class="availability-card conflict" id="availability-conflict">
+                    <div class="availability-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="availability-content">
+                        <div class="availability-title">Conflit Détecté!</div>
+                        <div class="availability-desc">Ce créneau n'est pas disponible:</div>
+                        <div class="conflict-list" id="conflict-list"></div>
+                    </div>
+                </div>
+                
+                <!-- Reason -->
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label class="form-label">
+                        <i class="fas fa-comment" style="color: #3b82f6;"></i>
+                        Motif/Description
+                    </label>
+                    {{ form.reason }}
+                </div>
+                
+                <!-- Is Exam -->
+                <label class="exam-toggle">
+                    {{ form.is_exam }}
+                    <span>Cette séance est un <strong>examen</strong></span>
+                </label>
+            </div>
+            
+            <!-- Form errors -->
+            {% if form.non_field_errors %}
+            <div class="form-error">
+                {% for error in form.non_field_errors %}
+                <p><i class="fas fa-exclamation-circle"></i> {{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- Submit -->
+            <button type="submit" id="submit-btn" class="submit-btn">
+                <i class="fas fa-paper-plane"></i>
+                Soumettre la Demande
+            </button>
+            <p class="submit-note">
+                <i class="fas fa-info-circle"></i>
+                Votre demande sera examinée par l'administration
+            </p>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let selectedStartDate = null;
+    let startMonth = new Date().getMonth();
+    let startYear = new Date().getFullYear();
+    let roomAvailability = {};
+    let hasConflict = false;
+    
+    const programSelect = document.getElementById('id_program');
+    const roomSelect = document.getElementById('id_room');
+    const startDatetimeInput = document.getElementById('id_start_datetime');
+    const endDatetimeInput = document.getElementById('id_end_datetime');
+    const startHour = document.getElementById('startHour');
+    const startMinute = document.getElementById('startMinute');
+    const endHour = document.getElementById('endHour');
+    const endMinute = document.getElementById('endMinute');
+    const durationDisplay = document.getElementById('duration-display');
+    const durationValue = document.getElementById('duration-value');
+    const groupsContainer = document.getElementById('groups-container');
+    const groupsList = document.getElementById('groups-list');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    const statusChecking = document.getElementById('availability-checking');
+    const statusOk = document.getElementById('availability-ok');
+    const statusConflict = document.getElementById('availability-conflict');
+    const conflictList = document.getElementById('conflict-list');
+    
+    const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
+                   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    
+    renderCalendar();
+    
+    document.querySelectorAll('.reservation-type-card').forEach(card => {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.reservation-type-card').forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            this.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+    
+    if (programSelect) {
+        programSelect.addEventListener('change', function() {
+            if (this.value) loadGroups(this.value);
+            else groupsContainer.classList.remove('show');
+            updateAvailability();
+        });
+    }
+    
+    if (roomSelect) {
+        roomSelect.addEventListener('change', function() {
+            loadRoomAvailability();
+            updateAvailability();
+        });
+    }
+    
+    [startHour, startMinute, endHour, endMinute].forEach(el => {
+        el.addEventListener('change', function() {
+            updateDatetimeInputs();
+            calculateDuration();
+            updateAvailability();
+        });
+    });
+    
+    function renderCalendar() {
+        const daysContainer = document.getElementById('startCalendarDays');
+        const monthLabel = document.getElementById('startMonthLabel');
+        
+        monthLabel.textContent = `${months[startMonth]} ${startYear}`;
+        
+        const firstDay = new Date(startYear, startMonth, 1);
+        const lastDay = new Date(startYear, startMonth + 1, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        let html = '';
+        
+        for (let i = 0; i < firstDay.getDay(); i++) {
+            html += '<div class="calendar-day empty"></div>';
+        }
+        
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const date = new Date(startYear, startMonth, day);
+            const dateStr = formatDate(date);
+            const isPast = date < today;
+            const isSunday = date.getDay() === 0;
+            const isToday = date.getTime() === today.getTime();
+            const isSelected = selectedStartDate && dateStr === selectedStartDate;
+            
+            let classes = 'calendar-day';
+            
+            if (isPast) {
+                classes += ' past disabled';
+            } else if (isSunday) {
+                classes += ' sunday disabled';
+            } else {
+                const availability = roomAvailability[dateStr];
+                if (availability === 'available' || !availability) classes += ' available';
+                else if (availability === 'partial') classes += ' partial';
+                else if (availability === 'busy') classes += ' busy';
+            }
+            
+            if (isToday) classes += ' today';
+            if (isSelected) classes += ' selected';
+            
+            html += `<div class="${classes}" data-date="${dateStr}" onclick="selectDate('${dateStr}')">${day}</div>`;
+        }
+        
+        daysContainer.innerHTML = html;
+    }
+    
+    window.changeMonth = function(which, delta) {
+        startMonth += delta;
+        if (startMonth > 11) { startMonth = 0; startYear++; }
+        else if (startMonth < 0) { startMonth = 11; startYear--; }
+        renderCalendar();
+        loadRoomAvailability();
+    };
+    
+    window.selectDate = function(dateStr) {
+        const date = new Date(dateStr);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (date < today || date.getDay() === 0) return;
+        
+        selectedStartDate = dateStr;
+        renderCalendar();
+        updateDatetimeInputs();
+        
+        const parts = dateStr.split('-');
+        document.getElementById('endDateDisplay').innerHTML = `<p><i class="fas fa-calendar-check" style="color: #667eea;"></i> ${parts[2]}/${parts[1]}/${parts[0]}</p>`;
+        document.getElementById('endDateDisplay').classList.add('selected');
+        
+        updateAvailability();
+    };
+    
+    function formatDate(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+    
+    function updateDatetimeInputs() {
+        if (selectedStartDate && startHour.value && startMinute.value) {
+            startDatetimeInput.value = `${selectedStartDate}T${startHour.value}:${startMinute.value}`;
+        }
+        if (selectedStartDate && endHour.value && endMinute.value) {
+            endDatetimeInput.value = `${selectedStartDate}T${endHour.value}:${endMinute.value}`;
+        }
+    }
+    
+    function loadGroups(programId) {
+        console.log('Loading groups for program:', programId);
+        fetch(`/scheduling/api/get-program-groups/${programId}/`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.groups && data.groups.length > 0) {
+                    groupsList.innerHTML = data.groups.map(g => `
+                        <label class="group-checkbox">
+                            <input type="checkbox" name="groups" value="${g.id}">
+                            <span class="group-name">${g.name}</span>
+                            <span class="group-count">(${g.student_count} étudiants)</span>
+                        </label>
+                    `).join('');
+                    groupsContainer.classList.add('show');
+                    groupsContainer.style.display = 'block'; // Force display
+                    console.log('Groups loaded and container shown');
+                    
+                    // Add change listeners to new checkboxes
+                    document.querySelectorAll('input[name="groups"]').forEach(cb => {
+                        cb.addEventListener('change', updateAvailability);
+                    });
+                    
+                    // Update availability after groups are loaded
+                    updateAvailability();
+                } else {
+                    groupsContainer.classList.remove('show');
+                    updateAvailability();
+                }
+            }).catch(console.error);
+    }
+    
+    function loadRoomAvailability() {
+        const roomId = roomSelect ? roomSelect.value : null;
+        if (!roomId) return;
+        
+        const firstDay = new Date(startYear, startMonth, 1);
+        const lastDay = new Date(startYear, startMonth + 1, 0);
+        
+        fetch(`/scheduling/api/get-available-dates/?room_id=${roomId}&start_date=${formatDate(firstDay)}&end_date=${formatDate(lastDay)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.availability) {
+                    roomAvailability = {...roomAvailability, ...data.availability};
+                    renderCalendar();
+                }
+            }).catch(console.log);
+    }
+    
+    function calculateDuration() {
+        if (startHour.value && startMinute.value && endHour.value && endMinute.value) {
+            const diff = (parseInt(endHour.value) * 60 + parseInt(endMinute.value)) - 
+                        (parseInt(startHour.value) * 60 + parseInt(startMinute.value));
+            
+            if (diff > 0) {
+                const hours = Math.floor(diff / 60);
+                const mins = diff % 60;
+                durationValue.textContent = hours > 0 && mins > 0 ? `${hours}h ${mins}min` : hours > 0 ? `${hours}h` : `${mins}min`;
+                durationDisplay.classList.add('show');
+            } else {
+                durationDisplay.classList.remove('show');
+            }
+        } else {
+            durationDisplay.classList.remove('show');
+        }
+    }
+    
+    function updateAvailability() {
+        const programId = programSelect ? programSelect.value : null;
+        const roomId = roomSelect ? roomSelect.value : null;
+        
+        // Get selected groups
+        const groupCheckboxes = document.querySelectorAll('input[name="groups"]:checked');
+        const groupIds = Array.from(groupCheckboxes).map(cb => cb.value);
+        
+        statusChecking.classList.remove('show');
+        statusOk.classList.remove('show');
+        statusConflict.classList.remove('show');
+        
+        if (!programId || !selectedStartDate || !startHour.value || !startMinute.value || !endHour.value || !endMinute.value) return;
+        
+        const startMins = parseInt(startHour.value) * 60 + parseInt(startMinute.value);
+        const endMins = parseInt(endHour.value) * 60 + parseInt(endMinute.value);
+        if (endMins <= startMins) return;
+        
+        statusChecking.classList.add('show');
+        
+        fetch('/scheduling/api/check-program-availability/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                program_id: programId,
+                room_id: roomId,
+                group_ids: groupIds,
+                start_datetime: `${selectedStartDate}T${startHour.value}:${startMinute.value}`,
+                end_datetime: `${selectedStartDate}T${endHour.value}:${endMinute.value}`
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            statusChecking.classList.remove('show');
+            if (data.available) {
+                statusOk.classList.add('show');
+                hasConflict = false;
+                submitBtn.disabled = false;
+            } else {
+                statusConflict.classList.add('show');
+                hasConflict = true;
+                submitBtn.disabled = true;
+                if (data.conflicts && data.conflicts.length > 0) {
+                    conflictList.innerHTML = data.conflicts.map(c => `
+                        <div class="conflict-item" style="color: #dc2626; font-size: 0.85rem; margin: 0.25rem 0;">
+                            <i class="fas fa-exclamation-circle" style="margin-right: 0.25rem;"></i>
+                            ${c.subject || 'Conflit'} 
+                            ${c.groups ? `(${c.groups})` : ''} 
+                            ${c.time ? `- ${c.time}` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    conflictList.innerHTML = '<div style="color: #dc2626; font-size: 0.85rem;"><i class="fas fa-exclamation-circle"></i> Créneau ou salle indisponible</div>';
+                }
+            }
+        })
+        .catch(() => {
+            statusChecking.classList.remove('show');
+            statusOk.classList.add('show');
+            hasConflict = false;
+            submitBtn.disabled = false;
+        });
+    }
+    
+    document.getElementById('reservationForm').addEventListener('submit', function(e) {
+        updateDatetimeInputs();
+        if (!startDatetimeInput.value || !endDatetimeInput.value) {
+            e.preventDefault();
+            alert('Veuillez sélectionner une date et des horaires.');
+            return false;
+        }
+        if (hasConflict) {
+            e.preventDefault();
+            alert('Impossible de soumettre: conflit détecté.');
+            return false;
+        }
+    });
+    
+    loadRoomAvailability();
+    
+    // Initial load of groups if program selected (e.g. browser autofill or default)
+    if (programSelect && programSelect.value) {
+        loadGroups(programSelect.value);
+    }
+});
+</script>
+{% endblock %}

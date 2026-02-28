@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inscription en attente - FSTTIME{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-20 flex items-center justify-center min-h-[60vh]">
+    <div class="max-w-md w-full animate-fadeInUp">
+        <div class="glass-card p-12 rounded-[3rem] shadow-2xl border border-white/40 text-center relative overflow-hidden bg-white/40 backdrop-blur-3xl">
+            <!-- Decorative Background Elements -->
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-amber-100/50 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-100/50 rounded-full blur-3xl"></div>
+            
+            <!-- Pending Icon -->
+            <div class="relative z-10 mb-8">
+                <div class="w-24 h-24 bg-amber-50 text-amber-500 rounded-[2.5rem] flex items-center justify-center text-4xl mx-auto shadow-xl shadow-amber-100/50 animate-pulse">
+                    <i class="fas fa-hourglass-start"></i>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="relative z-10">
+                <h2 class="text-3xl font-black text-gray-800 mb-4 tracking-tight uppercase">Examen en cours</h2>
+                <div class="space-y-4 mb-10">
+                    <p class="text-gray-500 font-medium leading-relaxed">
+                        Votre demande d'inscription a été soumise avec succès à l'administration de la FST.
+                    </p>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-full border border-amber-100">
+                        <i class="fas fa-envelope-open-text text-sm"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Notification par email à venir</span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="space-y-4">
+                    <a href="{% url 'home' %}" class="block w-full py-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-200 hover:scale-105 transition-all active:scale-95">
+                        <i class="fas fa-home mr-2"></i> Retour au portail
+                    </a>
+                </div>
+            </div>
+
+            <!-- Info Footer -->
+            <div class="mt-12 pt-8 border-t border-gray-100 relative z-10">
+                <p class="text-[9px] font-black text-gray-300 uppercase tracking-[0.3em]">Code de Suivi: {{ user.id|default:"REQ-2024" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

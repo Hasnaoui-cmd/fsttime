@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Emplois du Temps - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================
+   TIMETABLE LIST - STYLING
+   ============================================ */
+
+.list-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 50%, #f3e8ff 100%);
+    padding: 2rem 1rem;
+}
+
+/* Header */
+.page-header {
+    max-width: 1200px;
+    margin: 0 auto 2rem;
+    background: white;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.header-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    border-radius: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.header-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.page-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+}
+
+.page-subtitle {
+    font-size: 1rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.btn-create {
+    padding: 1rem 2rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-create:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    color: white;
+}
+
+/* Timetable Cards */
+.timetables-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.timetable-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    transition: all 0.3s;
+}
+
+.timetable-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.timetable-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+}
+
+.timetable-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.timetable-icon i {
+    font-size: 1.5rem;
+    color: #8b5cf6;
+}
+
+.timetable-icon.generated {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.timetable-icon.generated i {
+    color: #10b981;
+}
+
+.timetable-details h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+}
+
+.timetable-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.timetable-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    color: white;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+/* Card Actions */
+.timetable-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-action {
+    padding: 0.75rem 1.25rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-view {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+.btn-view:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    color: white;
+}
+
+.btn-edit {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.btn-edit:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+.empty-state h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #374151;
+    margin: 0 0 0.75rem 0;
+}
+
+.empty-state p {
+    color: #6b7280;
+    margin: 0 0 1.5rem 0;
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.pagination {
+    display: flex;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.page-link {
+    padding: 0.75rem 1rem;
+    background: white;
+    color: #6b7280;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.page-link:hover {
+    background: #8b5cf6;
+    color: white;
+}
+
+.page-item.active .page-link {
+    background: #8b5cf6;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .header-info {
+        flex-direction: column;
+    }
+    
+    .timetable-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .timetable-info {
+        flex-direction: column;
+    }
+    
+    .timetable-actions {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="list-page">
+    
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-info">
+            <div class="header-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div>
+                <h1 class="page-title">Emplois du Temps</h1>
+                <p class="page-subtitle">Gérez et consultez les emplois du temps générés</p>
+            </div>
+        </div>
+        
+        <a href="{% url 'timetable_generator' %}" class="btn-create">
+            <i class="fas fa-magic"></i> Générer un Nouvel Emploi du Temps
+        </a>
+    </div>
+    
+    <!-- Timetables List -->
+    <div class="timetables-container">
+        {% if timetables %}
+            {% for timetable in timetables %}
+            <div class="timetable-card">
+                <div class="timetable-info">
+                    <div class="timetable-icon {% if timetable.is_generated %}generated{% endif %}">
+                        <i class="fas fa-{% if timetable.is_generated %}check-circle{% else %}calendar{% endif %}"></i>
+                    </div>
+                    <div class="timetable-details">
+                        <h3>
+                            {{ timetable.name|default:timetable.program.name }}
+                            {% if timetable.is_generated %}
+                            <span class="badge badge-success">Généré</span>
+                            {% else %}
+                            <span class="badge badge-warning">Manuel</span>
+                            {% endif %}
+                        </h3>
+                        <div class="timetable-meta">
+                            <span><i class="fas fa-graduation-cap"></i> {{ timetable.program.code }}</span>
+                            <span><i class="fas fa-calendar-check"></i> {{ timetable.get_semester_display }}</span>
+                            <span><i class="fas fa-calendar"></i> {{ timetable.academic_year }}</span>
+                            <span><i class="fas fa-clock"></i> {{ timetable.sessions.count }} séances</span>
+                            {% if timetable.created_by %}
+                            <span><i class="fas fa-user"></i> {{ timetable.created_by.get_full_name }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="timetable-actions">
+                    <a href="{% url 'timetable_display' pk=timetable.id %}" class="btn-action btn-view">
+                        <i class="fas fa-eye"></i> Voir
+                    </a>
+                    {% if request.user.role == 'admin' %}
+                    <form method="POST" action="{% url 'timetable_regenerate' pk=timetable.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-action btn-edit" onclick="return confirm('Régénérer cet emploi du temps ?')">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="pagination-container">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+            
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <i class="fas fa-calendar-plus"></i>
+                <h3>Aucun emploi du temps</h3>
+                <p>Créez votre premier emploi du temps automatique en quelques clics.</p>
+                <a href="{% url 'timetable_generator' %}" class="btn-create">
+                    <i class="fas fa-magic"></i> Générer un Emploi du Temps
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

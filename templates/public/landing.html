@@ -1,0 +1,618 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Accueil - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================
+   MODERN HOMEPAGE - CLEAN ELEGANT DESIGN
+   ============================================ */
+
+.homepage {
+    width: 100%;
+}
+
+/* ==========================================
+   HERO SECTION
+   ========================================== */
+
+.hero-section {
+    min-height: 85vh;
+    padding: 6rem 2rem 4rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    /* Transparent background to show global aurora */
+    background: transparent;
+}
+
+.hero-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+    width: 100%;
+}
+
+/* Hero Badge */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(139, 92, 246, 0.1);
+    animation: slideDown 0.8s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-badge i {
+    color: #8b5cf6;
+    font-size: 1rem;
+}
+
+.hero-badge span {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #6d28d9;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* Hero Title */
+.hero-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 5rem;
+    font-weight: 900;
+    color: #111827;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    animation: fadeUp 0.8s ease-out 0.2s backwards;
+    text-shadow: 0 20px 40px rgba(139, 92, 246, 0.15); /* Soft shadow for depth */
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 3rem;
+    }
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 50%, #d946ef 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+}
+
+/* Hero Description */
+.hero-description {
+    font-size: 1.35rem;
+    color: #4b5563;
+    line-height: 1.6;
+    max-width: 750px;
+    margin: 0 auto;
+    font-weight: 500;
+    animation: fadeUp 0.8s ease-out 0.4s backwards;
+}
+
+/* Hero Actions */
+.hero-actions {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 1rem;
+    animation: fadeUp 0.8s ease-out 0.6s backwards;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 1.125rem 2.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 35px -5px rgba(99, 102, 241, 0.5);
+    color: white;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    color: #4b5563;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:hover {
+    background: white;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    color: #111827;
+}
+
+/* Hero Stats - Glassmorphism */
+.hero-stats {
+    display: flex;
+    gap: 3rem;
+    margin-top: 3rem;
+    animation: fadeUp 0.8s ease-out 0.8s backwards;
+    padding: 2rem 3rem;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    text-align: center;
+}
+
+.stat-number {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* ==========================================
+   FEATURES SECTION
+   ========================================== */
+
+.features-section {
+    padding: 2rem 2rem 6rem; /* Reduced top padding */
+    background: transparent; /* Transparent to show aurora */
+}
+
+.features-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.section-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+    font-size: 1.125rem;
+    color: #4b5563;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.feature-card {
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+    /* Glassmorphism for cards */
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.15);
+    border-color: rgba(255, 255, 255, 0.9);
+}
+
+.feature-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+    background: white;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.feature-icon.blue { color: #3b82f6; }
+.feature-icon.purple { color: #8b5cf6; }
+.feature-icon.green { color: #10b981; }
+
+.feature-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+}
+
+.feature-description {
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 0;
+    font-size: 0.95rem;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 1024px) {
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 6rem 1.5rem 3rem;
+    }
+    
+    .hero-stats {
+        flex-direction: column;
+        gap: 2rem;
+        width: 100%;
+        padding: 2rem;
+    }
+    
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .hero-title {
+        font-size: 2.75rem;
+    }
+}
+/* =================================
+   RESPONSIVE DESIGN ADAPTATIONS
+   ================================= */
+
+@media (max-width: 1024px) {
+    .hero-title {
+        font-size: 4rem;
+    }
+    
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .homepage {
+        overflow-x: hidden;
+    }
+
+    .hero-section {
+        padding: 8rem 1.5rem 4rem;
+        min-height: auto;
+    }
+
+    .hero-title {
+        font-size: 2.75rem;
+    }
+
+    .hero-stats {
+        flex-direction: column;
+        gap: 1.5rem;
+        width: 100%;
+        padding: 1.5rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2.25rem;
+    }
+
+    .hero-description {
+        font-size: 1.125rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+    
+    .feature-card {
+        padding: 1.5rem;
+    }
+}
+
+/* ==========================================
+   DARK MODE SUPPORT
+   ========================================== */
+
+.dark .hero-title,
+.dark .section-title {
+    color: #f3f4f6;
+}
+
+.dark .hero-description,
+.dark .section-subtitle,
+.dark .feature-description {
+    color: #9ca3af;
+}
+
+.dark .hero-badge {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+.dark .hero-badge i {
+    color: #a78bfa;
+}
+
+.dark .hero-badge span {
+    color: #c4b5fd;
+}
+
+.dark .hero-stats {
+    background: rgba(30, 41, 59, 0.4);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .stat-label {
+    color: #94a3b8;
+}
+
+.dark .btn-secondary {
+    background: rgba(30, 41, 59, 0.6);
+    color: #e5e7eb;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .btn-secondary:hover {
+    background: rgba(30, 41, 59, 0.9);
+    color: white;
+}
+
+.dark .feature-card {
+    background: rgba(30, 41, 59, 0.45);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .feature-card:hover {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+.dark .feature-icon {
+    background: #1e293b;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.dark .feature-title {
+    color: #f3f4f6;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="homepage">
+    
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <!-- Badge -->
+                <div class="hero-badge">
+                    <i class="fas fa-sparkles"></i>
+                    <span>La planification intelligente</span>
+                </div>
+                
+                <!-- Main Title -->
+                <h1 class="hero-title">
+                    Simplifiez votre<br>
+                    <span class="gradient-text">Gestion Académique</span>
+                </h1>
+                
+                <!-- Description -->
+                <p class="hero-description">
+                    Une plateforme unifiée, intuitive et moderne pour gérer les emplois du temps, les salles et les ressources de la FST. Conçue pour l'efficacité.
+                </p>
+                
+                <!-- CTA Buttons -->
+                <div class="hero-actions">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn-primary">
+                        <i class="fas fa-columns"></i>
+                        Accéder au Tableau de Bord
+                    </a>
+                    {% else %}
+                    <a href="{% url 'register' %}" class="btn-primary">
+                        <i class="fas fa-bolt"></i>
+                        Commencer maintenant
+                    </a>
+                    <a href="{% url 'login' %}" class="btn-secondary">
+                        <i class="fas fa-arrow-right"></i>
+                        Connexion
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Stats -->
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_rooms|default:"24" }}</span>
+                        <span class="stat-label">Salles</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_programs|default:"8" }}</span>
+                        <span class="stat-label">Filières</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_timetables|default:"12" }}</span>
+                        <span class="stat-label">Emplois</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="features-container">
+            <div class="section-header">
+                <h2 class="section-title">Tout ce dont vous avez besoin</h2>
+                <p class="section-subtitle">Des outils puissants pour simplifier la vie de l'administration, des enseignants et des étudiants.</p>
+            </div>
+            
+            <div class="features-grid">
+                <!-- Feature 1 -->
+                <div class="feature-card">
+                    <div class="feature-icon blue">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Emplois du Temps Intelligents</h3>
+                    <p class="feature-description">
+                        Génération automatique et détection de conflits pour des plannings parfaits. Visualisation claire par semaine ou par mois.
+                    </p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="feature-card">
+                    <div class="feature-icon purple">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+                    <h3 class="feature-title">Gestion des Salles</h3>
+                    <p class="feature-description">
+                        Suivi en temps réel de l'occupation des salles. Système de réservation simple pour les événements et cours supplémentaires.
+                    </p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="feature-card">
+                    <div class="feature-icon green">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="feature-title">Espace Collaboratif</h3>
+                    <p class="feature-description">
+                        Accès personnalisé pour chaque rôle (Admin, Prof, Étudiant). Communication fluide et notifications instantanées.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    // Add simple entrance animations
+    document.addEventListener('DOMContentLoaded', () => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        // Select elements to animate
+        const features = document.querySelectorAll('.feature-card');
+        features.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = `all 0.6s ease-out ${index * 0.1}s`;
+            observer.observe(el);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "user login functionality",
+    "description": "Test the user login API endpoint /accounts/login/ with valid and invalid credentials to verify successful authentication and proper error handling."
+  },
+  {
+    "id": "TC002",
+    "title": "student registration process",
+    "description": "Verify the student registration API /accounts/register/student/ by submitting valid and invalid data, ensuring correct creation of student accounts with program and group associations."
+  },
+  {
+    "id": "TC003",
+    "title": "association registration and approval workflow",
+    "description": "Test the association registration endpoint /accounts/register/association/ for successful registration and validate the admin approval workflow for activating association accounts."
+  },
+  {
+    "id": "TC004",
+    "title": "bulk room creation functionality",
+    "description": "Validate the bulk room creation API /rooms/bulk-create/ by submitting room prefix and numeric ranges, ensuring correct creation of multiple rooms with specified attributes."
+  },
+  {
+    "id": "TC005",
+    "title": "room reservation request and approval",
+    "description": "Test the room reservation creation endpoint /schedule/reservations/create/ for submitting valid reservation requests and the approval endpoint /schedule/reservations/{id}/approval/ for admin approval or rejection workflows."
+  },
+  {
+    "id": "TC006",
+    "title": "session creation and management",
+    "description": "Verify the session creation API /schedule/sessions/create/ by creating various session types (cours, td, tp) with valid data and checking for conflict validations."
+  },
+  {
+    "id": "TC007",
+    "title": "weekly timetable view by user role",
+    "description": "Test the timetable view endpoint /schedule/timetable/ to ensure it returns the correct weekly timetable data filtered by the authenticated user's role."
+  },
+  {
+    "id": "TC008",
+    "title": "notification api endpoints",
+    "description": "Validate the notification APIs including unread count /api/notifications/unread-count/, recent notifications /api/notifications/recent/, marking single notification as read /api/notifications/{id}/mark-read/, and marking all as read /api/notifications/mark-all-read/ for correct data and state changes."
+  },
+  {
+    "id": "TC009",
+    "title": "contact form submission",
+    "description": "Test the contact form submission endpoint /contact/ with valid and invalid inputs to ensure messages are stored and admin notifications are triggered."
+  },
+  {
+    "id": "TC010",
+    "title": "teacher unavailability management",
+    "description": "Verify the teacher unavailability APIs /schedule/unavailability/ and /schedule/unavailability/create/ for listing and creating unavailability periods, ensuring they are considered in scheduling conflicts."
+  }
+]

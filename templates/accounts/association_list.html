@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}R&#233;servations Associations - FSTTIME{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card glass-card rounded-2xl overflow-hidden shadow-lg">
+            <div class="h-2 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+            <div class="p-6">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium mb-1">Total</p>
+                        <h3 class="text-4xl font-bold text-gray-900">{{ total_count|default:"0" }}</h3>
+                    </div>
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-bookmark text-white text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card glass-card rounded-2xl overflow-hidden shadow-lg">
+            <div class="h-2 bg-gradient-to-r from-yellow-400 to-orange-500"></div>
+            <div class="p-6">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium mb-1">En Attente</p>
+                        <h3 class="text-4xl font-bold text-gray-900">{{ pending_count|default:"0" }}</h3>
+                    </div>
+                    <div class="w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-clock text-white text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card glass-card rounded-2xl overflow-hidden shadow-lg">
+            <div class="h-2 bg-gradient-to-r from-green-400 to-emerald-500"></div>
+            <div class="p-6">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium mb-1">Approuv&#233;es</p>
+                        <h3 class="text-4xl font-bold text-gray-900">{{ approved_count|default:"0" }}</h3>
+                    </div>
+                    <div class="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-check-circle text-white text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card glass-card rounded-2xl overflow-hidden shadow-lg">
+            <div class="h-2 bg-gradient-to-r from-red-400 to-red-500"></div>
+            <div class="p-6">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium mb-1">Rejet&#233;es</p>
+                        <h3 class="text-4xl font-bold text-gray-900">{{ rejected_count|default:"0" }}</h3>
+                    </div>
+                    <div class="w-14 h-14 bg-gradient-to-br from-red-400 to-red-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-times-circle text-white text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Page Header -->
+    <div class="glass-card rounded-2xl p-6 mb-8 shadow-xl">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-users text-purple-500 mr-3"></i>
+                    R&#233;servations des Associations
+                </h1>
+                <p class="text-gray-600 mt-1">G&#233;rez les demandes de r&#233;servation soumises par les associations</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="glass-card rounded-2xl p-6 mb-8 shadow-lg">
+        <div class="flex flex-col md:flex-row md:items-center gap-4">
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'association_list' %}" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all
+                   {% if not request.GET.status %}btn-gradient text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                    <i class="fas fa-list mr-2"></i>Toutes
+                </a>
+                <a href="?status=pending" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all
+                   {% if request.GET.status == 'pending' %}bg-yellow-500 text-white{% else %}bg-yellow-100 text-yellow-700 hover:bg-yellow-200{% endif %}">
+                    <i class="fas fa-clock mr-2"></i>En attente
+                </a>
+                <a href="?status=approved" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all
+                   {% if request.GET.status == 'approved' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}">
+                    <i class="fas fa-check mr-2"></i>Approuv&#233;es
+                </a>
+                <a href="?status=rejected" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all
+                   {% if request.GET.status == 'rejected' %}bg-red-500 text-white{% else %}bg-red-100 text-red-700 hover:bg-red-200{% endif %}">
+                    <i class="fas fa-times mr-2"></i>Rejet&#233;es
+                </a>
+            </div>
+            <div class="flex-1 md:max-w-xs ml-auto">
+                <form method="get" class="relative" id="searchForm">
+                    {% if request.GET.status %}
+                    <input type="hidden" name="status" value="{{ request.GET.status }}">
+                    {% endif %}
+                    <input type="text" name="q" value="{{ request.GET.q }}"
+                           class="w-full pl-10 pr-4 py-2 modern-input rounded-lg text-gray-700" 
+                           placeholder="Rechercher..."
+                           id="searchInput">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reservations Grid -->
+    {% if reservations %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for res in reservations %}
+        <div class="hover-lift glass-card rounded-2xl overflow-hidden shadow-lg" id="res-card-{{ res.pk }}">
+            <!-- Card Header -->
+            <div class="h-20 bg-gradient-to-br 
+                {% if res.status == 'approved' %}from-green-400 to-emerald-500
+                {% elif res.status == 'rejected' %}from-red-400 to-red-500
+                {% else %}from-yellow-400 to-orange-500{% endif %}
+                p-4 relative">
+                <div class="absolute top-4 right-4">
+                    {% if res.status == 'approved' %}
+                    <span class="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-medium rounded-full">
+                        <i class="fas fa-check mr-1"></i>Approuv&#233;e
+                    </span>
+                    {% elif res.status == 'rejected' %}
+                    <span class="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-medium rounded-full">
+                        <i class="fas fa-times mr-1"></i>Rejet&#233;e
+                    </span>
+                    {% else %}
+                    <span class="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-medium rounded-full">
+                        <i class="fas fa-clock mr-1"></i>En attente
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-door-open text-2xl text-gray-700"></i>
+                </div>
+            </div>
+            
+            <!-- Card Body -->
+            <div class="p-5">
+                <h3 class="text-xl font-bold text-gray-900 mb-2 truncate">
+                    {{ res.association.name|default:"Association" }}
+                </h3>
+                <div class="space-y-3 mb-4">
+                    <div class="flex items-center text-gray-600 text-sm">
+                        <i class="fas fa-door-open text-purple-500 w-5"></i>
+                        <span class="ml-2">{{ res.room.name|default:"--" }}</span>
+                    </div>
+                    <div class="flex items-center text-gray-600 text-sm">
+                        <i class="fas fa-calendar text-blue-500 w-5"></i>
+                        <span class="ml-2">
+                            {% if res.start_datetime %}{{ res.start_datetime|date:"d/m/Y H:i" }}{% else %}--{% endif %}
+                        </span>
+                    </div>
+                    <div class="flex items-center text-gray-600 text-sm">
+                        <i class="fas fa-clock text-green-500 w-5"></i>
+                        <span class="ml-2">
+                            {% if res.end_datetime %}{{ res.end_datetime|date:"d/m/Y H:i" }}{% else %}--{% endif %}
+                        </span>
+                    </div>
+                    {% if res.subject %}
+                    <div class="flex items-center text-gray-600 text-sm">
+                        <i class="fas fa-book text-cyan-500 w-5"></i>
+                        <span class="ml-2">{{ res.subject }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex items-center text-gray-600 text-sm">
+                        <i class="fas fa-info-circle text-amber-500 w-5"></i>
+                        <span class="ml-2">{{ res.get_reservation_type_display }}</span>
+                    </div>
+                </div>
+                {% if res.reason %}
+                <p class="text-gray-500 text-sm mb-4 line-clamp-2">{{ res.reason|truncatewords:15 }}</p>
+                {% endif %}
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
+                    <a href="{% url 'reservation_detail' res.pk %}" 
+                       class="flex-1 px-3 py-2 text-center text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-eye mr-1"></i>D&#233;tails
+                    </a>
+                    {% if res.status == 'pending' %}
+                    <button onclick="approveReservation({{ res.pk }})" 
+                            class="px-3 py-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button onclick="rejectReservation({{ res.pk }})" 
+                            class="px-3 py-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center mt-8">
+        <div class="flex items-center space-x-2 glass-card rounded-xl p-2 shadow-lg">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}" class="px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors"><i class="fas fa-chevron-left"></i></a>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="px-4 py-2 btn-gradient text-white rounded-lg font-medium">{{ num }}</span>
+            {% else %}
+            <a href="?page={{ num }}&{{ request.GET.urlencode }}" class="px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}" class="px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors"><i class="fas fa-chevron-right"></i></a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="text-center py-16 glass-card rounded-2xl shadow-lg">
+        <div class="w-24 h-24 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-bookmark text-purple-500 text-4xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Aucune r&#233;servation</h3>
+        <p class="text-gray-600">
+            {% if request.GET.q %}
+            Aucune r&#233;servation trouv&#233;e pour &#171; {{ request.GET.q }} &#187;
+            {% elif request.GET.status == 'pending' %}
+            Aucune r&#233;servation en attente
+            {% elif request.GET.status == 'approved' %}
+            Aucune r&#233;servation approuv&#233;e
+            {% elif request.GET.status == 'rejected' %}
+            Aucune r&#233;servation rejet&#233;e
+            {% else %}
+            Aucune r&#233;servation d'association pour le moment
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+function getCookie(name) {
+    let v = null;
+    document.cookie.split(';').forEach(function(c) {
+        c = c.trim();
+        if (c.startsWith(name + '=')) v = decodeURIComponent(c.substring(name.length + 1));
+    });
+    return v;
+}
+
+function approveReservation(pk) {
+    if (!confirm('Approuver cette r\u00e9servation ?')) return;
+    fetch('/scheduling/api/reservations/' + pk + '/approve/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            showToast('R\u00e9servation approuv\u00e9e !', 'success');
+            setTimeout(function() { location.reload(); }, 800);
+        } else {
+            showToast(data.error || 'Erreur', 'error');
+        }
+    })
+    .catch(function() { showToast('Erreur r\u00e9seau', 'error'); });
+}
+
+function rejectReservation(pk) {
+    if (!confirm('Rejeter cette r\u00e9servation ?')) return;
+    fetch('/scheduling/api/reservations/' + pk + '/reject/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            showToast('R\u00e9servation rejet\u00e9e.', 'warning');
+            setTimeout(function() { location.reload(); }, 800);
+        } else {
+            showToast(data.error || 'Erreur', 'error');
+        }
+    })
+    .catch(function() { showToast('Erreur r\u00e9seau', 'error'); });
+}
+
+function showToast(message, type) {
+    var existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+    
+    var colors = {
+        success: { bg: 'linear-gradient(135deg, #10b981, #059669)', icon: 'fa-check-circle' },
+        error:   { bg: 'linear-gradient(135deg, #ef4444, #dc2626)', icon: 'fa-times-circle' },
+        warning: { bg: 'linear-gradient(135deg, #f59e0b, #d97706)', icon: 'fa-exclamation-circle' }
+    };
+    var c = colors[type] || colors.success;
+    
+    var toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = '<i class="fas ' + c.icon + ' mr-2"></i>' + message;
+    toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:99999;padding:14px 24px;border-radius:12px;color:white;font-weight:600;font-size:0.9rem;background:' + c.bg + ';box-shadow:0 8px 30px rgba(0,0,0,0.3);display:flex;align-items:center;transform:translateX(120%);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);';
+    document.body.appendChild(toast);
+    requestAnimationFrame(function() { toast.style.transform = 'translateX(0)'; });
+    setTimeout(function() {
+        toast.style.transform = 'translateX(120%)';
+        setTimeout(function() { toast.remove(); }, 400);
+    }, 3000);
+}
+</script>
+
+<style>
+    /* Dark mode overrides */
+    .dark .glass-card { background: rgba(39, 39, 42, 0.6) !important; border: 1px solid rgba(63, 63, 70, 0.5) !important; }
+    .dark .text-gray-900 { color: #f4f4f5 !important; }
+    .dark .text-gray-700 { color: #d4d4d8 !important; }
+    .dark .text-gray-600 { color: #a1a1aa !important; }
+    .dark .text-gray-500 { color: #71717a !important; }
+    .dark input[name="q"] { background-color: rgba(255, 255, 255, 0.1) !important; border-color: rgba(63, 63, 70, 0.5) !important; color: white !important; }
+    .dark input[name="q"]::placeholder { color: #a1a1aa !important; }
+    .dark .bg-gray-100 { background-color: #3f3f46 !important; color: #d4d4d8 !important; }
+    .dark .bg-gray-100:hover { background-color: #52525b !important; }
+    .dark .bg-yellow-100 { background-color: rgba(234, 179, 8, 0.2) !important; color: #fef08a !important; }
+    .dark .bg-green-100 { background-color: rgba(34, 197, 94, 0.2) !important; color: #86efac !important; }
+    .dark .bg-red-100 { background-color: rgba(239, 68, 68, 0.2) !important; color: #fca5a5 !important; }
+    .dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.15) !important; }
+    .dark .bg-green-50 { background-color: rgba(34, 197, 94, 0.15) !important; }
+    .dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.15) !important; }
+    .dark .border-gray-100 { border-color: rgba(63, 63, 70, 0.5) !important; }
+    .dark .text-gray-800 { color: #e4e4e7 !important; }
+</style>
+{% endblock %}
+{% endblock %}

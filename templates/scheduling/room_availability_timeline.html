@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+
+{% block title %}Disponibilité des Salles - Timeline{% endblock %}
+
+{% block extra_css %}
+<style>
+.timeline-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.timeline-table {
+    min-width: 1000px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.timeline-table th {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 10;
+    padding: 10px 5px;
+    font-size: 0.85rem;
+    border-bottom: 2px solid #dee2e6;
+    text-align: center;
+}
+
+.timeline-table th.room-header {
+    left: 0;
+    z-index: 11;
+    background-color: #f8f9fa;
+    border-right: 2px solid #dee2e6;
+    min-width: 180px;
+    text-align: left;
+}
+
+.timeline-table td.room-info {
+    position: sticky;
+    left: 0;
+    background-color: #f8f9fa;
+    border-right: 2px solid #dee2e6;
+    font-weight: 500;
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.time-slot {
+    width: 55px;
+    height: 55px;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.time-slot.available {
+    background-color: #d4edda;
+}
+
+.time-slot.available:hover {
+    background-color: #9be0ac;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.time-slot.occupied {
+    background-color: #f8d7da;
+    cursor: not-allowed;
+}
+
+.time-slot.pending {
+    background-color: #fff3cd;
+}
+
+.room-details {
+    font-size: 0.75rem;
+    color: #6c757d;
+    line-height: 1.3;
+}
+
+.legend {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.legend-box {
+    width: 25px;
+    height: 25px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.legend-box.available { background-color: #d4edda; }
+.legend-box.occupied { background-color: #f8d7da; }
+.legend-box.pending { background-color: #fff3cd; }
+
+@media (max-width: 768px) {
+    .timeline-table {
+        font-size: 0.75rem;
+    }
+    .time-slot {
+        width: 45px;
+        height: 45px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Disponibilité des Salles</h4>
+            <span class="badge bg-light text-primary">{{ working_hours_start }}h00 - {{ working_hours_end }}h00</span>
+        </div>
+        <div class="card-body">
+            
+            {% if is_sunday %}
+            <div class="alert alert-warning text-center py-5">
+                <i class="fas fa-exclamation-triangle fa-3x mb-3 d-block"></i>
+                <h4>Dimanche - Fermé</h4>
+                <p class="mb-3">Les salles ne sont pas disponibles le dimanche.</p>
+                <p>Veuillez sélectionner un jour du <strong>lundi au samedi</strong>.</p>
+                <form method="get" class="mt-4">
+                    <input type="date" name="date" class="form-control d-inline-block" style="width: auto;">
+                    <button type="submit" class="btn btn-primary ms-2">Afficher</button>
+                </form>
+            </div>
+            {% else %}
+
+            <!-- Filters -->
+            <form method="get" class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Date</label>
+                    <input type="date" name="date" class="form-control" 
+                           value="{{ selected_date|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Type de Salle</label>
+                    <select name="room_type" class="form-select">
+                        <option value="">Tous</option>
+                        {% for code, label in room_types %}
+                            <option value="{{ code }}" {% if request.GET.room_type == code %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Bâtiment</label>
+                    <select name="building" class="form-select">
+                        <option value="">Tous</option>
+                        {% for bldg in buildings %}
+                            <option value="{{ bldg }}" {% if request.GET.building == bldg %}selected{% endif %}>
+                                {{ bldg }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Capacité Min.</label>
+                    <input type="number" name="min_capacity" class="form-control" 
+                           value="{{ request.GET.min_capacity }}" placeholder="0" min="0">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-filter"></i> Filtrer
+                    </button>
+                    <a href="{% url 'room_availability_timeline' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo"></i> Réinitialiser
+                    </a>
+                </div>
+            </form>
+
+            <!-- Legend -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box available"></div>
+                    <span>Disponible</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box occupied"></div>
+                    <span>Occupée</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box pending"></div>
+                    <span>En attente</span>
+                </div>
+            </div>
+
+            <!-- Date Display -->
+            <div class="alert alert-secondary mb-4">
+                <i class="fas fa-calendar me-2"></i>
+                <strong>{{ selected_date|date:"l d F Y" }}</strong>
+                <span class="ms-3 text-muted">Horaires: {{ working_hours_start }}h00 - {{ working_hours_end }}h00</span>
+            </div>
+
+            <!-- Timeline Table -->
+            <div class="timeline-container">
+                <table class="timeline-table table table-bordered mb-0">
+                    <thead>
+                        <tr>
+                            <th class="room-header">Salle</th>
+                            {% for slot in time_slots %}
+                                <th>{{ slot.time_str }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for schedule in room_schedules %}
+                        <tr>
+                            <td class="room-info">
+                                <div class="fw-bold text-primary">{{ schedule.room.name }}</div>
+                                <div class="room-details">
+                                    <i class="fas fa-building"></i> {{ schedule.room.building }}<br>
+                                    <i class="fas fa-users"></i> {{ schedule.room.capacity }} places<br>
+                                    <i class="fas fa-tag"></i> {{ schedule.room.get_room_type_display }}
+                                </div>
+                            </td>
+                            {% for slot in schedule.slots %}
+                                <td class="time-slot {{ slot.status }}" 
+                                    data-room="{{ schedule.room.name }}"
+                                    data-room-id="{{ schedule.room.id }}"
+                                    data-time="{{ slot.time }}"
+                                    data-status="{{ slot.status }}"
+                                    {% if slot.session %}
+                                    data-session="{{ slot.session.subject }}"
+                                    data-teacher="{{ slot.session.teacher.user.get_full_name }}"
+                                    {% endif %}
+                                    onclick="handleSlotClick(this)">
+                                    
+                                    {% if slot.status == 'available' %}
+                                        <i class="fas fa-check text-success"></i>
+                                    {% elif slot.status == 'occupied' %}
+                                        <i class="fas fa-times text-danger"></i>
+                                    {% elif slot.status == 'pending' %}
+                                        <i class="fas fa-clock text-warning"></i>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ time_slots|length|add:1 }}" class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
+                                <p class="text-muted">Aucune salle trouvée avec ces critères.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+        </div>
+        
+        {% if request.user.can_reserve_room %}
+        <div class="card-footer">
+            <a href="{% url 'reservation_create' %}" class="btn btn-success">
+                <i class="fas fa-plus-circle"></i> Nouvelle Demande de Réservation
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal for Slot Details -->
+<div class="modal fade" id="slotModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-info-circle"></i> Détails du Créneau</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="slotModalBody">
+                <!-- Content populated by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <a href="#" id="reserveBtn" class="btn btn-success" style="display:none;">
+                    <i class="fas fa-calendar-plus"></i> Réserver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function handleSlotClick(element) {
+    const room = element.dataset.room;
+    const roomId = element.dataset.roomId;
+    const time = element.dataset.time;
+    const status = element.dataset.status;
+    const session = element.dataset.session || '';
+    const teacher = element.dataset.teacher || '';
+    
+    const modalBody = document.getElementById('slotModalBody');
+    const reserveBtn = document.getElementById('reserveBtn');
+    
+    let content = `
+        <dl class="row mb-0">
+            <dt class="col-sm-4">Salle</dt>
+            <dd class="col-sm-8">${room}</dd>
+            <dt class="col-sm-4">Heure</dt>
+            <dd class="col-sm-8">${time}</dd>
+            <dt class="col-sm-4">Date</dt>
+            <dd class="col-sm-8">{{ selected_date|date:'d/m/Y' }}</dd>
+        </dl>
+    `;
+    
+    if (status === 'available') {
+        content += `<div class="alert alert-success mt-3 mb-0"><i class="fas fa-check-circle"></i> Cette salle est disponible pour ce créneau</div>`;
+        {% if request.user.can_reserve_room %}
+        reserveBtn.style.display = 'inline-block';
+        reserveBtn.href = "{% url 'reservation_create' %}";
+        {% else %}
+        reserveBtn.style.display = 'none';
+        {% endif %}
+    } else if (status === 'occupied') {
+        content += `
+            <div class="alert alert-danger mt-3 mb-0">
+                <i class="fas fa-ban"></i> <strong>Occupée</strong><br>
+                ${session ? '<small>Cours: ' + session + '</small><br>' : ''}
+                ${teacher ? '<small>Enseignant: ' + teacher + '</small>' : ''}
+            </div>
+        `;
+        reserveBtn.style.display = 'none';
+    } else if (status === 'pending') {
+        content += `<div class="alert alert-warning mt-3 mb-0"><i class="fas fa-clock"></i> Réservation en attente d'approbation</div>`;
+        reserveBtn.style.display = 'none';
+    }
+    
+    modalBody.innerHTML = content;
+    
+    const modal = new bootstrap.Modal(document.getElementById('slotModal'));
+    modal.show();
+}
+
+// Disable Sundays in date picker
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.querySelector('input[type="date"]');
+    
+    if (dateInput) {
+        dateInput.addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            if (selectedDate.getDay() === 0) {
+                alert('Les dimanches sont fermés. Veuillez sélectionner un jour du lundi au samedi.');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+
+{% block title %}Détails de la Réservation - FSTTIME{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Beautiful Reservation Details Card -->
+    <div class="glass-card rounded-3xl shadow-2xl overflow-hidden animate-fadeIn">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-700 p-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-white mb-2 flex items-center">
+                        <i class="fas fa-calendar-check mr-4 text-indigo-200"></i> Détails de la Réservation
+                    </h1>
+                    <p class="text-indigo-100 mb-0 opacity-80">
+                        Demande #{{ reservation.id }} • {{ reservation.created_at|date:"d/m/Y à H:i" }}
+                    </p>
+                </div>
+                
+                <!-- Status Badge -->
+                <div>
+                    {% if reservation.status == 'pending' %}
+                        <span class="inline-flex items-center px-6 py-2 rounded-full bg-amber-400 text-amber-900 text-sm font-black shadow-lg">
+                            <i class="fas fa-clock mr-2"></i> EN ATTENTE
+                        </span>
+                    {% elif reservation.status == 'approved' %}
+                        <span class="inline-flex items-center px-6 py-2 rounded-full bg-emerald-500 text-white text-sm font-black shadow-lg">
+                            <i class="fas fa-check-circle mr-2"></i> APPROUVÉE
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center px-6 py-2 rounded-full bg-rose-500 text-white text-sm font-black shadow-lg">
+                            <i class="fas fa-times-circle mr-2"></i> REJETÉE
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-8 space-y-8">
+            <!-- Room Information -->
+            <div class="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-door-open mr-2 text-indigo-500"></i> Salle
+                </h3>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-2xl shadow-md flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-2xl">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-indigo-100 uppercase tracking-tighter">Nom de la salle</p>
+                            <p class="text-2xl font-black">{{ reservation.room.name }}</p>
+                        </div>
+                    </div>
+                    <div class="flex-1 grid grid-cols-2 gap-4">
+                        <div class="bg-white border border-gray-200 p-4 rounded-xl flex items-center gap-3">
+                            <i class="fas fa-building text-gray-400"></i>
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase">Bâtiment</p>
+                                <p class="font-bold text-gray-700">{{ reservation.room.building }}</p>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-gray-200 p-4 rounded-xl flex items-center gap-3">
+                            <i class="fas fa-layer-group text-gray-400"></i>
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase">Étage</p>
+                                <p class="font-bold text-gray-700">{{ reservation.room.floor }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Date & Time Information -->
+            <div class="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-calendar-alt mr-2 text-indigo-500"></i> Date et heure
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400">DATE</p>
+                            <p class="font-bold text-gray-800">{{ reservation.get_start_datetime|date:"l d F Y" }}</p>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400">HEURE</p>
+                            <p class="font-bold text-gray-800">{{ reservation.get_start_datetime|time:"H:i" }}</p>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400">DURÉE</p>
+                            <p class="font-bold text-gray-800">{{ reservation.get_duration_hours }} Heure(s)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Requester Information -->
+                <div class="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-user mr-2 text-indigo-500"></i> Demandeur
+                    </h3>
+                    <div class="bg-white border border-gray-100 p-6 rounded-2xl flex items-center gap-6 shadow-sm">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-3xl shadow-lg">
+                            {% if reservation.teacher %}
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            {% else %}
+                                <i class="fas fa-users"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="text-xl font-black text-gray-800">
+                                {% if reservation.teacher %}
+                                    {{ reservation.teacher.user.get_full_name }}
+                                {% else %}
+                                    {{ reservation.association.name }}
+                                {% endif %}
+                            </p>
+                            <div class="mt-1">
+                                {% if reservation.teacher %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase border border-emerald-100">
+                                        <i class="fas fa-chalkboard-teacher mr-1"></i> Enseignant
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-lg bg-purple-50 text-purple-600 text-[10px] font-black uppercase border border-purple-100">
+                                        <i class="fas fa-users mr-1"></i> Association
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Purpose/Motif -->
+                <div class="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-comment-alt mr-2 text-indigo-500"></i> Motif
+                    </h3>
+                    <div class="bg-white border border-gray-100 p-6 rounded-2xl min-h-[100px] flex items-center shadow-sm">
+                        <p class="text-gray-700 italic">"{{ reservation.reason }}"</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if reservation.admin_notes %}
+            <div class="bg-amber-50 p-6 rounded-2xl border border-amber-200">
+                <h3 class="text-lg font-bold text-amber-800 mb-2 flex items-center">
+                    <i class="fas fa-sticky-note mr-2"></i> Notes Administrateur
+                </h3>
+                <p class="text-amber-700">{{ reservation.admin_notes }}</p>
+            </div>
+            {% endif %}
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-4 pt-6 mt-8 border-t border-gray-100">
+                <a href="{% url 'reservation_list' %}" class="px-8 py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-2xl font-black transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-arrow-left"></i> RETOUR
+                </a>
+                
+                {% if user.role == 'admin' and reservation.status == 'pending' %}
+                    <button onclick="approveReservation({{ reservation.id }}, '{{ reservation.room.name|escapejs }}', '{% if reservation.teacher %}{{ reservation.teacher.user.get_full_name|escapejs }}{% else %}{{ reservation.association.name|escapejs }}{% endif %}')" 
+                            class="flex-1 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black transition-all shadow-xl hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fas fa-check"></i> APPROUVER
+                    </button>
+                    <button onclick="rejectReservation({{ reservation.id }}, '{{ reservation.room.name|escapejs }}', '{% if reservation.teacher %}{{ reservation.teacher.user.get_full_name|escapejs }}{% else %}{{ reservation.association.name|escapejs }}{% endif %}')" 
+                            class="flex-1 px-8 py-4 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl font-black transition-all shadow-xl hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fas fa-times"></i> REJETER
+                    </button>
+                {% endif %}
+                
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Structure for Approval/Rejection -->
+<div id="actionModal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeActionModal()"></div>
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md relative animate-popIn overflow-hidden">
+        <div id="modalHeader" class="p-6 text-white text-center">
+            <h3 id="modalTitle" class="text-xl font-black"></h3>
+        </div>
+        <div class="p-8">
+            <p id="modalMessage" class="text-gray-600 mb-6 font-medium text-center"></p>
+            <div id="modalDetails" class="mb-8 p-4 rounded-2xl border-l-4"></div>
+            
+            <div id="rejectionNotesContainer" class="hidden mb-6">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Motif du rejet (Optionnel)</label>
+                <textarea id="rejectionNotes" class="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-indigo-500 outline-none transition-all placeholder:text-gray-300" 
+                          placeholder="Expliquez pourquoi la demande est rejetée..."></textarea>
+            </div>
+
+            <div class="flex gap-3">
+                <button id="modalConfirmBtn" class="flex-1 py-4 text-white rounded-2xl font-black transition-all shadow-lg hover:scale-105 active:scale-95">
+                    CONFIRMER
+                </button>
+                <button onclick="closeActionModal()" class="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-black hover:bg-gray-200 transition-all">
+                    ANNULER
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes popIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .animate-popIn {
+        animation: popIn 0.3s ease-out forwards;
+    }
+
+    /* Dark Mode Overrides */
+    .dark .glass-card {
+        background: rgba(39, 39, 42, 0.6) !important;
+        border: 1px solid rgba(63, 63, 70, 0.5) !important;
+    }
+    .dark .bg-gray-50\/50, .dark .bg-gray-50 {
+        background-color: rgba(39, 39, 42, 0.4) !important;
+        border-color: rgba(63, 63, 70, 0.4) !important;
+    }
+    .dark .bg-white {
+        background-color: #27272a !important;
+        border-color: rgba(63, 63, 70, 0.5) !important;
+    }
+    .dark .text-gray-800, .dark .text-gray-900 {
+        color: #f4f4f5 !important;
+    }
+    .dark .text-gray-700 {
+        color: #d4d4d8 !important;
+    }
+    .dark .text-gray-600 {
+        color: #a1a1aa !important;
+    }
+    .dark .text-gray-500 {
+        color: #71717a !important;
+    }
+    .dark .border-gray-100 {
+        border-color: rgba(63, 63, 70, 0.4) !important;
+    }
+    
+    /* Specific overrides for this template */
+    .dark .bg-amber-50 {
+        background-color: rgba(120, 53, 15, 0.2) !important;
+        border-color: rgba(146, 64, 14, 0.3) !important;
+    }
+    .dark .text-amber-800 { color: #fcd34d !important; }
+    .dark .text-amber-700 { color: #fde68a !important; }
+    
+    .dark #actionModal > div:nth-child(2) {
+        background-color: #27272a !important;
+    }
+    .dark textarea {
+        background-color: #3f3f46 !important;
+        border-color: #52525b !important;
+        color: #f4f4f5 !important;
+    }
+    .dark textarea::placeholder {
+        color: #a1a1aa !important;
+    }
+</style>
+
+<script>
+let currentAction = null;
+let currentId = null;
+
+function showActionModal(type, id, room, requester) {
+    const modal = document.getElementById('actionModal');
+    const header = document.getElementById('modalHeader');
+    const title = document.getElementById('modalTitle');
+    const message = document.getElementById('modalMessage');
+    const details = document.getElementById('modalDetails');
+    const confirmBtn = document.getElementById('modalConfirmBtn');
+    const notesContainer = document.getElementById('rejectionNotesContainer');
+    
+    currentAction = type;
+    currentId = id;
+    
+    if (type === 'approve') {
+        header.className = 'p-6 bg-emerald-500 text-white text-center';
+        title.innerHTML = '<i class="fas fa-check-circle mr-2"></i> APPROUVER';
+        message.textContent = 'Êtes-vous sûr de vouloir approuver cette réservation ?';
+        details.className = 'mb-8 p-4 rounded-2xl border-l-4 bg-emerald-50 border-emerald-500';
+        confirmBtn.className = 'flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-black transition-all shadow-lg hover:bg-emerald-600';
+        notesContainer.classList.add('hidden');
+    } else {
+        header.className = 'p-6 bg-rose-500 text-white text-center';
+        title.innerHTML = '<i class="fas fa-times-circle mr-2"></i> REJETER';
+        message.textContent = 'Êtes-vous sûr de vouloir rejeter cette demande ?';
+        details.className = 'mb-8 p-4 rounded-2xl border-l-4 bg-rose-50 border-rose-500';
+        confirmBtn.className = 'flex-1 py-4 bg-rose-500 text-white rounded-2xl font-black transition-all shadow-lg hover:bg-rose-600';
+        notesContainer.classList.remove('hidden');
+    }
+    
+    details.innerHTML = `
+        <p class="text-sm"><strong>Salle:</strong> ${room}</p>
+        <p class="text-sm"><strong>Demandeur:</strong> ${requester}</p>
+    `;
+    
+    confirmBtn.onclick = handleConfirmation;
+    modal.classList.remove('hidden');
+}
+
+function closeActionModal() {
+    document.getElementById('actionModal').classList.add('hidden');
+}
+
+function approveReservation(id, room, requester) {
+    showActionModal('approve', id, room, requester);
+}
+
+function rejectReservation(id, room, requester) {
+    showActionModal('reject', id, room, requester);
+}
+
+function handleConfirmation() {
+    const btn = document.getElementById('modalConfirmBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> TRAITEMENT...';
+    btn.disabled = true;
+    
+    const url = currentAction === 'approve' 
+        ? `/scheduling/api/reservations/${currentId}/approve/`
+        : `/scheduling/api/reservations/${currentId}/reject/`;
+        
+    const body = currentAction === 'reject' 
+        ? JSON.stringify({ reason: document.getElementById('rejectionNotes').value })
+        : null;
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+        body: body
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showToast(data.message || 'Erreur lors du traitement', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    })
+    .catch(error => {
+        showToast('Erreur réseau', 'error');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Profil - FSTTIME{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+        
+        <!-- Left Column: Profile Card -->
+        <div class="lg:w-1/3 animate-fadeIn">
+            <!-- Main Info Card -->
+            <div class="glass-card rounded-2xl shadow-xl overflow-hidden mb-8 dark:bg-zinc-900/70 dark:border-zinc-800">
+                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-8 text-center text-white relative">
+                    <div class="absolute top-4 right-4">
+                        <span class="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-bold uppercase rounded-full tracking-wider border border-white/30">
+                            {{ user.get_role_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30">
+                        <i class="fas fa-user text-white text-4xl"></i>
+                    </div>
+                    
+                    <h2 class="text-2xl font-bold mb-1">{{ user.get_full_name|default:user.username }}</h2>
+                    <p class="text-blue-100 text-sm font-medium">{{ user.email }}</p>
+                </div>
+                
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center p-3 bg-gray-50 dark:bg-zinc-800 rounded-xl">
+                            <i class="fas fa-id-badge text-blue-500 w-8"></i>
+                            <div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Identifiant</p>
+                                <p class="text-gray-800 dark:text-gray-100 font-semibold">{{ user.username }}</p>
+                            </div>
+                        </div>
+                        
+                        {% if user.phone %}
+                        <div class="flex items-center p-3 bg-gray-50 dark:bg-zinc-800 rounded-xl">
+                            <i class="fas fa-phone text-blue-500 w-8"></i>
+                            <div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Téléphone</p>
+                                <p class="text-gray-800 dark:text-gray-100 font-semibold">{{ user.phone }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="flex items-center p-3 bg-gray-50 dark:bg-zinc-800 rounded-xl">
+                            <i class="fas fa-calendar-alt text-blue-500 w-8"></i>
+                            <div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Membre depuis</p>
+                                <p class="text-gray-800 dark:text-gray-100 font-semibold">{{ user.date_joined|date:"d F Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Role Specific Details -->
+            {% if user.role == 'teacher' and user.teacher_profile %}
+            <div class="glass-card rounded-2xl shadow-xl overflow-hidden animate-fadeIn dark:bg-zinc-900/70 dark:border-zinc-800" style="animation-delay: 0.1s;">
+                <div class="bg-gradient-to-r from-green-500 to-teal-600 p-4 text-white">
+                    <h3 class="font-bold flex items-center">
+                        <i class="fas fa-chalkboard-teacher mr-2"></i>
+                        Informations Académiques
+                    </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Matricule</p>
+                        <p class="text-gray-800 dark:text-gray-100 font-medium bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg border-l-4 border-green-500">
+                            {{ user.teacher_profile.employee_id|default:"N/A" }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Département</p>
+                        <p class="text-gray-800 dark:text-gray-100 font-medium bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg border-l-4 border-green-500">
+                            {{ user.teacher_profile.get_department_display|default:user.teacher_profile.department }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Spécialité</p>
+                        <p class="text-gray-800 dark:text-gray-100 font-medium bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg border-l-4 border-green-500">
+                            {{ user.teacher_profile.specialization|default:"N/A" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% elif user.role == 'student' and user.student_profile %}
+            <div class="glass-card rounded-2xl shadow-xl overflow-hidden animate-fadeIn dark:bg-zinc-900/70 dark:border-zinc-800" style="animation-delay: 0.1s;">
+                <div class="bg-gradient-to-r from-purple-500 to-pink-600 p-4 text-white">
+                    <h3 class="font-bold flex items-center">
+                        <i class="fas fa-graduation-cap mr-2"></i>
+                        Informations Étudiant
+                    </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Numéro Étudiant (CNE)</p>
+                        <p class="text-gray-800 dark:text-gray-100 font-medium bg-purple-50 dark:bg-purple-900/20 px-3 py-2 rounded-lg border-l-4 border-purple-500">
+                            {{ user.student_profile.student_id|default:"N/A" }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Groupe</p>
+                        <p class="text-gray-800 dark:text-gray-100 font-medium bg-purple-50 dark:bg-purple-900/20 px-3 py-2 rounded-lg border-l-4 border-purple-500">
+                            {{ user.student_profile.group|default:"N/A" }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Année d'inscription</p>
+                        <p class="text-gray-800 dark:text-gray-100 font-medium bg-purple-50 dark:bg-purple-900/20 px-3 py-2 rounded-lg border-l-4 border-purple-500">
+                            {{ user.student_profile.enrollment_year|default:"N/A" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% elif user.role == 'association' and user.association_profile %}
+            <div class="glass-card rounded-2xl shadow-xl overflow-hidden animate-fadeIn dark:bg-zinc-900/70 dark:border-zinc-800" style="animation-delay: 0.1s;">
+                <div class="bg-gradient-to-r from-orange-500 to-red-600 p-4 text-white">
+                    <h3 class="font-bold flex items-center">
+                        <i class="fas fa-users mr-2"></i>
+                        Détails de l'Association
+                    </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Nom de l'Association</p>
+                        <p class="text-gray-800 dark:text-gray-100 font-medium bg-orange-50 dark:bg-orange-900/20 px-3 py-2 rounded-lg border-l-4 border-orange-500">
+                            {{ user.association_profile.name }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Président</p>
+                        <p class="text-gray-800 dark:text-gray-100 font-medium bg-orange-50 dark:bg-orange-900/20 px-3 py-2 rounded-lg border-l-4 border-orange-500">
+                            {{ user.association_profile.president_name }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Right Column: Settings Form -->
+        <div class="lg:w-2/3 animate-fadeIn" style="animation-delay: 0.2s;">
+            <div class="glass-card rounded-2xl shadow-xl overflow-hidden h-full dark:bg-zinc-900/70 dark:border-zinc-800">
+                <!-- Tab Header -->
+                <div class="border-b border-gray-100 dark:border-gray-700">
+                    <div class="flex overflow-x-auto">
+                        <button class="px-8 py-5 text-blue-600 border-b-2 border-blue-600 font-bold whitespace-nowrap dark:text-blue-400 dark:border-blue-400">
+                            <i class="fas fa-user-edit mr-2"></i>Modifier le Profil
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-8">
+                    <form method="post" class="space-y-6">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="p-4 mb-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg animate-pulse">
+                            {% for error in form.non_field_errors %}
+                            <p class="text-red-700 dark:text-red-300 font-medium flex items-center">
+                                <i class="fas fa-exclamation-circle mr-2"></i>{{ error }}
+                            </p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- First Name -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                                    <i class="fas fa-signature text-blue-500 mr-2"></i>Prénom
+                                </label>
+                                <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}"
+                                       class="w-full px-4 py-3 modern-input rounded-xl text-gray-800 dark:text-white dark:bg-zinc-800 dark:border-zinc-700"
+                                       placeholder="Votre prénom">
+                                {% if form.first_name.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ form.first_name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Last Name -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                                    <i class="fas fa-font text-blue-500 mr-2"></i>Nom
+                                </label>
+                                <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}"
+                                       class="w-full px-4 py-3 modern-input rounded-xl text-gray-800 dark:text-white dark:bg-zinc-800 dark:border-zinc-700"
+                                       placeholder="Votre nom">
+                                {% if form.last_name.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ form.last_name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Email -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                                    <i class="fas fa-envelope text-blue-500 mr-2"></i>Adresse Email
+                                </label>
+                                <input type="email" name="email" value="{{ form.email.value|default:'' }}"
+                                       class="w-full px-4 py-3 modern-input rounded-xl text-gray-800 dark:text-white dark:bg-zinc-800 dark:border-zinc-700"
+                                       placeholder="votre.email@exemple.com">
+                                {% if form.email.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Phone -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                                    <i class="fas fa-phone text-blue-500 mr-2"></i>Téléphone
+                                </label>
+                                <input type="tel" name="phone" value="{{ form.phone.value|default:'' }}"
+                                       class="w-full px-4 py-3 modern-input rounded-xl text-gray-800 dark:text-white dark:bg-zinc-800 dark:border-zinc-700"
+                                       placeholder="+212 6XX XXX XXX">
+                                {% if form.phone.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ form.phone.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="pt-8 flex items-center justify-between border-t border-gray-100 dark:border-gray-700">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 italic">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Vos informations sont sécurisées et visibles uniquement par l'administration.
+                            </p>
+                            <button type="submit" class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+                                <i class="fas fa-save mr-2"></i>Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Additional Actions -->
+                    <div class="mt-12 pt-8 border-t border-gray-100 dark:border-gray-700">
+                        <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Sécurité du Compte</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <a href="#" class="flex items-center p-4 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded-2xl transition-all border border-transparent hover:border-blue-200 group">
+                                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-key text-blue-600 dark:text-blue-400"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-800 dark:text-gray-100">Changer le mot de passe</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Modifier votre clé d'accès</p>
+                                </div>
+                                <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
+                            </a>
+                            
+                            <a href="{% url 'logout' %}" class="flex items-center p-4 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-2xl transition-all border border-transparent hover:border-red-200 group">
+                                <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-sign-out-alt text-red-600 dark:text-red-400"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-red-800 dark:text-red-300">Déconnexion</p>
+                                    <p class="text-xs text-red-500 dark:text-red-400">Quitter la session</p>
+                                </div>
+                                <i class="fas fa-chevron-right ml-auto text-red-300"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

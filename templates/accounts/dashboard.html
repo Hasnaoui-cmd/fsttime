@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de Bord{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold text-gray-900 dark:text-white text-3xl font-bold flex items-center gap-3">
+                <i class="fas fa-tachometer-alt text-primary me-2 text-blue-600 dark:text-blue-400"></i>
+                Tableau de Bord
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Bienvenue, {{ user.get_full_name|default:user.username }}!</p>
+        </div>
+    </div>
+    
+    <div class="row g-4 grid md:grid-cols-2 gap-6">
+        <div class="col-md-6">
+            <div class="glass-card h-full p-8 rounded-2xl hover-lift transition-all duration-300">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-user-circle text-4xl text-blue-500 dark:text-blue-400"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Mon Profil</h4>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Gérez vos informations personnelles</p>
+                    <a href="{% url 'profile' %}" class="btn-gradient px-6 py-2 rounded-lg text-white font-medium hover:shadow-lg inline-block transition-all">Accéder</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="glass-card h-full p-8 rounded-2xl hover-lift transition-all duration-300">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-calendar-alt text-4xl text-green-500 dark:text-green-400"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Mon Emploi du Temps</h4>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Consultez votre planning</p>
+                    <a href="{% url 'my_timetable' %}" class="btn-gradient px-6 py-2 rounded-lg text-white font-medium hover:shadow-lg inline-block transition-all from-green-400 to-emerald-600">Consulter</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

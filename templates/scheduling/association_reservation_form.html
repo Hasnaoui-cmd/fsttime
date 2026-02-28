@@ -1,0 +1,577 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Réserver une Salle - Association{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================
+   ENHANCED RESERVATION FORM - COMPACT & CLEAR
+   ============================================ */
+
+/* Page Container */
+.reservation-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 50%, #e0f2fe 100%);
+    padding: 2rem 1rem;
+}
+
+/* Form Container - COMPACT WIDTH */
+.reservation-container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 2rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header - MORE COMPACT */
+.reservation-header {
+    background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+    padding: 2rem 2rem 1.5rem 2rem;
+    text-align: center;
+    position: relative;
+}
+
+/* Plus Icon Button */
+.add-icon-btn {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -30px auto 1rem auto;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    top: -30px;
+    margin-bottom: -15px;
+}
+
+.add-icon-btn:hover {
+    transform: scale(1.1);
+}
+
+.add-icon-btn i {
+    font-size: 1.75rem;
+    color: #7c3aed;
+}
+
+/* Title - BIGGER & BOLDER */
+.reservation-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: white;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+}
+
+.reservation-subtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Form Body - COMPACT PADDING */
+.reservation-form {
+    padding: 2rem;
+}
+
+/* Info Banner - Compact */
+.info-banner {
+    background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+    border-left: 4px solid #3b82f6;
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.info-banner i {
+    font-size: 1.5rem;
+    color: #3b82f6;
+}
+
+.info-banner-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e40af;
+    line-height: 1.5;
+}
+
+/* Section Headers - BIGGER & BOLDER */
+.form-section {
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.section-icon {
+    font-size: 1.5rem;
+    color: #7c3aed;
+}
+
+.section-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+/* Form Labels - BIGGER & CLEARER */
+.form-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 0.75rem;
+    display: block;
+    letter-spacing: -0.01em;
+}
+
+.form-label i {
+    margin-right: 0.5rem;
+    color: #7c3aed;
+}
+
+/* Select Dropdown - Enhanced */
+.form-select {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    background: #f9fafb;
+    color: #1f2937;
+    width: 100%;
+    transition: all 0.3s;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.25rem;
+    padding-right: 3rem;
+}
+
+.form-select:focus {
+    border-color: #7c3aed;
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    outline: none;
+}
+
+/* Date/Time Inputs - Enhanced */
+.form-control {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    background: #f9fafb;
+    color: #1f2937;
+    width: 100%;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    border-color: #7c3aed;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    outline: none;
+}
+
+/* Two Column Layout */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Textarea - Purpose/Motif */
+.form-textarea {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    background: #f9fafb;
+    color: #1f2937;
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.form-textarea:focus {
+    border-color: #7c3aed;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    outline: none;
+}
+
+/* Error Messages */
+.error-message {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #dc2626;
+    margin-top: 0.5rem;
+}
+
+/* Error Banner */
+.error-banner {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-left: 4px solid #dc2626;
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.error-banner i {
+    font-size: 1.5rem;
+    color: #dc2626;
+}
+
+.error-banner-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #991b1b;
+    line-height: 1.5;
+}
+
+/* Submit Button - PROMINENT */
+.btn-submit {
+    width: 100%;
+    padding: 1.25rem 2rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+    color: white;
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+
+.btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(124, 58, 237, 0.5);
+}
+
+.btn-submit:active {
+    transform: translateY(-1px);
+}
+
+.btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+    .reservation-container {
+        border-radius: 1.5rem;
+        margin: 0 0.5rem;
+    }
+    
+    .reservation-title {
+        font-size: 1.5rem;
+    }
+    
+    .reservation-form {
+        padding: 1.5rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.125rem;
+    }
+}
+    .section-title {
+        font-size: 1.125rem;
+    }
+}
+
+/* Dark Mode Overrides */
+.dark .reservation-page {
+    background: linear-gradient(135deg, #09090b 0%, #1c1917 100%);
+}
+
+.dark .reservation-container {
+    background: #18181b;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.dark .add-icon-btn {
+    background: #27272a;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.dark .add-icon-btn i { color: #a78bfa; }
+
+.dark .reservation-header {
+    background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%);
+}
+
+.dark .reservation-title { color: #f3f4f6; }
+.dark .reservation-subtitle { color: #d1d5db; }
+
+.dark .info-banner {
+    background: #1e1b4b;
+    border-left-color: #60a5fa;
+}
+
+.dark .info-banner i { color: #60a5fa; }
+.dark .info-banner-text { color: #bfdbfe; }
+
+.dark .section-icon { color: #a78bfa; }
+.dark .section-title { color: #e5e7eb; }
+
+.dark .form-label { color: #d1d5db; }
+.dark .form-label i { color: #a78bfa; }
+
+.dark .form-control,
+.dark .form-select,
+.dark .form-textarea {
+    background: #27272a;
+    border-color: #3f3f46;
+    color: #f3f4f6;
+}
+
+.dark .form-control:focus,
+.dark .form-select:focus,
+.dark .form-textarea:focus {
+    background: #27272a;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+}
+
+.dark .error-banner {
+    background: #450a0a;
+    border-left-color: #ef4444;
+}
+
+.dark .error-banner i { color: #ef4444; }
+.dark .error-banner-text { color: #fca5a5; }
+
+.dark .btn-submit {
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2);
+}
+
+/* Fix for date picker icon color in dark mode */
+.dark ::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reservation-page">
+    <div class="reservation-container">
+        
+        <!-- Compact Header -->
+        <div class="reservation-header">
+            <div class="add-icon-btn">
+                <i class="fas fa-plus"></i>
+            </div>
+            <h1 class="reservation-title">Réservation de Salle</h1>
+            <p class="reservation-subtitle">
+                {% if user.is_teacher %}
+                    Enseignant
+                {% else %}
+                    Association: {{ user.association.name|default:user.get_full_name }}
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- Form Body -->
+        <form method="POST" id="reservationForm" class="reservation-form">
+            {% csrf_token %}
+            
+            <!-- Info Banner -->
+            <div class="info-banner">
+                <i class="fas fa-clock"></i>
+                <div class="info-banner-text">
+                    Périodes autorisées: Lundi à Samedi, de 09:00 à 18:00.
+                </div>
+            </div>
+            
+            <!-- Global Errors -->
+            {% if form.non_field_errors %}
+            <div class="error-banner">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="error-banner-text">
+                    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Room Selection Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-door-open section-icon"></i>
+                    <h2 class="section-title">Local souhaité</h2>
+                </div>
+                
+                <div>
+                    <label class="form-label">Sélectionner une salle</label>
+                    <select class="form-select" name="room" id="{{ form.room.id_for_label }}" required>
+                        <option value="">Choisir une salle...</option>
+                        {% for choice in form.room.field.queryset %}
+                            <option value="{{ choice.id }}" {% if form.room.value|stringformat:"s" == choice.id|stringformat:"s" %}selected{% endif %}>
+                                {{ choice.name }} - {% if choice.type == 'amphi' %}Amphithéâtre{% elif choice.type == 'td' %}Salle TD{% else %}Salle TP{% endif %} ({{ choice.capacity }} places)
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.room.errors %}
+                        <p class="error-message">{{ form.room.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Date & Time Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-calendar-alt section-icon"></i>
+                    <h2 class="section-title">Date & Horaire</h2>
+                </div>
+                
+                <div class="form-row">
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-calendar"></i> Début de l'événement
+                        </label>
+                        <input type="datetime-local" 
+                               class="form-control" 
+                               name="start_datetime"
+                               id="{{ form.start_datetime.id_for_label }}"
+                               value="{{ form.start_datetime.value|default:'' }}"
+                               required>
+                        {% if form.start_datetime.errors %}
+                            <p class="error-message">{{ form.start_datetime.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-clock"></i> Fin de l'événement
+                        </label>
+                        <input type="datetime-local" 
+                               class="form-control" 
+                               name="end_datetime"
+                               id="{{ form.end_datetime.id_for_label }}"
+                               value="{{ form.end_datetime.value|default:'' }}"
+                               required>
+                        {% if form.end_datetime.errors %}
+                            <p class="error-message">{{ form.end_datetime.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Purpose Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-file-alt section-icon"></i>
+                    <h2 class="section-title">Motif de la réservation</h2>
+                </div>
+                
+                <div>
+                    <label class="form-label">Décrivez l'objectif de votre réservation</label>
+                    <textarea class="form-textarea" 
+                              name="reason"
+                              id="{{ form.reason.id_for_label }}"
+                              placeholder="Ex: Cours de mathématiques, Atelier robotique, Conférence..."
+                              required>{{ form.reason.value|default:'' }}</textarea>
+                    {% if form.reason.errors %}
+                        <p class="error-message">{{ form.reason.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <i class="fas fa-paper-plane"></i>
+                <span>Envoyer la Demande</span>
+            </button>
+        </form>
+        
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('reservationForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', function(e) {
+        if (submitBtn.disabled) return;
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <span style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-circle-notch fa-spin"></i>
+                Traitement...
+            </span>
+        `;
+    });
+});
+</script>
+{% endblock %}

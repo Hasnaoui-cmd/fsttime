@@ -1,0 +1,938 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.5);
+        --glass-border: rgba(255, 255, 255, 0.6);
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .notifications-page {
+        min-height: 100vh;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0fe 100%);
+    }
+    
+    .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .notifications-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .notifications-title i {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .unread-badge {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: #fff;
+        font-size: 0.875rem;
+        padding: 0.375rem 1rem;
+        border-radius: 20px;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+    }
+    
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .btn-mark-all {
+        background: white;
+        border: 2px solid #e5e7eb;
+        color: #4b5563;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn-mark-all:hover {
+        background: #f9fafb;
+        border-color: #667eea;
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .filters-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        background: white;
+        border: 2px solid #e5e7eb;
+        color: #6b7280;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+    
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .notifications-container {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    }
+    
+    .notification-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        background: transparent;
+    }
+    
+    .notification-item:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+    
+    .notification-item.unread {
+        background: rgba(102, 126, 234, 0.08);
+        border-left: 4px solid #667eea;
+    }
+    
+    .notification-item.unread:hover {
+        background: rgba(102, 126, 234, 0.12);
+    }
+    
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+    
+    .notification-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .notification-icon.success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .notification-icon.danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    
+    .notification-icon.warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    
+    .notification-icon.primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .notification-content {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .notification-title {
+        font-size: 1.0625rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .notification-time {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        white-space: nowrap;
+        font-weight: 600;
+    }
+    
+    .notification-message {
+        font-size: 0.9375rem;
+        color: #4b5563;
+        line-height: 1.6;
+        margin: 0;
+        white-space: pre-line;
+    }
+    
+    .priority-badge {
+        font-size: 0.625rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: 6px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-left: 0.5rem;
+        letter-spacing: 0.05em;
+    }
+    
+    .priority-urgent {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+    
+    .priority-high {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        color: #6b7280;
+    }
+    
+    .empty-state i {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        color: #d1d5db;
+    }
+    
+    .empty-state h3 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.5rem;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+    
+    .empty-state p {
+        color: #6b7280;
+        font-size: 1rem;
+    }
+    
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        padding: 1.5rem;
+        gap: 0.5rem;
+    }
+    
+    .pagination-container a,
+    .pagination-container span {
+        padding: 0.625rem 1.125rem;
+        border-radius: 10px;
+        color: #4b5563;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        background: white;
+        border: 2px solid #e5e7eb;
+    }
+    
+    .pagination-container a:hover {
+        background: #f9fafb;
+        border-color: #667eea;
+        color: #667eea;
+    }
+    
+    .pagination-container .current {
+        background: var(--primary-gradient);
+        color: white;
+        font-weight: 700;
+        border-color: transparent;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    /* ========== DETAIL MODAL ========== */
+    .detail-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(6px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .detail-modal {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(30px);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 24px;
+        width: 95%;
+        max-width: 640px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 80px rgba(0,0,0,0.2);
+        animation: slideUp 0.3s ease;
+    }
+    .detail-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.75rem 2rem 1rem;
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .detail-modal-title-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .detail-modal-icon {
+        width: 48px; height: 48px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem;
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 6px 20px rgba(102,126,234,0.3);
+    }
+    .detail-modal-header h2 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+    }
+    .detail-modal-close {
+        background: none; border: none;
+        font-size: 2rem; color: #9ca3af;
+        cursor: pointer; line-height: 1;
+        transition: color 0.2s;
+    }
+    .detail-modal-close:hover { color: #ef4444; }
+    .detail-modal-body {
+        padding: 1.5rem 2rem 2rem;
+    }
+
+    .detail-field {
+        margin-bottom: 1.25rem;
+    }
+    .detail-field-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #9ca3af;
+        margin-bottom: 0.35rem;
+    }
+    .detail-field-value {
+        font-size: 1rem;
+        color: #1f2937;
+        line-height: 1.6;
+        white-space: pre-line;
+    }
+    .detail-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    .detail-status-badge {
+        display: inline-block;
+        padding: 0.3rem 0.85rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+    .detail-status-badge.pending {
+        background: linear-gradient(135deg, #f59e0b20, #f59e0b10);
+        color: #b45309;
+        border: 1px solid #f59e0b40;
+    }
+    .detail-status-badge.approved {
+        background: linear-gradient(135deg, #10b98120, #10b98110);
+        color: #047857;
+        border: 1px solid #10b98140;
+    }
+    .detail-status-badge.rejected {
+        background: linear-gradient(135deg, #ef444420, #ef444410);
+        color: #b91c1c;
+        border: 1px solid #ef444440;
+    }
+    .detail-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0,0,0,0.06);
+    }
+    .detail-btn {
+        flex: 1;
+        padding: 0.85rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .detail-btn-approve {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .detail-btn-approve:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    .detail-btn-reject {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    .detail-btn-reject:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+    .detail-loading {
+        text-align: center;
+        padding: 3rem;
+        color: #9ca3af;
+        font-size: 1.1rem;
+    }
+    .detail-loading i { margin-right: 0.5rem; }
+
+    /* Toast notification */
+    .toast-notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        padding: 1rem 1.75rem;
+        border-radius: 14px;
+        color: white;
+        font-weight: 600;
+        z-index: 10001;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        animation: slideUp 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .toast-success { background: linear-gradient(135deg, #10b981, #059669); }
+    .toast-error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    
+    @media (max-width: 768px) {
+        .notifications-page { padding: 1rem; }
+        .notifications-header { flex-direction: column; align-items: flex-start; }
+        .notification-item { padding: 1.25rem; }
+        .notification-icon { width: 44px; height: 44px; font-size: 1.25rem; }
+        .notifications-title { font-size: 1.5rem; }
+        .detail-modal { width: 98%; max-height: 90vh; }
+        .detail-row { grid-template-columns: 1fr; }
+    }
+
+    /* Dark Mode */
+    .dark .notifications-page { background: linear-gradient(135deg, #18181b 0%, #27272a 100%) !important; }
+    .dark .notifications-container { background: rgba(39, 39, 42, 0.6) !important; border-color: rgba(63, 63, 70, 0.5) !important; }
+    .dark .notifications-title { color: #f4f4f5 !important; }
+    .dark .btn-mark-all { background: #3f3f46 !important; border-color: #52525b !important; color: #f4f4f5 !important; }
+    .dark .btn-mark-all:hover { background: #52525b !important; }
+    .dark .filter-btn { background: #3f3f46 !important; border-color: #52525b !important; color: #d4d4d8 !important; }
+    .dark .filter-btn:hover, .dark .filter-btn.active { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important; color: white !important; }
+    .dark .notification-item { border-bottom-color: rgba(255, 255, 255, 0.05) !important; }
+    .dark .notification-item:hover { background: rgba(255, 255, 255, 0.05) !important; }
+    .dark .notification-title { color: #f4f4f5 !important; }
+    .dark .notification-message { color: #d4d4d8 !important; }
+    .dark .notification-time { color: #a1a1aa !important; }
+    .dark .empty-state i { color: #52525b !important; }
+    .dark .empty-state h3 { color: #f4f4f5 !important; }
+    .dark .pagination-container a, .dark .pagination-container span { background: #3f3f46 !important; border-color: #52525b !important; color: #f4f4f5 !important; }
+    .dark .pagination-container .current { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important; color: white !important; }
+    .dark .detail-modal { background: rgba(39,39,42,0.97) !important; border-color: rgba(63,63,70,0.5) !important; }
+    .dark .detail-modal-header { border-bottom-color: rgba(255,255,255,0.06) !important; }
+    .dark .detail-modal-header h2 { color: #f4f4f5 !important; }
+    .dark .detail-field-label { color: #a1a1aa !important; }
+    .dark .detail-field-value { color: #f4f4f5 !important; }
+    .dark .detail-actions { border-top-color: rgba(255,255,255,0.06) !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notifications-page">
+    <div class="notifications-header">
+        <h1 class="notifications-title">
+            <i class="fas fa-bell"></i>
+            Notifications
+            {% if unread_count > 0 %}
+            <span class="unread-badge">{{ unread_count }} non lu{{ unread_count|pluralize:"e,es" }}</span>
+            {% endif %}
+        </h1>
+        
+        <div class="header-actions">
+            {% if notifications.exists %}
+            <form method="post" action="{% url 'mark_all_as_read' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-mark-all">
+                    <i class="fas fa-check-double"></i>
+                    Tout marquer comme lu
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="filters-bar">
+        <a href="?filter=all" class="filter-btn {% if filter == 'all' or not filter %}active{% endif %}">
+            <i class="fas fa-inbox"></i> Toutes
+        </a>
+        <a href="?filter=unread" class="filter-btn {% if filter == 'unread' %}active{% endif %}">
+            <i class="fas fa-circle"></i> Non lues
+        </a>
+        <a href="?filter=reservation" class="filter-btn {% if filter == 'reservation' %}active{% endif %}">
+            <i class="fas fa-calendar-alt"></i> R&#233;servations
+        </a>
+        <a href="?filter=session" class="filter-btn {% if filter == 'session' %}active{% endif %}">
+            <i class="fas fa-chalkboard"></i> S&#233;ances
+        </a>
+        <a href="?filter=timetable" class="filter-btn {% if filter == 'timetable' %}active{% endif %}">
+            <i class="fas fa-calendar-week"></i> Emplois du temps
+        </a>
+    </div>
+    
+    <div class="notifications-container">
+        {% if notifications %}
+            {% for notification in notifications %}
+            <a href="{{ notification.get_link_url }}" 
+               class="notification-item {% if not notification.is_read %}unread{% endif %}"
+               data-notification-id="{{ notification.id }}"
+               data-notification-type="{{ notification.notification_type }}"
+               data-related-type="{{ notification.related_object_type|default:'' }}"
+               data-related-id="{{ notification.related_object_id|default:'' }}">
+                <div class="notification-icon {{ notification.get_color }}">
+                    <i class="{{ notification.get_icon }}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-header">
+                        <h3 class="notification-title">
+                            {{ notification.title }}
+                            {% if notification.priority == 'urgent' %}
+                            <span class="priority-badge priority-urgent">Urgent</span>
+                            {% elif notification.priority == 'high' %}
+                            <span class="priority-badge priority-high">Important</span>
+                            {% endif %}
+                        </h3>
+                        <span class="notification-time">
+                            {{ notification.created_at|timesince }} ago
+                        </span>
+                    </div>
+                    <p class="notification-message">{{ notification.message }}</p>
+                </div>
+            </a>
+            {% endfor %}
+            
+            {% if is_paginated %}
+            <div class="pagination-container">
+                {% if page_obj.has_previous %}
+                <a href="?page=1{% if filter %}&filter={{ filter }}{% endif %}">&laquo; Premier</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if filter %}&filter={{ filter }}{% endif %}">Pr&#233;c&#233;dent</a>
+                {% endif %}
+                
+                <span class="current">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if filter %}&filter={{ filter }}{% endif %}">Suivant</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if filter %}&filter={{ filter }}{% endif %}">Dernier &raquo;</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-bell-slash"></i>
+                <h3>Aucune notification</h3>
+                <p>Vous n'avez aucune notification pour le moment.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="detail-modal-overlay" id="detailModalOverlay" style="display:none;">
+    <div class="detail-modal" id="detailModal">
+        <div class="detail-modal-header">
+            <div class="detail-modal-title-row">
+                <div class="detail-modal-icon" id="detailModalIcon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <h2 id="detailModalTitle">D&#233;tails</h2>
+            </div>
+            <button class="detail-modal-close" id="detailModalClose">&times;</button>
+        </div>
+        <div class="detail-modal-body" id="detailModalBody">
+            <div class="detail-loading">
+                <i class="fas fa-spinner fa-spin"></i> Chargement...
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const DETAIL_TYPES = ['TeacherUnavailability', 'TimetableChangeRequest', 'RoomReservationRequest'];
+    const overlay = document.getElementById('detailModalOverlay');
+    const modal = document.getElementById('detailModal');
+    const modalTitle = document.getElementById('detailModalTitle');
+    const modalIcon = document.getElementById('detailModalIcon');
+    const modalBody = document.getElementById('detailModalBody');
+    const modalClose = document.getElementById('detailModalClose');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+    function closeModal() {
+        overlay.style.display = 'none';
+    }
+    modalClose.addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification toast-' + type;
+        toast.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i> ' + message;
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 2500);
+        setTimeout(function() { toast.remove(); }, 3000);
+    }
+
+    // Click handler for notification items
+    document.querySelectorAll('.notification-item').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            var relatedType = this.dataset.relatedType;
+            var notifId = this.dataset.notificationId;
+
+            // If this notification type supports detail modal, show it instead
+            if (relatedType && DETAIL_TYPES.indexOf(relatedType) !== -1) {
+                e.preventDefault();
+                e.stopPropagation();
+                openDetailModal(notifId, this);
+            } else if (notifId && this.classList.contains('unread')) {
+                // Just mark as read for non-detail notifications
+                fetch('/notifications/mark-read/' + notifId + '/', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken }
+                });
+            }
+        });
+    });
+
+    function openDetailModal(notifId, itemEl) {
+        overlay.style.display = 'flex';
+        modalBody.innerHTML = '<div class="detail-loading"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>';
+        modalTitle.textContent = 'D\u00e9tails';
+
+        fetch('/notifications/api/detail/' + notifId + '/')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                // Mark item as read visually
+                if (itemEl) itemEl.classList.remove('unread');
+
+                modalTitle.textContent = data.title || 'D\u00e9tails';
+
+                if (!data.detail) {
+                    modalBody.innerHTML = 
+                        '<div class="detail-field">' +
+                            '<div class="detail-field-label">Message</div>' +
+                            '<div class="detail-field-value">' + escapeHtml(data.message) + '</div>' +
+                        '</div>' +
+                        '<div class="detail-field">' +
+                            '<div class="detail-field-label">Date</div>' +
+                            '<div class="detail-field-value">' + data.created_at + '</div>' +
+                        '</div>';
+                    return;
+                }
+
+                var d = data.detail;
+                if (d.object_type === 'unavailability') {
+                    renderUnavailability(d);
+                } else if (d.object_type === 'change_request') {
+                    renderChangeRequest(d);
+                } else if (d.object_type === 'reservation') {
+                    renderReservation(d);
+                }
+            })
+            .catch(function(err) {
+                modalBody.innerHTML = '<div class="detail-loading" style="color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Erreur de chargement</div>';
+            });
+    }
+
+    function renderUnavailability(d) {
+        modalIcon.innerHTML = '<i class="fas fa-user-slash"></i>';
+        modalIcon.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        modalBody.innerHTML = 
+            '<div class="detail-field">' +
+                '<div class="detail-field-label">Enseignant</div>' +
+                '<div class="detail-field-value"><strong>' + escapeHtml(d.teacher_name) + '</strong></div>' +
+            '</div>' +
+            '<div class="detail-row">' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">D\u00e9but</div>' +
+                    '<div class="detail-field-value">' + d.start + '</div>' +
+                '</div>' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Fin</div>' +
+                    '<div class="detail-field-value">' + d.end + '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="detail-field">' +
+                '<div class="detail-field-label">Raison</div>' +
+                '<div class="detail-field-value">' + escapeHtml(d.reason) + '</div>' +
+            '</div>' +
+            '<div class="detail-row">' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">R\u00e9current</div>' +
+                    '<div class="detail-field-value">' + (d.is_recurring ? 'Oui' : 'Non') + '</div>' +
+                '</div>' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">D\u00e9clar\u00e9 le</div>' +
+                    '<div class="detail-field-value">' + d.created_at + '</div>' +
+                '</div>' +
+            '</div>';
+    }
+
+    function renderChangeRequest(d) {
+        modalIcon.innerHTML = '<i class="fas fa-exchange-alt"></i>';
+        modalIcon.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+        var statusClass = d.status === 'approved' ? 'approved' : d.status === 'rejected' ? 'rejected' : 'pending';
+        var html = 
+            '<div class="detail-field">' +
+                '<div class="detail-field-label">Enseignant</div>' +
+                '<div class="detail-field-value"><strong>' + escapeHtml(d.teacher_name) + '</strong></div>' +
+            '</div>' +
+            '<div class="detail-row">' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Mati\u00e8re</div>' +
+                    '<div class="detail-field-value">' + escapeHtml(d.subject_code) + ' - ' + escapeHtml(d.subject_name) + '</div>' +
+                '</div>' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Statut</div>' +
+                    '<div class="detail-field-value"><span class="detail-status-badge ' + statusClass + '">' + escapeHtml(d.status_display) + '</span></div>' +
+                '</div>' +
+            '</div>';
+        if (d.current_entry) {
+            html += 
+            '<div class="detail-field">' +
+                '<div class="detail-field-label">S\u00e9ance actuelle</div>' +
+                '<div class="detail-field-value">' + escapeHtml(d.current_entry) + '</div>' +
+            '</div>';
+        }
+        html += 
+            '<div class="detail-field">' +
+                '<div class="detail-field-label">Changement souhait\u00e9</div>' +
+                '<div class="detail-field-value">' + escapeHtml(d.desired_change) + '</div>' +
+            '</div>';
+        if (d.reason) {
+            html += 
+            '<div class="detail-field">' +
+                '<div class="detail-field-label">Justification</div>' +
+                '<div class="detail-field-value">' + escapeHtml(d.reason) + '</div>' +
+            '</div>';
+        }
+        if (d.admin_notes) {
+            html += 
+            '<div class="detail-field">' +
+                '<div class="detail-field-label">Notes admin</div>' +
+                '<div class="detail-field-value">' + escapeHtml(d.admin_notes) + '</div>' +
+            '</div>';
+        }
+        html += 
+            '<div class="detail-field">' +
+                '<div class="detail-field-label">Date de demande</div>' +
+                '<div class="detail-field-value">' + d.created_at + '</div>' +
+            '</div>';
+
+        // Show approve/reject buttons only for pending requests
+        if (d.status === 'pending') {
+            html += 
+            '<div class="detail-actions">' +
+                '<button class="detail-btn detail-btn-approve" onclick="handleChangeRequestAction(' + d.change_request_id + ', \'approved\')">' +
+                    '<i class="fas fa-check"></i> Approuver' +
+                '</button>' +
+                '<button class="detail-btn detail-btn-reject" onclick="handleChangeRequestAction(' + d.change_request_id + ', \'rejected\')">' +
+                    '<i class="fas fa-times"></i> Rejeter' +
+                '</button>' +
+            '</div>';
+        }
+
+        modalBody.innerHTML = html;
+    }
+
+    function renderReservation(d) {
+        modalIcon.innerHTML = '<i class="fas fa-calendar-check"></i>';
+        modalIcon.style.background = d.status === 'approved' 
+            ? 'linear-gradient(135deg, #10b981, #059669)' 
+            : d.status === 'rejected' 
+            ? 'linear-gradient(135deg, #ef4444, #dc2626)' 
+            : 'linear-gradient(135deg, #f59e0b, #d97706)';
+        var statusClass = d.status === 'approved' ? 'approved' : d.status === 'rejected' ? 'rejected' : 'pending';
+        var requesterLabel = d.requester_type === 'teacher' ? 'Enseignant' : 'Association';
+        modalBody.innerHTML = 
+            '<div class="detail-row">' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Demandeur</div>' +
+                    '<div class="detail-field-value"><strong>' + escapeHtml(d.requester_name) + '</strong></div>' +
+                '</div>' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Type</div>' +
+                    '<div class="detail-field-value">' + requesterLabel + '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="detail-row">' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Salle</div>' +
+                    '<div class="detail-field-value">' + escapeHtml(d.room_name) + '</div>' +
+                '</div>' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Fili\u00e8re</div>' +
+                    '<div class="detail-field-value">' + escapeHtml(d.program_name || 'N/A') + '</div>' +
+                '</div>' +
+            '</div>' +
+            (d.subject ? 
+            '<div class="detail-field">' +
+                '<div class="detail-field-label">Mati\u00e8re / Sujet</div>' +
+                '<div class="detail-field-value">' + escapeHtml(d.subject) + '</div>' +
+            '</div>' : '') +
+            '<div class="detail-row">' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">D\u00e9but</div>' +
+                    '<div class="detail-field-value">' + d.start + '</div>' +
+                '</div>' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Fin</div>' +
+                    '<div class="detail-field-value">' + d.end + '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="detail-row">' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Type de r\u00e9servation</div>' +
+                    '<div class="detail-field-value">' + escapeHtml(d.reservation_type_display) + '</div>' +
+                '</div>' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Statut</div>' +
+                    '<div class="detail-field-value"><span class="detail-status-badge ' + statusClass + '">' + escapeHtml(d.status_display) + '</span></div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="detail-field">' +
+                '<div class="detail-field-label">Motif</div>' +
+                '<div class="detail-field-value">' + escapeHtml(d.reason) + '</div>' +
+            '</div>' +
+            (d.admin_notes ? 
+            '<div class="detail-field">' +
+                '<div class="detail-field-label">Notes admin</div>' +
+                '<div class="detail-field-value">' + escapeHtml(d.admin_notes) + '</div>' +
+            '</div>' : '') +
+            '<div class="detail-row">' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Examen</div>' +
+                    '<div class="detail-field-value">' + (d.is_exam ? 'Oui' : 'Non') + '</div>' +
+                '</div>' +
+                '<div class="detail-field">' +
+                    '<div class="detail-field-label">Cr\u00e9\u00e9 le</div>' +
+                    '<div class="detail-field-value">' + d.created_at + '</div>' +
+                '</div>' +
+            '</div>';
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Global function for change request actions
+    window.handleChangeRequestAction = function(requestId, action) {
+        var url = action === 'approved' 
+            ? '/scheduling/api/change-request/' + requestId + '/approve/'
+            : '/scheduling/api/change-request/' + requestId + '/reject/';
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: action })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                showToast(action === 'approved' ? 'Demande approuv\u00e9e !' : 'Demande rejet\u00e9e.', 'success');
+                closeModal();
+                setTimeout(function() { location.reload(); }, 800);
+            } else {
+                showToast(data.message || 'Erreur', 'error');
+            }
+        })
+        .catch(function() { showToast('Erreur de connexion', 'error'); });
+    };
+});
+</script>
+{% endblock %}

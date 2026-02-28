@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="fr" class="">
+<script>
+    // FOUC Prevention: Apply theme before render
+    (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    })();
+</script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FSTTIME - Système intelligent de gestion des emplois du temps universitaires">
+    <title>{% block title %}Gestion Emplois du Temps{% endblock %} | FSTTIME</title>
+    
+    <!-- Tailwind CSS with Dark Mode Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        aurora: 'aurora 60s linear infinite',
+                    },
+                    keyframes: {
+                        aurora: {
+                            from: { backgroundPosition: '50% 50%, 50% 50%' },
+                            to: { backgroundPosition: '350% 50%, 350% 50%' },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Navbar Styles -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+    
+    <!-- Google Fonts - Inter for body, Poppins for headings -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ===== UI Scaling Fix (User requested 80% zoom look) ===== */
+        html {
+            font-size: 80%; /* 16px * 0.8 = ~12.8px base size. This scales down all rem units. */
+        }
+
+        /* ===== CSS Variables for Aurora ===== */
+        :root {
+            --white: #ffffff;
+            --black: #18181b;
+            --transparent: transparent;
+            --blue-300: #93c5fd;
+            --blue-400: #60a5fa;
+            --blue-500: #3b82f6;
+            --indigo-300: #a5b4fc;
+            --violet-200: #ddd6fe;
+            --cyan-500: #06b6d4;
+        }
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Aurora Background Animation - Ported from React Component */
+        @keyframes aurora {
+            from { background-position: 50% 50%, 50% 50%; }
+            to { background-position: 350% 50%, 350% 50%; }
+        }
+        
+        .aurora-bg {
+            --white-gradient: repeating-linear-gradient(100deg, var(--white) 0%, var(--white) 7%, var(--transparent) 10%, var(--transparent) 12%, var(--white) 16%);
+            --dark-gradient: repeating-linear-gradient(100deg, var(--black) 0%, var(--black) 7%, var(--transparent) 10%, var(--transparent) 12%, var(--black) 16%);
+            --aurora-gradient: repeating-linear-gradient(100deg, var(--blue-500) 10%, var(--indigo-300) 15%, var(--blue-300) 20%, var(--violet-200) 25%, var(--blue-400) 30%);
+            
+            background-image: var(--white-gradient), var(--aurora-gradient);
+            background-size: 300%, 200%;
+            background-position: 50% 50%, 50% 50%;
+            animation: aurora 60s linear infinite;
+            filter: blur(10px) invert(1);
+            opacity: 0.5;
+            will-change: transform;
+        }
+        
+        .aurora-bg::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: var(--white-gradient), var(--aurora-gradient);
+            background-size: 200%, 100%;
+            background-attachment: fixed;
+            animation: aurora 60s linear infinite;
+            mix-blend-mode: difference;
+        }
+        
+        /* Dark Mode Aurora */
+        .dark .aurora-bg {
+            background-image: var(--dark-gradient), var(--aurora-gradient);
+            filter: blur(10px) invert(0);
+        }
+        
+        .dark .aurora-bg::after {
+            background-image: var(--dark-gradient), var(--aurora-gradient);
+        }
+        
+        /* Fade In Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Glassmorphism - Light Mode */
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Glassmorphism - Dark Mode */
+        .dark .glass {
+            background: rgba(24, 24, 27, 0.8);
+            border: 1px solid rgba(63, 63, 70, 0.5);
+        }
+        
+        .dark .glass-card {
+            background: rgba(39, 39, 42, 0.7);
+            border: 1px solid rgba(63, 63, 70, 0.3);
+        }
+        
+        /* Hover Effects */
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+        }
+        
+        /* Stats Card Animation */
+        .stats-card {
+            transition: all 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .stats-card:hover .stats-icon {
+            transform: scale(1.1);
+        }
+        
+        /* Modern Form Inputs */
+        .modern-input {
+            transition: all 0.3s ease;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .modern-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+        
+        /* Modern Buttons */
+        .btn-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+        }
+        
+        /* Alert/Message Animations */
+        .alert-slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Card Hover Gradient */
+        .card-hover-gradient:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+        }
+        
+        /* Notification Badge Pulse */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .notification-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Page Transition */
+        .page-content {
+            animation: fadeInUp 0.5s ease-out;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    
+    <!-- Aurora Background -->
+    <div class="fixed inset-0 aurora-bg pointer-events-none z-0"></div>
+    
+    <!-- Header/Navbar -->
+    {% include 'includes/navbar.html' %}
+    
+    <!-- Messages/Alerts -->
+    {% if messages %}
+    <div class="fixed top-24 right-4 z-50 space-y-2" id="messages-container">
+        {% for message in messages %}
+        <div class="alert-slide-in glass-card rounded-xl p-4 shadow-lg flex items-center space-x-3 max-w-sm {% if message.tags == 'error' %}border-l-4 border-red-500{% elif message.tags == 'success' %}border-l-4 border-green-500{% elif message.tags == 'warning' %}border-l-4 border-yellow-500{% else %}border-l-4 border-blue-500{% endif %}">
+            {% if message.tags == 'error' %}
+            <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+            {% elif message.tags == 'success' %}
+            <i class="fas fa-check-circle text-green-500 text-xl"></i>
+            {% elif message.tags == 'warning' %}
+            <i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i>
+            {% else %}
+            <i class="fas fa-info-circle text-blue-500 text-xl"></i>
+            {% endif %}
+            <p class="text-gray-700 text-sm flex-1">{{ message }}</p>
+            <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <main class="flex-1 relative z-10 page-content">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="relative z-10 glass border-t border-blue-100 dark:border-zinc-800 mt-auto transition-colors duration-300">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-calendar-alt text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold gradient-text">FSTTIME</span>
+                    </div>
+                    <p class="text-gray-600 dark:text-zinc-400 text-sm">Système intelligent de gestion des emplois du temps universitaires.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 dark:text-zinc-100 mb-4">Navigation</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'home' %}" class="text-gray-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-colors">Accueil</a></li>
+                        <li><a href="{% url 'room_list' %}" class="text-gray-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-colors">Salles</a></li>
+                        <li><a href="{% url 'program_list' %}" class="text-gray-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-colors">Filières</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 dark:text-zinc-100 mb-4">Support</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'contact' %}" class="text-gray-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-colors">Contact</a></li>
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'dashboard' %}" class="text-gray-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-colors">Tableau de Bord</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 dark:text-zinc-100 mb-4">Contact</h4>
+                    <ul class="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-envelope text-blue-500"></i>
+                            <span>contact@fsttime.ma</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-phone text-blue-500"></i>
+                            <span>+212 5XX XXX XXX</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-6 border-blue-100 dark:border-zinc-800">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-500 dark:text-zinc-500 text-sm">© 2026 FSTTIME. Tous droits réservés.</p>
+                <div class="flex items-center space-x-4 mt-4 md:mt-0">
+                    <span class="text-gray-500 dark:text-zinc-500 text-sm">Développé avec</span>
+                    <i class="fas fa-heart text-red-500"></i>
+                    <span class="text-gray-500 dark:text-zinc-500 text-sm">pour la FST</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script>
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // Notification Toggle
+        function toggleNotifications() {
+            const list = document.getElementById('notification-list');
+            list.classList.toggle('hidden');
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            const notifContainer = document.getElementById('notification-container');
+            const notifList = document.getElementById('notification-list');
+            
+            if (notifContainer && !notifContainer.contains(e.target)) {
+                notifList.classList.add('hidden');
+            }
+        });
+        
+        // Auto-hide messages after 5 seconds
+        setTimeout(function() {
+            const messages = document.getElementById('messages-container');
+            if (messages) {
+                messages.style.transition = 'opacity 0.5s ease';
+                messages.style.opacity = '0';
+                setTimeout(() => messages.remove(), 500);
+            }
+        }, 5000);
+        
+        // Load notifications
+        {% if user.is_authenticated %}
+        function loadNotifications() {
+            fetch('/api/notifications/')
+                .then(response => response.json())
+                .then(data => {
+                    updateNotificationsList(data.notifications || []);
+                    updateNotificationBadge(data.unread_count || 0);
+                })
+                .catch(err => console.log('Notifications error:', err));
+        }
+        
+        function updateNotificationsList(notifications) {
+            const container = document.getElementById('notification-items');
+            if (notifications.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-4">Aucune notification</p>';
+                return;
+            }
+            
+            container.innerHTML = notifications.map(n => `
+                <a href="${n.link_url || '#'}" class="block p-3 hover:bg-blue-50 rounded-lg transition-colors ${!n.is_read ? 'bg-blue-50/50' : ''}">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-800 truncate">${n.title}</p>
+                            <p class="text-xs text-gray-500 truncate">${n.message}</p>
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+        }
+        
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notification-badge');
+            if (count > 0) {
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        
+        // Load notifications on page load
+        document.addEventListener('DOMContentLoaded', loadNotifications);
+        
+        // Refresh notifications every 60 seconds
+        setInterval(loadNotifications, 60000);
+        {% endif %}
+        
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // ==========================================
+        // TOAST NOTIFICATION SYSTEM
+        // ==========================================
+        const ToastManager = {
+            container: null,
+            
+            init() {
+                if (!this.container) {
+                    this.container = document.createElement('div');
+                    this.container.id = 'toast-container';
+                    this.container.style.cssText = `
+                        position: fixed;
+                        bottom: 2rem;
+                        right: 2rem;
+                        z-index: 9999;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 1rem;
+                        max-width: 400px;
+                    `;
+                    document.body.appendChild(this.container);
+                    
+                    // Add CSS animations
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes toastSlideIn {
+                            from { transform: translateX(400px); opacity: 0; }
+                            to { transform: translateX(0); opacity: 1; }
+                        }
+                        @keyframes toastSlideOut {
+                            from { transform: translateX(0); opacity: 1; }
+                            to { transform: translateX(400px); opacity: 0; }
+                        }
+                        @keyframes progressBar {
+                            from { width: 100%; }
+                            to { width: 0%; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            },
+            
+            show(message, type = 'success', duration = 3000) {
+                this.init();
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-times-circle',
+                    info: 'fa-info-circle',
+                    warning: 'fa-exclamation-triangle'
+                };
+                
+                const colors = {
+                    success: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    error: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                    info: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                    warning: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                };
+                
+                const toast = document.createElement('div');
+                toast.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas ${icons[type]}" style="font-size: 1.25rem;"></i>
+                        <span style="flex: 1;">${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; padding: 0.25rem;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div style="position: absolute; bottom: 0; left: 0; height: 4px; background: rgba(255,255,255,0.3); animation: progressBar ${duration}ms linear;"></div>
+                `;
+                
+                toast.style.cssText = `
+                    background: ${colors[type]};
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 0.75rem;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                    position: relative;
+                    overflow: hidden;
+                    animation: toastSlideIn 0.3s ease;
+                    font-weight: 500;
+                `;
+                
+                this.container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+        };
+        
+        // Global function for easy access
+        function showToast(message, type = 'success', duration = 3000) {
+            ToastManager.show(message, type, duration);
+        }
+        
+        // ==========================================
+        // DELETE CONFIRMATION MODAL (Enhanced)
+        // ==========================================
+        function showDeleteModal(itemName, onConfirm, options = {}) {
+            // Remove any existing modal
+            const existingModal = document.getElementById('delete-modal');
+            if (existingModal) existingModal.remove();
+            
+            const {
+                message = 'Êtes-vous sûr de vouloir supprimer :',
+                itemIcon = 'fa-file',
+                itemDetails = '',
+                warningDetails = '',
+                confirmText = 'Supprimer',
+                cancelText = 'Annuler'
+            } = options;
+            
+            const modal = document.createElement('div');
+            modal.id = 'delete-modal';
+            modal.innerHTML = `
+                <div class="delete-modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+                    <div style="background: white; border-radius: 1.5rem; max-width: 450px; width: 100%; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.25); animation: modalSlideIn 0.3s ease;">
+                        <!-- Header -->
+                        <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 1.5rem; text-align: center;">
+                            <div style="width: 5rem; height: 5rem; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; animation: iconPulse 2s infinite;">
+                                <i class="fas fa-trash-alt" style="color: white; font-size: 2rem;"></i>
+                            </div>
+                            <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-top: 1rem;">⚠️ Confirmer la Suppression</h3>
+                        </div>
+                        
+                        <!-- Body -->
+                        <div style="padding: 1.5rem;">
+                            <p style="color: #6b7280; margin-bottom: 1rem; text-align: center;">${message}</p>
+                            
+                            <!-- Item Info Box -->
+                            <div style="background: #f3f4f6; border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                                <p style="font-weight: 600; color: #374151; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas ${itemIcon}" style="color: #3b82f6;"></i>
+                                    ${itemName}
+                                </p>
+                                ${itemDetails ? `<p style="color: #6b7280; font-size: 0.875rem; margin: 0.5rem 0 0 0;">${itemDetails}</p>` : ''}
+                            </div>
+                            
+                            <!-- Warning Box -->
+                            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
+                                <span style="color: #92400e; font-weight: 500; font-size: 0.875rem;">Cette action est irréversible !</span>
+                            </div>
+                            
+                            ${warningDetails ? `
+                            <!-- Details Box -->
+                            <div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                                <p style="color: #991b1b; font-weight: 600; margin: 0 0 0.5rem 0; font-size: 0.875rem;">Cette action supprimera :</p>
+                                <div style="color: #7f1d1d; font-size: 0.875rem;">${warningDetails}</div>
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Buttons -->
+                            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                <button id="cancel-delete" style="flex: 1; padding: 0.875rem 1.5rem; background: #f3f4f6; color: #374151; border: none; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 1rem;">
+                                    <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>${cancelText}
+                                </button>
+                                <button id="confirm-delete" style="flex: 1; padding: 0.875rem 1.5rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 1rem;">
+                                    <i class="fas fa-trash-alt" style="margin-right: 0.5rem;"></i>${confirmText}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <style>
+                    @keyframes modalSlideIn {
+                        from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+                        to { opacity: 1; transform: translateY(0) scale(1); }
+                    }
+                    @keyframes iconPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                    }
+                    #cancel-delete:hover { background: #e5e7eb; }
+                    #confirm-delete:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(220,38,38,0.3); }
+                </style>
+            `;
+            
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+            
+            // Close on cancel
+            document.getElementById('cancel-delete').onclick = () => {
+                modal.remove();
+                document.body.style.overflow = 'auto';
+            };
+            
+            // Close on backdrop click
+            modal.querySelector('.delete-modal-backdrop').onclick = (e) => {
+                if (e.target.classList.contains('delete-modal-backdrop')) {
+                    modal.remove();
+                    document.body.style.overflow = 'auto';
+                }
+            };
+            
+            // Close on ESC key
+            const escHandler = (e) => {
+                if (e.key === 'Escape') {
+                    modal.remove();
+                    document.body.style.overflow = 'auto';
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+            
+            // Confirm delete
+            document.getElementById('confirm-delete').onclick = () => {
+                modal.remove();
+                document.body.style.overflow = 'auto';
+                if (onConfirm) onConfirm();
+            };
+        }
+
+    </script>
+
+    <!-- Beautiful Delete Confirmation Modal -->
+    <div id="deleteModal" class="delete-modal" style="display: none;">
+        <div class="delete-modal-backdrop" onclick="DeleteModal.close()"></div>
+        <div class="delete-modal-container">
+            <div class="delete-modal-header">
+                <h3>⚠️ Confirmer la Suppression</h3>
+            </div>
+            
+            <div class="delete-modal-body">
+                <!-- Animated Delete Icon -->
+                <div class="delete-icon-container">
+                    <div class="delete-icon-circle">
+                        <i class="fas fa-trash-alt"></i>
+                    </div>
+                </div>
+                
+                <!-- Message -->
+                <p class="delete-message" id="deleteModalMessage">
+                    Êtes-vous sûr de vouloir supprimer cet élément ?
+                </p>
+                
+                <!-- Item Info -->
+                <div class="delete-item-box" id="deleteModalItem"></div>
+                
+                <!-- Warning -->
+                <div class="delete-warning-box">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Cette action est IRRÉVERSIBLE !</strong>
+                </div>
+            </div>
+            
+            <div class="delete-modal-footer">
+                <button class="delete-btn-confirm" id="confirmDeleteBtn">
+                    <i class="fas fa-trash"></i> Oui, Supprimer
+                </button>
+                <button class="delete-btn-cancel" id="cancelDeleteBtn">
+                    <i class="fas fa-times"></i> Non, Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    /* Delete Modal Styles */
+    .delete-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .delete-modal-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+    }
+
+    .delete-modal-container {
+        position: relative;
+        background: white;
+        border-radius: 1.5rem;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        animation: deleteModalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 100000;
+    }
+
+    @keyframes deleteModalSlideIn {
+        from { opacity: 0; transform: translateY(-50px) scale(0.9); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .delete-modal-header {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 1.5rem 1.5rem 0 0;
+        text-align: center;
+    }
+
+    .delete-modal-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .delete-modal-body {
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .delete-icon-container {
+        margin: 1rem 0 1.5rem;
+    }
+
+    .delete-icon-circle {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: deleteIconPulse 2s infinite;
+    }
+
+    .delete-icon-circle i {
+        font-size: 3rem;
+        color: #dc2626;
+    }
+
+    @keyframes deleteIconPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .delete-message {
+        font-size: 1.125rem;
+        color: #374151;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+
+    .delete-item-box {
+        background: #f3f4f6;
+        border-left: 4px solid #3b82f6;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+
+    .delete-item-box p {
+        margin: 0.5rem 0;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .delete-item-box:empty {
+        display: none;
+    }
+
+    .delete-warning-box {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        justify-content: center;
+    }
+
+    .delete-warning-box i {
+        color: #f59e0b;
+        font-size: 1.5rem;
+    }
+
+    .delete-warning-box strong {
+        color: #92400e;
+    }
+
+    .delete-modal-footer {
+        padding: 1.5rem 2rem;
+        display: flex;
+        gap: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .delete-btn-confirm {
+        flex: 1;
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .delete-btn-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(220, 38, 38, 0.5);
+    }
+
+    .delete-btn-cancel {
+        flex: 1;
+        background: white;
+        color: #6b7280;
+        border: 2px solid #d1d5db;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .delete-btn-cancel:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+        transform: translateY(-2px);
+    }
+    </style>
+
+    <script>
+    // Delete Modal Manager
+    const DeleteModal = {
+        modal: null,
+        confirmCallback: null,
+        initialized: false,
+        
+        init() {
+            if (this.initialized) return;
+            this.modal = document.getElementById('deleteModal');
+            if (!this.modal) return;
+            
+            document.getElementById('confirmDeleteBtn').onclick = () => this.confirm();
+            document.getElementById('cancelDeleteBtn').onclick = () => this.close();
+            
+            // Close on ESC key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this.modal.style.display === 'flex') {
+                    this.close();
+                }
+            });
+            
+            this.initialized = true;
+        },
+        
+        show(config) {
+            this.init();
+            this.confirmCallback = config.onConfirm;
+            
+            // Update content
+            document.getElementById('deleteModalMessage').textContent = config.message || 'Êtes-vous sûr de vouloir supprimer cet élément ?';
+            document.getElementById('deleteModalItem').innerHTML = config.itemHtml || '';
+            
+            // Show modal
+            this.modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        },
+        
+        confirm() {
+            if (this.confirmCallback) {
+                this.confirmCallback();
+            }
+            this.close();
+        },
+        
+        close() {
+            if (this.modal) {
+                this.modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+    };
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        DeleteModal.init();
+    });
+    </script>
+
+    
+    
+    <!-- Navbar JavaScript -->
+    <script src="{% static 'js/navbar.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

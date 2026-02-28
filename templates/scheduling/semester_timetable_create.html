@@ -1,0 +1,409 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Créer un Emploi du Temps - FSTTIME{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-5xl">
+    
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{% url 'timetable_list' %}" class="text-indigo-600 hover:text-indigo-800 font-medium mb-4 inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i> Retour à la liste
+        </a>
+        <h1 class="text-3xl font-black text-gray-800 mt-4">Créer un Emploi du Temps</h1>
+        <p class="text-gray-500 mt-1">Ajoutez les matières, le système générera automatiquement la grille</p>
+    </div>
+    
+    <!-- Progress Steps -->
+    <div class="flex items-center justify-center mb-8">
+        <div class="flex items-center">
+            <div class="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
+            <span class="ml-2 font-bold text-indigo-600">Informations & Matières</span>
+        </div>
+        <div class="w-16 h-1 bg-gray-200 mx-4"></div>
+        <div class="flex items-center">
+            <div class="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-bold">
+                <i class="fas fa-magic text-sm"></i>
+            </div>
+            <span class="ml-2 text-gray-500">Auto-génération</span>
+        </div>
+        <div class="w-16 h-1 bg-gray-200 mx-4"></div>
+        <div class="flex items-center">
+            <div class="w-10 h-10 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-bold">2</div>
+            <span class="ml-2 text-gray-500">Ajustements</span>
+        </div>
+    </div>
+    
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="p-4 rounded-xl {% if message.tags == 'success' %}bg-emerald-100 text-emerald-800{% elif message.tags == 'warning' %}bg-amber-100 text-amber-800{% elif message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Auto-generation Info -->
+    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-6 mb-8">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-magic text-xl text-indigo-600"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-indigo-900 mb-1">Génération Automatique Intelligente</h3>
+                <p class="text-indigo-700 text-sm">
+                    Après avoir ajouté les matières, le système générera automatiquement l'emploi du temps en:
+                </p>
+                <ul class="text-indigo-600 text-sm mt-2 space-y-1">
+                    <li><i class="fas fa-check text-emerald-500 mr-2"></i>Assignant les créneaux (COURS le matin, TD/TP l'après-midi)</li>
+                    <li><i class="fas fa-check text-emerald-500 mr-2"></i>Évitant les conflits (enseignant, salle, groupe)</li>
+                    <li><i class="fas fa-check text-emerald-500 mr-2"></i>Sélectionnant les salles appropriées (Amphi, Labo, Salle)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Form -->
+    <form method="post" id="timetableForm">
+        {% csrf_token %}
+        
+        <!-- Section 1: Basic Info -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <i class="fas fa-info-circle text-indigo-500"></i>
+                Informations Générales
+            </h2>
+            
+            <!-- Name -->
+            <div class="mb-6">
+                <label for="id_name" class="block text-sm font-bold text-gray-700 mb-2">
+                    <i class="fas fa-tag text-indigo-500 mr-2"></i>Nom de l'emploi du temps
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}<p class="text-red-500 text-sm mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+            </div>
+            
+            <!-- Program and Semester -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="id_program" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-graduation-cap text-purple-500 mr-2"></i>Filière *
+                    </label>
+                    {{ form.program }}
+                    {% if form.program.errors %}<p class="text-red-500 text-sm mt-1">{{ form.program.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label for="id_semester" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-calendar-alt text-amber-500 mr-2"></i>Semestre *
+                    </label>
+                    {{ form.semester }}
+                    {% if form.semester.errors %}<p class="text-red-500 text-sm mt-1">{{ form.semester.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+            
+            <!-- Academic Year -->
+            <div class="mb-6">
+                <label for="id_academic_year" class="block text-sm font-bold text-gray-700 mb-2">
+                    <i class="fas fa-university text-emerald-500 mr-2"></i>Année universitaire *
+                </label>
+                {{ form.academic_year }}
+                {% if form.academic_year.errors %}<p class="text-red-500 text-sm mt-1">{{ form.academic_year.errors.0 }}</p>{% endif %}
+            </div>
+            
+            <!-- Dates -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="id_start_date" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-play text-green-500 mr-2"></i>Date de début
+                    </label>
+                    {{ form.start_date }}
+                </div>
+                <div>
+                    <label for="id_end_date" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-stop text-red-500 mr-2"></i>Date de fin
+                    </label>
+                    {{ form.end_date }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 2: Subjects -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-book text-purple-500"></i>
+                    Ajouter les Matières
+                </h2>
+                <span class="text-sm text-gray-500">Ajoutez les matières à programmer</span>
+            </div>
+            
+            <!-- Subject formset management -->
+            {{ subject_formset.management_form }}
+            
+            <div id="subject-forms-container" class="space-y-4">
+                {% for subject_form in subject_formset %}
+                <div class="subject-row bg-gray-50 rounded-xl p-5 border border-gray-200" data-form-index="{{ forloop.counter0 }}">
+                    <!-- Hidden fields -->
+                    {{ subject_form.id }}
+                    <input type="hidden" name="{{ subject_form.prefix }}-DELETE" class="delete-checkbox">
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-gray-700">
+                            <i class="fas fa-book-open text-indigo-500 mr-2"></i>
+                            Matière <span class="subject-number">{{ forloop.counter }}</span>
+                        </h4>
+                        <button type="button" class="text-red-500 hover:text-red-700 text-sm font-medium remove-subject-btn" onclick="removeSubject(this)">
+                            <i class="fas fa-trash mr-1"></i>Supprimer
+                        </button>
+                    </div>
+                    
+                    <!-- Row 1: Code and Name -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Code de matière *</label>
+                            {{ subject_form.code }}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Nom de matière *</label>
+                            {{ subject_form.name }}
+                        </div>
+                    </div>
+                    
+                    <!-- Row 2: Hours -->
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">
+                            <i class="fas fa-clock text-amber-500 mr-1"></i>Heures par semaine
+                        </label>
+                        {{ subject_form.hours_per_week }}
+                    </div>
+                    
+                    <!-- Row 3: Session counts -->
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">
+                                <span class="inline-block w-5 h-5 bg-blue-100 text-blue-600 rounded text-center text-xs leading-5 mr-1">CM</span>
+                                Séances COURS
+                            </label>
+                            {{ subject_form.sessions_cours }}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">
+                                <span class="inline-block w-5 h-5 bg-green-100 text-green-600 rounded text-center text-xs leading-5 mr-1">TD</span>
+                                Séances TD
+                            </label>
+                            {{ subject_form.sessions_td }}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">
+                                <span class="inline-block w-5 h-5 bg-amber-100 text-amber-600 rounded text-center text-xs leading-5 mr-1">TP</span>
+                                Séances TP
+                            </label>
+                            {{ subject_form.sessions_tp }}
+                        </div>
+                    </div>
+                    
+                    <!-- Row 4: Teacher -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">
+                            <i class="fas fa-user-tie text-indigo-500 mr-1"></i>Professeur
+                        </label>
+                        {{ subject_form.teacher }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Add Subject Button -->
+            <button type="button" id="add-subject-btn" class="mt-4 w-full py-3 border-2 border-dashed border-indigo-300 rounded-xl text-indigo-600 font-bold hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2">
+                <i class="fas fa-plus-circle"></i>
+                Ajouter une matière
+            </button>
+        </div>
+        
+        <!-- Submit Button -->
+        <div class="pt-4">
+            <button type="submit" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-3 text-lg">
+                <i class="fas fa-magic"></i>
+                Générer l'Emploi du Temps
+            </button>
+            <p class="text-center text-gray-500 text-sm mt-3">
+                <i class="fas fa-info-circle mr-1"></i>
+                L'emploi du temps sera généré automatiquement et vous pourrez le modifier ensuite
+            </p>
+        </div>
+    </form>
+    
+</div>
+
+<!-- Empty Subject Template (for cloning) -->
+<template id="subject-template">
+    <div class="subject-row bg-gray-50 rounded-xl p-5 border border-gray-200">
+        <input type="hidden" name="inline_subjects-__prefix__-id" id="id_inline_subjects-__prefix__-id">
+        <input type="hidden" name="inline_subjects-__prefix__-DELETE" class="delete-checkbox">
+        
+        <div class="flex justify-between items-center mb-4">
+            <h4 class="font-bold text-gray-700">
+                <i class="fas fa-book-open text-indigo-500 mr-2"></i>
+                Matière <span class="subject-number">X</span>
+            </h4>
+            <button type="button" class="text-red-500 hover:text-red-700 text-sm font-medium remove-subject-btn" onclick="removeSubject(this)">
+                <i class="fas fa-trash mr-1"></i>Supprimer
+            </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">Code de matière *</label>
+                <input type="text" name="inline_subjects-__prefix__-code" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="AD_51">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">Nom de matière *</label>
+                <input type="text" name="inline_subjects-__prefix__-name" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="Nom de la matière">
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-xs font-bold text-gray-600 mb-1">
+                <i class="fas fa-clock text-amber-500 mr-1"></i>Heures par semaine
+            </label>
+            <input type="number" name="inline_subjects-__prefix__-hours_per_week" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" step="0.5" min="0.5" value="3.0" placeholder="4.5">
+        </div>
+        
+        <div class="grid grid-cols-3 gap-4 mb-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">
+                    <span class="inline-block w-5 h-5 bg-blue-100 text-blue-600 rounded text-center text-xs leading-5 mr-1">CM</span>
+                    Séances COURS
+                </label>
+                <input type="number" name="inline_subjects-__prefix__-sessions_cours" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" min="0" value="1" placeholder="2">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">
+                    <span class="inline-block w-5 h-5 bg-green-100 text-green-600 rounded text-center text-xs leading-5 mr-1">TD</span>
+                    Séances TD
+                </label>
+                <input type="number" name="inline_subjects-__prefix__-sessions_td" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" min="0" value="0" placeholder="1">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">
+                    <span class="inline-block w-5 h-5 bg-amber-100 text-amber-600 rounded text-center text-xs leading-5 mr-1">TP</span>
+                    Séances TP
+                </label>
+                <input type="number" name="inline_subjects-__prefix__-sessions_tp" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" min="0" value="0" placeholder="0">
+            </div>
+        </div>
+        
+        <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">
+                <i class="fas fa-user-tie text-indigo-500 mr-1"></i>Professeur
+            </label>
+            <select name="inline_subjects-__prefix__-teacher" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                <option value="">Sélectionner un professeur</option>
+                {% for teacher in teachers %}
+                <option value="{{ teacher.id }}">{{ teacher.user.get_full_name|default:teacher.user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('subject-forms-container');
+    const addBtn = document.getElementById('add-subject-btn');
+    const template = document.getElementById('subject-template');
+    const totalFormsInput = document.querySelector('input[name$="TOTAL_FORMS"]');
+    
+    // Add new subject form
+    addBtn.addEventListener('click', function() {
+        const formIdx = parseInt(totalFormsInput.value);
+        
+        // Clone template
+        const newForm = template.content.cloneNode(true);
+        const formHtml = newForm.querySelector('.subject-row');
+        
+        // Replace __prefix__ with form index
+        formHtml.innerHTML = formHtml.innerHTML.replace(/__prefix__/g, formIdx);
+        formHtml.dataset.formIndex = formIdx;
+        
+        // Update subject number display
+        formHtml.querySelector('.subject-number').textContent = formIdx + 1;
+        
+        // Add to container
+        container.appendChild(formHtml);
+        
+        // Update total forms count
+        totalFormsInput.value = formIdx + 1;
+        
+        // Renumber all subjects
+        renumberSubjects();
+    });
+});
+
+function removeSubject(btn) {
+    const row = btn.closest('.subject-row');
+    const deleteCheckbox = row.querySelector('.delete-checkbox');
+    
+    // If it's an existing form, mark for deletion
+    if (deleteCheckbox && deleteCheckbox.name) {
+        deleteCheckbox.value = 'on';
+        deleteCheckbox.checked = true;
+    }
+    
+    // Hide the row
+    row.style.display = 'none';
+    
+    // Renumber visible subjects
+    renumberSubjects();
+}
+
+function renumberSubjects() {
+    const rows = document.querySelectorAll('.subject-row:not([style*="display: none"])');
+    rows.forEach((row, index) => {
+        const numberSpan = row.querySelector('.subject-number');
+        if (numberSpan) {
+            numberSpan.textContent = index + 1;
+        }
+    });
+}
+</script>
+<style>
+    /* Dark mode overrides */
+    .dark .bg-white { background-color: #27272a !important; } /* zinc-800 */
+    .dark .text-gray-800 { color: #f4f4f5 !important; } /* zinc-100 */
+    .dark .text-gray-700 { color: #e4e4e7 !important; } /* zinc-200 */
+    .dark .text-gray-600 { color: #d4d4d8 !important; } /* zinc-300 */
+    .dark .text-gray-500 { color: #a1a1aa !important; } /* zinc-400 */
+    
+    .dark input[type="text"],
+    .dark input[type="number"],
+    .dark input[type="date"],
+    .dark select,
+    .dark textarea {
+        background-color: #3f3f46 !important; /* zinc-700 */
+        border-color: #52525b !important; /* zinc-600 */
+        color: #f4f4f5 !important; /* zinc-100 */
+    }
+    
+    .dark .bg-gray-50 { background-color: rgba(63, 63, 70, 0.5) !important; } /* zinc-700/50 */
+    .dark .border-gray-200 { border-color: #52525b !important; } /* zinc-600 */
+    
+    /* Progress steps */
+    .dark .bg-gray-200 { background-color: #3f3f46 !important; } /* zinc-700 */
+    
+    /* Info box */
+    .dark .bg-gradient-to-r.from-indigo-50 { --tw-gradient-from: rgba(49, 46, 129, 0.3) !important; } /* indigo-900 */
+    .dark .bg-gradient-to-r.to-purple-50 { --tw-gradient-to: rgba(88, 28, 135, 0.3) !important; } /* purple-900 */
+    .dark .border-indigo-100 { border-color: #3730a3 !important; } /* indigo-800 */
+    .dark .bg-indigo-100 { background-color: rgba(49, 46, 129, 0.5) !important; }
+    .dark .text-indigo-900 { color: #e0e7ff !important; } /* indigo-100 */
+    .dark .text-indigo-700 { color: #c7d2fe !important; } /* indigo-200 */
+    .dark .text-indigo-600 { color: #a5b4fc !important; } /* indigo-300 */
+    
+    /* Add button */
+    .dark .hover\:bg-indigo-50:hover { background-color: rgba(49, 46, 129, 0.3) !important; }
+</style>
+{% endblock %}

@@ -1,0 +1,873 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================
+   CONTACT PAGE - MODERN CLEAN DESIGN
+   ============================================ */
+
+.contact-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 50%, #f3e8ff 100%);
+}
+
+/* ==========================================
+   HERO HEADER
+   ========================================== */
+
+.contact-hero {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    padding: 4rem 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-hero::before {
+    content: '';
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -200px;
+    right: -200px;
+}
+
+.hero-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3rem;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-content {
+    max-width: 700px;
+}
+
+.hero-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+}
+
+.hero-title span {
+    background: linear-gradient(135deg, #a5b4fc 0%, #c4b5fd 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: #cbd5e1;
+    line-height: 1.7;
+}
+
+.hero-icon {
+    width: 140px;
+    height: 140px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    border-radius: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 15px 40px rgba(139, 92, 246, 0.4);
+    animation: float 6s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.hero-icon i {
+    font-size: 4rem;
+    color: white;
+}
+
+/* ==========================================
+   MAIN CONTENT
+   ========================================== */
+
+.contact-content {
+    padding: 4rem 2rem;
+}
+
+.content-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 3rem;
+}
+
+/* ==========================================
+   FORM SECTION
+   ========================================== */
+
+.form-section {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.section-header i {
+    font-size: 1.5rem;
+    color: #8b5cf6;
+}
+
+.section-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin: 0;
+}
+
+/* Messages */
+.messages-container {
+    margin-bottom: 2rem;
+}
+
+.alert {
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.alert i {
+    font-size: 1.25rem;
+}
+
+.alert-success {
+    background: #d1fae5;
+    border-left: 4px solid #10b981;
+    color: #065f46;
+}
+
+.alert-error {
+    background: #fee2e2;
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+}
+
+/* Form Styling */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-label {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-label i {
+    font-size: 1rem;
+    color: #8b5cf6;
+}
+
+.required {
+    color: #ef4444;
+}
+
+.form-input,
+.form-textarea {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.875rem;
+    background: #f9fafb;
+    color: #1f2937;
+    transition: all 0.3s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: #9ca3af;
+}
+
+.form-textarea {
+    min-height: 180px;
+    resize: vertical;
+    line-height: 1.7;
+}
+
+.char-counter {
+    font-size: 0.875rem;
+    color: #6b7280;
+    text-align: right;
+    margin-top: 0.5rem;
+}
+
+.char-counter span {
+    font-weight: 700;
+    transition: color 0.3s;
+}
+
+/* Submit Button */
+.btn-submit {
+    padding: 1.25rem 2.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 0.875rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+    margin-top: 0.5rem;
+}
+
+.btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.45);
+}
+
+.btn-submit:active {
+    transform: translateY(-1px);
+}
+
+/* ==========================================
+   ASSISTANCE SECTION
+   ========================================== */
+
+.assistance-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.assistance-header {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.assistance-header i {
+    font-size: 1.25rem;
+    color: #8b5cf6;
+}
+
+.assistance-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Info Cards */
+.info-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.info-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s;
+}
+
+.info-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.card-icon i {
+    font-size: 1.25rem;
+    color: white;
+}
+
+.card-icon.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+.card-icon.purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+.card-icon.green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+
+.card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin: 0 0 0.25rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.card-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.card-link {
+    font-size: 0.875rem;
+    color: #8b5cf6;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.card-link:hover {
+    color: #6366f1;
+    text-decoration: underline;
+}
+
+/* Quick Help Box */
+.quick-help-box {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-radius: 1.25rem;
+    padding: 1.75rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-help-box::before {
+    content: '';
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -50px;
+    right: -50px;
+}
+
+.help-icon {
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.help-icon i {
+    font-size: 1.5rem;
+}
+
+.help-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    margin: 0 0 0.75rem 0;
+    position: relative;
+    z-index: 1;
+}
+
+.help-text {
+    font-size: 0.875rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+    margin: 0 0 1.25rem 0;
+    position: relative;
+    z-index: 1;
+}
+
+.help-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.625rem;
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.875rem;
+    transition: all 0.3s;
+    position: relative;
+    z-index: 1;
+}
+
+.help-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    color: white;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 1024px) {
+    .content-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .assistance-section {
+        order: -1;
+    }
+    
+    .info-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .contact-hero {
+        padding: 3rem 1.5rem;
+    }
+    
+    .hero-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 2.25rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .hero-icon {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .hero-icon i {
+        font-size: 2.5rem;
+    }
+    
+    .contact-content {
+        padding: 2rem 1rem;
+    }
+    
+    .form-section {
+        padding: 1.5rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-cards {
+        grid-template-columns: 1fr;
+    }
+}
+    .info-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark Mode Overrides */
+.dark .contact-page {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+}
+
+.dark .contact-hero {
+    background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+}
+
+.dark .hero-title,
+.dark .hero-subtitle {
+    color: #e2e8f0;
+}
+
+.dark .hero-container::before {
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+}
+
+.dark .form-section {
+    background: #1e293b;
+    border: 1px solid #334155;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+}
+
+.dark .section-header {
+    border-bottom-color: #334155;
+}
+
+.dark .section-title {
+    color: #f1f5f9;
+}
+
+.dark .form-label {
+    color: #cbd5e1;
+}
+
+.dark .form-input,
+.dark .form-textarea {
+    background: #0f172a;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+
+.dark .form-input:focus,
+.dark .form-textarea:focus {
+    border-color: #8b5cf6;
+    background: #1e293b;
+}
+
+.dark .form-input::placeholder,
+.dark .form-textarea::placeholder {
+    color: #64748b;
+}
+
+.dark .char-counter {
+    color: #94a3b8;
+}
+
+.dark .assistance-header {
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+
+.dark .assistance-title {
+    color: #f1f5f9;
+}
+
+.dark .info-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+
+.dark .info-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    background: #334155;
+}
+
+.dark .card-title {
+    color: #f1f5f9;
+}
+
+.dark .card-text {
+    color: #cbd5e1;
+}
+
+.dark .quick-help-box {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    border: 1px solid #334155;
+}
+
+.dark .help-text {
+    color: #cbd5e1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    
+    <!-- Hero Header -->
+    <section class="contact-hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Parlons <span>Ensemble</span></h1>
+                <p class="hero-subtitle">
+                    Une question sur votre emploi du temps ? Un problème technique ?
+                    Notre équipe administrative est là pour vous accompagner.
+                </p>
+            </div>
+            <div class="hero-icon">
+                <i class="fas fa-paper-plane"></i>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Main Content -->
+    <section class="contact-content">
+        <div class="content-container">
+            
+            <!-- Contact Form -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-edit"></i>
+                    <h2 class="section-title">Formulaire de Contact</h2>
+                </div>
+                
+                <!-- Messages -->
+                {% if messages %}
+                    <div class="messages-container">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <form method="post" novalidate class="contact-form">
+                    {% csrf_token %}
+                    
+                    {% if not user.is_authenticated %}
+                    <!-- Name and Email for Guest Users -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-user"></i>
+                                Nom Complet <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                name="sender_name" 
+                                class="form-input" 
+                                placeholder="Votre nom complet"
+                                required
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-envelope"></i>
+                                Email <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="email" 
+                                name="sender_email" 
+                                class="form-input" 
+                                placeholder="votre@email.com"
+                                required
+                            >
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Subject Field -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-heading"></i>
+                            Sujet <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="subject" 
+                            class="form-input" 
+                            placeholder="Sujet de votre message"
+                            required
+                            maxlength="200"
+                            value="{{ form.subject.value|default:'' }}"
+                        >
+                        {% if form.subject.errors %}
+                        <p style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">{{ form.subject.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Message Field -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-comment-dots"></i>
+                            Message <span class="required">*</span>
+                        </label>
+                        <textarea 
+                            name="message" 
+                            id="message-textarea"
+                            class="form-textarea" 
+                            placeholder="Décrivez votre demande ou question en détail..."
+                            required
+                            maxlength="2000"
+                        >{{ form.message.value|default:'' }}</textarea>
+                        <div class="char-counter">
+                            <span id="char-count">0</span> / 2000 caractères
+                        </div>
+                        {% if form.message.errors %}
+                        <p style="color: #ef4444; font-size: 0.875rem;">{{ form.message.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-paper-plane"></i>
+                        Envoyer le Message
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Assistance Sidebar -->
+            <div class="assistance-section">
+                <!-- Assistance Header -->
+                <div class="assistance-header">
+                    <i class="fas fa-life-ring"></i>
+                    <h3 class="assistance-title">Assistance</h3>
+                </div>
+                
+                <!-- Info Cards -->
+                <div class="info-cards">
+                    <!-- Response Time -->
+                    <div class="info-card">
+                        <div class="card-icon blue">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Temps de Réponse</h4>
+                            <p class="card-text">Sous 24h à 48h ouvrées</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Direct Email -->
+                    <div class="info-card">
+                        <div class="card-icon purple">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Direct Email</h4>
+                            <a href="mailto:support@fsttime.ma" class="card-link">
+                                support@fsttime.ma
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Location -->
+                    <div class="info-card">
+                        <div class="card-icon green">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Localisation</h4>
+                            <p class="card-text">Bloc Administratif, FST</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Help Box -->
+                <div class="quick-help-box">
+                    <div class="help-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h4 class="help-title">Besoin d'aide rapide ?</h4>
+                    <p class="help-text">
+                        Consultez notre section "Aide" dans votre tableau de bord avant d'envoyer un message.
+                    </p>
+                    <a href="{% url 'about' %}" class="help-link">
+                        <i class="fas fa-book"></i>
+                        En savoir plus
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+    
+</div>
+
+<script>
+// Character counter for textarea
+document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('message-textarea');
+    const charCount = document.getElementById('char-count');
+    
+    if (textarea && charCount) {
+        // Initial count
+        charCount.textContent = textarea.value.length;
+        
+        textarea.addEventListener('input', function() {
+            const count = this.value.length;
+            charCount.textContent = count;
+            
+            // Change color when approaching limit
+            if (count > 1800) {
+                charCount.style.color = '#ef4444';
+            } else if (count > 1500) {
+                charCount.style.color = '#f59e0b';
+            } else {
+                charCount.style.color = '#6b7280';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

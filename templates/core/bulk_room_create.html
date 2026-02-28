@@ -1,0 +1,416 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Création en Masse de Salles - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    .preview-box {
+        transition: all 0.3s ease;
+    }
+    .preview-box.has-content {
+        border-color: #10b981;
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    }
+    
+    /* Equipment Checkboxes Grid */
+    .equipment-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .equipment-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    .equipment-checkbox:hover {
+        border-color: #14b8a6;
+        box-shadow: 0 2px 8px rgba(20, 184, 166, 0.15);
+        background: white;
+    }
+
+    .equipment-checkbox input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .checkbox-visual {
+        width: 22px;
+        height: 22px;
+        border: 2px solid #d1d5db;
+        border-radius: 0.375rem;
+        transition: all 0.3s;
+        flex-shrink: 0;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .equipment-checkbox input:checked ~ .checkbox-visual {
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        border-color: #14b8a6;
+    }
+
+    .equipment-checkbox input:checked ~ .checkbox-visual::after {
+        content: '\f00c';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        color: white;
+        font-size: 0.75rem;
+    }
+
+    .checkbox-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+    }
+
+    .checkbox-icon {
+        font-size: 1.25rem;
+        color: #9ca3af;
+        transition: all 0.3s;
+    }
+
+    .equipment-checkbox input:checked ~ .checkbox-content .checkbox-icon {
+        color: #14b8a6;
+    }
+
+    .checkbox-text {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #6b7280;
+        transition: all 0.3s;
+    }
+
+    .equipment-checkbox input:checked ~ .checkbox-content .checkbox-text {
+        color: #1f2937;
+        font-weight: 700;
+    }
+    
+    /* Dark Mode Overrides */
+    .dark .glass-card {
+        background: rgba(39, 39, 42, 0.6) !important;
+        border: 1px solid rgba(63, 63, 70, 0.5) !important;
+    }
+    .dark .bg-white {
+        background-color: #27272a !important;
+        border-color: rgba(63, 63, 70, 0.5) !important;
+    }
+    .dark .text-gray-800, .dark .text-gray-900 {
+        color: #f4f4f5 !important;
+    }
+    .dark .text-gray-700 {
+        color: #d4d4d8 !important;
+    }
+    .dark .text-gray-600 {
+        color: #a1a1aa !important;
+    }
+    .dark .text-gray-500 {
+        color: #71717a !important;
+    }
+    
+    /* Inputs */
+    .dark .modern-input {
+        background-color: #3f3f46 !important;
+        border-color: #52525b !important;
+        color: #f4f4f5 !important;
+    }
+    .dark .modern-input::placeholder {
+        color: #a1a1aa !important;
+    }
+    
+    /* Preview Box */
+    .dark .bg-gray-50 {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    .dark .border-gray-300 {
+        border-color: #52525b !important;
+    }
+    .dark .bg-teal-100 {
+        background-color: rgba(20, 184, 166, 0.2) !important;
+    }
+    .dark .text-teal-600 {
+        color: #5eead4 !important;
+    }
+    
+    /* Equipment Checkboxes */
+    .dark .equipment-checkbox {
+        background-color: #27272a !important;
+        border-color: #52525b !important;
+    }
+    .dark .equipment-checkbox:hover {
+        border-color: #14b8a6 !important;
+        background-color: #3f3f46 !important;
+    }
+    .dark .checkbox-text {
+        color: #d4d4d8 !important;
+    }
+    .dark .equipment-checkbox input:checked ~ .checkbox-content .checkbox-text {
+        color: #f4f4f5 !important;
+    }
+    
+    /* Checkbox Visual */
+    .dark .checkbox-visual {
+        border-color: #71717a !important;
+    }
+    
+     /* Buttons */
+    .dark .bg-gray-100 {
+        background-color: #3f3f46 !important;
+        color: #d4d4d8 !important;
+    }
+    .dark .bg-gray-100:hover {
+        background-color: #52525b !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    
+    <!-- Breadcrumb -->
+    <div class="mb-6">
+        <a href="{% url 'room_list' %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Retour à la liste des salles
+        </a>
+    </div>
+    
+    <!-- Form Card -->
+    <div class="glass-card rounded-2xl shadow-xl overflow-hidden animate-fadeIn">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-teal-500 to-cyan-500 p-6">
+            <div class="flex items-center space-x-4">
+                <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                    <i class="fas fa-layer-group text-white text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Création en Masse de Salles</h1>
+                    <p class="text-teal-100">Créez plusieurs salles identiques rapidement</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Form -->
+        <form method="post" class="p-8">
+            {% csrf_token %}
+            
+            <!-- Step 1: Naming Pattern -->
+            <div class="mb-8">
+                <div class="flex items-center mb-4">
+                    <span class="w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center font-bold mr-3">1</span>
+                    <h3 class="text-lg font-semibold text-gray-800">Modèle de Nom</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Prefix -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-tag text-teal-500 mr-1"></i>
+                            Préfixe *
+                        </label>
+                        <input type="text" name="room_prefix" id="prefix" value="{{ form.room_prefix.value|default:'' }}"
+                               class="w-full px-4 py-3 modern-input rounded-xl text-gray-900 font-mono uppercase"
+                               placeholder="Ex: B, SALLE, INFO" required
+                               oninput="updatePreview()">
+                        <p class="text-gray-500 text-xs mt-1">Début du nom de salle</p>
+                    </div>
+                    
+                    <!-- Start Number -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-arrow-right text-green-500 mr-1"></i>
+                            Numéro de Début *
+                        </label>
+                        <input type="number" name="start_number" id="start_number" value="{{ form.start_number.value|default:'1' }}"
+                               class="w-full px-4 py-3 modern-input rounded-xl text-gray-900"
+                               min="1" required
+                               oninput="updatePreview()">
+                        <p class="text-gray-500 text-xs mt-1">Premier numéro</p>
+                    </div>
+                    
+                    <!-- End Number -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-flag-checkered text-red-500 mr-1"></i>
+                            Numéro de Fin *
+                        </label>
+                        <input type="number" name="end_number" id="end_number" value="{{ form.end_number.value|default:'10' }}"
+                               class="w-full px-4 py-3 modern-input rounded-xl text-gray-900"
+                               min="1" required
+                               oninput="updatePreview()">
+                        <p class="text-gray-500 text-xs mt-1">Dernier numéro</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Preview Box -->
+            <div class="mb-8">
+                <div class="preview-box border-2 border-dashed border-gray-300 rounded-xl p-6 bg-gray-50" id="previewBox">
+                    <div class="flex items-start">
+                        <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                            <i class="fas fa-eye text-teal-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800 mb-1">Aperçu</p>
+                            <p class="text-gray-600" id="previewText">Entrez un préfixe et une plage de numéros pour voir l'aperçu</p>
+                            <p class="text-teal-600 font-mono mt-2" id="previewRooms"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Room Details -->
+            <div class="mb-8">
+                <div class="flex items-center mb-4">
+                    <span class="w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center font-bold mr-3">2</span>
+                    <h3 class="text-lg font-semibold text-gray-800">Détails des Salles</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Building -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-building text-purple-500 mr-1"></i>
+                            Bâtiment *
+                        </label>
+                        <input type="text" name="building" value="{{ form.building.value|default:'' }}"
+                               class="w-full px-4 py-3 modern-input rounded-xl text-gray-900"
+                               placeholder="Ex: Bâtiment A" required>
+                    </div>
+                    
+                    <!-- Floor -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-layer-group text-cyan-500 mr-1"></i>
+                            Étage *
+                        </label>
+                        <input type="number" name="floor" value="{{ form.floor.value|default:'0' }}"
+                               class="w-full px-4 py-3 modern-input rounded-xl text-gray-900"
+                               placeholder="0" required>
+                    </div>
+                    
+                    <!-- Room Type -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-th-large text-blue-500 mr-1"></i>
+                            Type de Salle *
+                        </label>
+                        <select name="room_type" class="w-full px-4 py-3 modern-input rounded-xl text-gray-700" required>
+                            <option value="">-- Sélectionnez --</option>
+                            {% for value, label in form.fields.room_type.choices %}
+                            {% if value %}
+                            <option value="{{ value }}" {% if form.room_type.value == value %}selected{% endif %}>{{ label }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Capacity -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-users text-yellow-500 mr-1"></i>
+                            Capacité *
+                        </label>
+                        <input type="number" name="capacity" value="{{ form.capacity.value|default:'30' }}"
+                               class="w-full px-4 py-3 modern-input rounded-xl text-gray-900"
+                               min="1" required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Equipment -->
+            <div class="mb-8">
+                <div class="flex items-center mb-4">
+                    <span class="w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center font-bold mr-3">3</span>
+                    <h3 class="text-lg font-semibold text-gray-800">Équipements Communs</h3>
+                </div>
+                
+                <p class="text-gray-600 mb-4">Sélectionnez les équipements qui seront attribués à <strong>toutes</strong> les salles créées</p>
+                
+                <div class="equipment-grid">
+                    {% for checkbox in form.equipment %}
+                    <label class="equipment-checkbox">
+                        <input type="checkbox" name="equipment" value="{{ checkbox.data.value }}"
+                               {% if checkbox.data.selected %}checked{% endif %}>
+                        <span class="checkbox-visual"></span>
+                        <div class="checkbox-content">
+                            <i class="fas fa-tools checkbox-icon"></i>
+                            <span class="checkbox-text">{{ checkbox.data.label }}</span>
+                        </div>
+                    </label>
+                    {% empty %}
+                    <p class="col-span-3 text-gray-500 text-center py-4">Aucun équipement disponible</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                <button type="submit" class="flex-1 px-6 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
+                    <i class="fas fa-rocket mr-2"></i>
+                    Créer les Salles
+                </button>
+                <a href="{% url 'room_list' %}" class="flex-1 px-6 py-4 text-center text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold text-lg transition-all">
+                    <i class="fas fa-times mr-2"></i>Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function updatePreview() {
+    const prefix = document.getElementById('prefix').value.toUpperCase();
+    const start = parseInt(document.getElementById('start_number').value) || 1;
+    const end = parseInt(document.getElementById('end_number').value) || 1;
+    const previewBox = document.getElementById('previewBox');
+    const previewText = document.getElementById('previewText');
+    const previewRooms = document.getElementById('previewRooms');
+    
+    if (prefix && start > 0 && end >= start) {
+        const count = end - start + 1;
+        previewText.innerHTML = `<span class="text-teal-600 font-bold">✅ Création de ${count} salle(s)</span>`;
+        
+        let rooms = [];
+        for (let i = start; i <= Math.min(end, start + 4); i++) {
+            rooms.push(prefix + i);
+        }
+        if (end > start + 4) {
+            rooms.push('...');
+            rooms.push(prefix + end);
+        }
+        previewRooms.textContent = rooms.join(', ');
+        previewBox.classList.add('has-content');
+    } else {
+        previewText.textContent = 'Entrez un préfixe et une plage de numéros pour voir l\'aperçu';
+        previewRooms.textContent = '';
+        previewBox.classList.remove('has-content');
+    }
+}
+
+// Initialize preview
+updatePreview();
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supprimer - {{ timetable }} - FSTTIME{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+    
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-red-600 to-rose-600 p-6 text-white text-center">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold">Confirmer la suppression</h1>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-8">
+            <div class="text-center mb-8">
+                <p class="text-gray-600 mb-4">Êtes-vous sûr de vouloir supprimer cet emploi du temps ?</p>
+                
+                <div class="bg-gray-50 rounded-xl p-6 inline-block">
+                    <div class="text-xl font-bold text-gray-800">{{ timetable.program.code }}</div>
+                    <div class="text-gray-600">{{ timetable.program.name }}</div>
+                    <div class="mt-2 text-indigo-600 font-semibold">{{ timetable.get_semester_display }} • {{ timetable.academic_year }}</div>
+                    <div class="mt-2 text-sm text-gray-500">
+                        <i class="fas fa-calendar-alt mr-1"></i>
+                        {{ timetable.entries.count }} séances programmées
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                <div class="flex items-start gap-3 text-red-700">
+                    <i class="fas fa-warning mt-0.5"></i>
+                    <div>
+                        <p class="font-bold">Attention !</p>
+                        <p class="text-sm mt-1">Cette action est irréversible. Toutes les séances associées seront également supprimées.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <form method="post" class="flex gap-4">
+                {% csrf_token %}
+                <a href="{% url 'timetable_list' %}" class="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl text-center hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-times mr-2"></i>Annuler
+                </a>
+                <button type="submit" class="flex-1 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold rounded-xl hover:shadow-lg transition-all">
+                    <i class="fas fa-trash mr-2"></i>Supprimer
+                </button>
+            </form>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

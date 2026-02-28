@@ -1,0 +1,261 @@
+{
+  "tech_stack": ["Python", "Django 5.x", "SQLite", "HTML/CSS/JavaScript", "Tailwind CSS", "xhtml2pdf", "python-docx"],
+  "features": [
+    {
+      "name": "User Authentication",
+      "description": "Login, logout, and registration for students, teachers, and associations",
+      "files": ["apps/accounts/views.py", "apps/accounts/urls.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/accounts/login/": {
+            "get": {"summary": "Display login form"},
+            "post": {"summary": "Authenticate user"}
+          },
+          "/accounts/logout/": {
+            "post": {"summary": "Log out user"}
+          },
+          "/accounts/register/student/": {
+            "get": {"summary": "Student registration form"},
+            "post": {"summary": "Register new student"}
+          },
+          "/accounts/register/teacher/": {
+            "get": {"summary": "Teacher registration form"},
+            "post": {"summary": "Register new teacher"}
+          },
+          "/accounts/register/association/": {
+            "get": {"summary": "Association registration form"},
+            "post": {"summary": "Register new association"}
+          }
+        }
+      }
+    },
+    {
+      "name": "Dashboard",
+      "description": "User dashboard with role-based content",
+      "files": ["apps/accounts/views.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/accounts/dashboard/": {
+            "get": {"summary": "Display user dashboard"}
+          }
+        }
+      }
+    },
+    {
+      "name": "Room Management",
+      "description": "CRUD operations for rooms including bulk creation",
+      "files": ["apps/core/views.py", "apps/core/urls.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/core/rooms/": {
+            "get": {"summary": "List all rooms"}
+          },
+          "/core/rooms/create/": {
+            "get": {"summary": "Room creation form"},
+            "post": {"summary": "Create new room"}
+          },
+          "/core/rooms/{pk}/": {
+            "get": {"summary": "Room detail view"}
+          },
+          "/core/rooms/{pk}/edit/": {
+            "get": {"summary": "Room edit form"},
+            "post": {"summary": "Update room"}
+          },
+          "/core/rooms/{pk}/delete/": {
+            "post": {"summary": "Delete room"}
+          },
+          "/core/api/rooms/{room_id}/delete/": {
+            "post": {"summary": "Delete room via API"}
+          }
+        }
+      }
+    },
+    {
+      "name": "Program Management",
+      "description": "CRUD operations for academic programs",
+      "files": ["apps/core/views.py", "apps/core/urls.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/core/programs/": {
+            "get": {"summary": "List all programs"}
+          },
+          "/core/programs/{pk}/": {
+            "get": {"summary": "Program detail view"}
+          },
+          "/core/programs/create/": {
+            "get": {"summary": "Program creation form"},
+            "post": {"summary": "Create new program"}
+          },
+          "/core/api/programs/{program_id}/delete/": {
+            "post": {"summary": "Delete program via API"}
+          }
+        }
+      }
+    },
+    {
+      "name": "Timetable Management",
+      "description": "Create, view, edit, delete and export timetables",
+      "files": ["apps/scheduling/views.py", "apps/scheduling/urls.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/scheduling/timetables/": {
+            "get": {"summary": "List all timetables"}
+          },
+          "/scheduling/timetables/create/": {
+            "get": {"summary": "Timetable creation form"},
+            "post": {"summary": "Create new timetable"}
+          },
+          "/scheduling/timetables/{pk}/": {
+            "get": {"summary": "Timetable detail view"}
+          },
+          "/scheduling/timetables/{pk}/edit/": {
+            "get": {"summary": "Timetable edit form"},
+            "post": {"summary": "Update timetable"}
+          },
+          "/scheduling/timetables/{pk}/export/": {
+            "get": {
+              "summary": "Export timetable",
+              "parameters": [
+                {"name": "format", "in": "query", "schema": {"type": "string", "enum": ["pdf", "docx"]}}
+              ]
+            }
+          },
+          "/scheduling/timetables/{pk}/delete/": {
+            "post": {"summary": "Delete timetable"}
+          },
+          "/scheduling/my-timetable/": {
+            "get": {"summary": "View personal timetable"}
+          },
+          "/scheduling/my-timetable/export/": {
+            "get": {
+              "summary": "Export personal timetable",
+              "parameters": [
+                {"name": "format", "in": "query", "schema": {"type": "string", "enum": ["pdf", "docx"]}}
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Room Reservations",
+      "description": "Room reservation requests and approval workflow",
+      "files": ["apps/scheduling/views.py", "apps/scheduling/urls.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/scheduling/reservations/": {
+            "get": {"summary": "List reservations"}
+          },
+          "/scheduling/reservations/create/": {
+            "get": {"summary": "Reservation form"},
+            "post": {"summary": "Create reservation request"}
+          },
+          "/scheduling/reservations/{pk}/": {
+            "get": {"summary": "Reservation detail"}
+          },
+          "/scheduling/api/reservations/{pk}/approve/": {
+            "post": {"summary": "Approve reservation"}
+          },
+          "/scheduling/api/reservations/{pk}/reject/": {
+            "post": {"summary": "Reject reservation"}
+          }
+        }
+      }
+    },
+    {
+      "name": "Notifications",
+      "description": "User notification system",
+      "files": ["apps/notifications/views.py", "apps/notifications/urls.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/notifications/": {
+            "get": {"summary": "List notifications"}
+          },
+          "/notifications/api/unread-count/": {
+            "get": {"summary": "Get unread notification count"}
+          },
+          "/notifications/api/recent/": {
+            "get": {"summary": "Get recent notifications"}
+          },
+          "/notifications/mark-read/{pk}/": {
+            "post": {"summary": "Mark notification as read"}
+          },
+          "/notifications/mark-all-read/": {
+            "post": {"summary": "Mark all notifications as read"}
+          }
+        }
+      }
+    },
+    {
+      "name": "Contact Form",
+      "description": "Public contact form submission and admin management",
+      "files": ["apps/core/views.py", "apps/core/urls.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/core/contact/": {
+            "get": {"summary": "Contact form"},
+            "post": {"summary": "Submit contact message"}
+          },
+          "/core/contact/list/": {
+            "get": {"summary": "List contact messages (admin)"}
+          },
+          "/core/api/contact/{message_id}/mark-read/": {
+            "post": {"summary": "Mark message as read"}
+          },
+          "/core/api/contact/{message_id}/delete/": {
+            "post": {"summary": "Delete message"}
+          }
+        }
+      }
+    },
+    {
+      "name": "Public Pages",
+      "description": "Landing page, about page, and public room search",
+      "files": ["apps/public/views.py", "apps/public/urls.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/": {
+            "get": {"summary": "Landing page"}
+          },
+          "/rooms/search/": {
+            "get": {"summary": "Public room search"}
+          },
+          "/programs/": {
+            "get": {"summary": "Public program list"}
+          },
+          "/about/": {
+            "get": {"summary": "About page"}
+          }
+        }
+      }
+    },
+    {
+      "name": "Room Availability API",
+      "description": "Check room and slot availability",
+      "files": ["apps/scheduling/views.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/scheduling/api/check-room-availability/": {
+            "get": {"summary": "Check room availability for a date/time"}
+          },
+          "/scheduling/api/get-available-dates/": {
+            "get": {"summary": "Get available dates for a room"}
+          },
+          "/scheduling/api/get-available-time-slots/": {
+            "get": {"summary": "Get available time slots"}
+          }
+        }
+      }
+    }
+  ]
+}

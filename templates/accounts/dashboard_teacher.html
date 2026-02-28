@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tableau de Bord Enseignant - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Custom Scrollbar */
+    .dashboard-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .dashboard-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+    .dashboard-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+    .dashboard-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    
+    <!-- Header Section -->
+    <div class="glass-card rounded-3xl shadow-2xl overflow-hidden mb-8 animate-fadeIn">
+        <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 p-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div class="flex items-center gap-5">
+                    <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shadow-xl animate-float">
+                        <i class="fas fa-chalkboard-teacher text-3xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-black text-white mb-1">
+                            Bienvenue, Prof. <span class="text-emerald-100">{{ user.get_full_name }}</span>
+                        </h1>
+                        <p class="text-emerald-100/80 font-medium flex items-center gap-2">
+                            <i class="fas fa-university"></i> Tableau de bord Enseignant
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-3">
+                    <div class="bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-xl text-white">
+                        <p class="text-[10px] font-black uppercase tracking-widest opacity-60">Session</p>
+                        <p class="font-bold">Automne 2026</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-xl text-white">
+                        <p class="text-[10px] font-black uppercase tracking-widest opacity-60">Heure Locale</p>
+                        <p class="font-bold" id="current-time">--:--</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="glass-card p-6 rounded-3xl border-l-4 border-emerald-500 shadow-xl flex items-center justify-between group hover:-translate-y-2 transition-all">
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Charge Hebdomadaire</p>
+                <h3 class="text-3xl font-black text-gray-800 dark:text-gray-100">{{ weekly_hours|floatformat:1 }}<span class="text-sm font-bold text-gray-400 ml-1">Heures</span></h3>
+            </div>
+            <div class="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-lg shadow-emerald-100 dark:shadow-none">
+                <i class="fas fa-clock"></i>
+            </div>
+        </div>
+        
+        <div class="glass-card p-6 rounded-3xl border-l-4 border-indigo-500 shadow-xl flex items-center justify-between group hover:-translate-y-2 transition-all">
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Mes Séances</p>
+                <h3 class="text-3xl font-black text-gray-800 dark:text-gray-100">{{ my_sessions.count }}<span class="text-sm font-bold text-gray-400 ml-1">À venir</span></h3>
+            </div>
+            <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-lg shadow-indigo-100 dark:shadow-none">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border-l-4 border-cyan-500 shadow-xl flex items-center justify-between group hover:-translate-y-2 transition-all">
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Réservations</p>
+                <h3 class="text-3xl font-black text-gray-800 dark:text-gray-100">{{ my_reservations.count }}<span class="text-sm font-bold text-gray-400 ml-1">Total</span></h3>
+            </div>
+            <div class="w-14 h-14 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-cyan-600 group-hover:text-white transition-all shadow-lg shadow-cyan-100 dark:shadow-none">
+                <i class="fas fa-door-open"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Main Column: Upcoming Sessions -->
+        <div class="lg:col-span-8 space-y-6">
+            <div class="glass-card rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-zinc-700">
+                <div class="p-6 border-b border-gray-100 dark:border-zinc-700 flex justify-between items-center bg-gray-50/50 dark:bg-zinc-800/50">
+                    <h2 class="text-xl font-black text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                        <i class="fas fa-calendar-day text-emerald-500"></i> Mes Prochaines Séances
+                    </h2>
+                    <a href="{% url 'my_timetable' %}" class="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-800/50 text-emerald-600 dark:text-emerald-400 rounded-xl text-xs font-black uppercase tracking-wider transition-all">
+                        Consulter mon planning
+                    </a>
+                </div>
+                
+                <div class="p-6 space-y-4 max-h-[600px] overflow-y-auto dashboard-scrollbar">
+                    {% if my_sessions %}
+                        {% for session in my_sessions %}
+                        <div class="p-5 rounded-2xl border border-gray-100 dark:border-zinc-700 hover:border-emerald-200 dark:hover:border-emerald-700 hover:bg-emerald-50/10 dark:hover:bg-emerald-900/10 transition-all group relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 -mr-8 -mt-8 rounded-full"></div>
+                            
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-3">
+                                        <h4 class="text-lg font-black text-gray-800 dark:text-gray-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors uppercase tracking-tight">{{ session.subject }}</h4>
+                                        <span class="px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest
+                                            {% if session.session_type == 'cours' %}bg-blue-500 text-white
+                                            {% elif session.session_type == 'td' %}bg-emerald-500 text-white
+                                            {% elif session.session_type == 'tp' %}bg-amber-500 text-white
+                                            {% elif session.is_exam %}bg-rose-500 text-white animate-pulse
+                                            {% else %}bg-gray-500 text-white{% endif %}">
+                                            {{ session.get_session_type_display }}
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-4 text-xs font-bold text-gray-500 dark:text-gray-400">
+                                        <span class="flex items-center gap-1.5"><i class="fas fa-clock text-emerald-500"></i> {{ session.start_datetime|date:"d M" }} • {{ session.start_datetime|time:"H:i" }} - {{ session.end_datetime|time:"H:i" }}</span>
+                                        <span class="flex items-center gap-1.5"><i class="fas fa-door-open text-emerald-500"></i> {{ session.room.name|default:"À définir" }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm p-3 rounded-xl border border-gray-100 dark:border-zinc-700 shadow-sm min-w-[140px]">
+                                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Groupes assigned</p>
+                                    <div class="flex flex-wrap gap-1">
+                                        {% for group in session.groups.all %}
+                                        <span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-black uppercase tracking-tighter">{{ group.name }}</span>
+                                        {% empty %}
+                                        <span class="text-gray-300 dark:text-gray-600 italic text-[10px]">Aucun</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="py-12 text-center text-gray-400">
+                            <i class="fas fa-calendar-times text-5xl mb-4 opacity-20"></i>
+                            <p class="font-bold">Aucune séance programmée.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: Actions -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="glass-card p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-zinc-700">
+                <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <i class="fas fa-bolt text-emerald-500"></i> Outils de Gestion
+                </h3>
+                <div class="space-y-3">
+                    <a href="{% url 'reservation_create' %}" class="flex items-center gap-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/30 group hover:bg-emerald-600 dark:hover:bg-emerald-600 transition-all">
+                        <div class="w-12 h-12 bg-white dark:bg-zinc-800 rounded-xl shadow-sm flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-calendar-plus"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-black text-emerald-800 dark:text-emerald-100 uppercase group-hover:text-white transition-colors">Réserver Salle</span>
+                            <span class="text-[9px] font-bold text-emerald-600/70 dark:text-emerald-300/70 group-hover:text-emerald-100/70 transition-colors uppercase">Nouvelle demande</span>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'unavailability_create' %}" class="flex items-center gap-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-100 dark:border-amber-800/30 group hover:bg-amber-600 dark:hover:bg-amber-600 transition-all">
+                        <div class="w-12 h-12 bg-white dark:bg-zinc-800 rounded-xl shadow-sm flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-user-clock"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-black text-amber-800 dark:text-amber-100 uppercase group-hover:text-white transition-colors">Indisponibilité</span>
+                            <span class="text-[9px] font-bold text-amber-600/70 dark:text-amber-300/70 group-hover:text-amber-100/70 transition-colors uppercase">Gérer absences</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'change_request_create' %}" class="flex items-center gap-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl border border-purple-100 dark:border-purple-800/30 group hover:bg-purple-600 dark:hover:bg-purple-600 transition-all">
+                        <div class="w-12 h-12 bg-white dark:bg-zinc-800 rounded-xl shadow-sm flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-black text-purple-800 dark:text-purple-100 uppercase group-hover:text-white transition-colors">Changement Horaire</span>
+                            <span class="text-[9px] font-bold text-purple-600/70 dark:text-purple-300/70 group-hover:text-purple-100/70 transition-colors uppercase">Demander modif.</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'reservation_list' %}" class="flex items-center gap-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/30 group hover:bg-indigo-600 dark:hover:bg-indigo-600 transition-all">
+                        <div class="w-12 h-12 bg-white dark:bg-zinc-800 rounded-xl shadow-sm flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-black text-indigo-800 dark:text-indigo-100 uppercase group-hover:text-white transition-colors">Mes demandes</span>
+                            <span class="text-[9px] font-bold text-indigo-600/70 dark:text-indigo-300/70 group-hover:text-indigo-100/70 transition-colors uppercase">Suivi statut</span>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'profile' %}" class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-2xl border border-gray-100 dark:border-zinc-700 group hover:bg-gray-800 dark:hover:bg-zinc-700 transition-all">
+                        <div class="w-12 h-12 bg-white dark:bg-zinc-800 rounded-xl shadow-sm flex items-center justify-center text-gray-600 dark:text-gray-400 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-user-cog"></i>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-black text-gray-800 dark:text-gray-100 uppercase group-hover:text-white transition-colors">Paramètres</span>
+                            <span class="text-[9px] font-bold text-gray-400 group-hover:text-gray-400 transition-colors uppercase">Éditer profil</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Promotion Card -->
+            <div class="bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800 p-8 rounded-3xl shadow-2xl text-white relative overflow-hidden group">
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+                <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:scale-150 transition-all duration-1000"></div>
+                
+                <h3 class="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i class="fas fa-award text-amber-400"></i> Espace Enseignants
+                </h3>
+                <p class="text-indigo-100 text-sm leading-relaxed mb-6 font-medium">
+                    Optimisez votre temps ! Utilisez le moteur de recherche de salles pour trouver instantanément un créneau vide.
+                </p>
+                <a href="{% url 'public_room_search' %}" class="inline-flex items-center gap-2 bg-emerald-500 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-emerald-400 transition-all active:scale-95 shadow-lg shadow-emerald-900/40">
+                    Explorer <i class="fas fa-search-plus"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        const el = document.getElementById('current-time');
+        if (el) el.textContent = time;
+    }
+    updateClock();
+    setInterval(updateClock, 60000);
+</script>
+{% endblock %}

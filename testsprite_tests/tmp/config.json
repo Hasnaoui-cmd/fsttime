@@ -1,0 +1,19 @@
+{
+  "status": "commited",
+  "type": "backend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:8000",
+  "backendAuthType": "basic token",
+  "backendUsername": "admin",
+  "backendPassword": "admin123",
+  "executionArgs": {
+    "projectName": "FSTTIME",
+    "projectPath": "c:\\Users\\pc\\Desktop\\Anti\\FSTTIME",
+    "testIds": [],
+    "additionalInstruction": "",
+    "envs": {
+      "API_KEY": "sk-user-XrIojaWeHv3v9tto0nwKPFHm5YbAzG5YeR0XzvJYtbR2z1WsV-2l79wNQXn2xXCgHJi_KsjFOtVVD_BhODj_63soaSLgIH3MOVxF8faNYTQnyiMQGkeKUyXaaQTI63eDzN4"
+    }
+  },
+  "proxy": "http://f76cffb4-3be1-419d-a49b-f50e8d2e0feb:ioMcP9OtsZo6b1fqx3yZjD8DWTwSQqoo@tun.testsprite.com:8080"
+}

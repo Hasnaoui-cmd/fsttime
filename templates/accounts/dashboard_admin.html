@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panneau d'Administration - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Stats Card Hover Effects */
+    .stat-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .stat-icon-wrapper {
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover .stat-icon-wrapper {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    /* Custom Transitions */
+    .dashboard-scrollbar::-webkit-scrollbar {
+        width: 5px;
+    }
+    .dashboard-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .dashboard-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+    .dashboard-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #cbd5e1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    
+    <!-- Premium Header -->
+    <div class="glass-card rounded-[40px] shadow-2xl overflow-hidden mb-10 animate-fadeIn relative">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5"></div>
+        <div class="bg-gradient-to-r from-gray-900 via-indigo-950 to-purple-950 p-10 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                <div class="flex items-center gap-6">
+                    <div class="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center text-white shadow-2xl shadow-indigo-500/30 border border-white/20 animate-float">
+                        <i class="fas fa-shield-alt text-4xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-4xl font-black text-white mb-2">
+                             Bonjour, <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-purple-300">{{ user.get_full_name|default:user.username }}</span>
+                        </h1>
+                        <p class="text-indigo-200/60 font-black uppercase tracking-[0.2em] text-xs flex items-center gap-3">
+                            <span class="w-8 h-[1px] bg-indigo-500/50"></span> Administration Système
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="bg-black/20 backdrop-blur-xl border border-white/5 px-6 py-4 rounded-3xl text-center">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-indigo-300/50 mb-1">Heure du Serveur</p>
+                        <p class="text-2xl font-black text-white" id="current-time">--:--</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Counters Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <!-- Card 1: Reservations -->
+        <a href="{% url 'reservation_list' %}?status=pending" class="stat-card glass-card p-6 rounded-3xl border border-gray-100 dark:border-white/10 flex flex-col justify-between h-full bg-white dark:bg-zinc-800/50 group">
+            <div class="flex justify-between items-start mb-4">
+                <div class="stat-icon-wrapper w-14 h-14 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-sm border border-amber-100 dark:border-amber-800/30">
+                    <i class="fas fa-clock text-2xl"></i>
+                </div>
+                <div class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-full text-[10px] font-black uppercase tracking-tighter">En Attente</div>
+            </div>
+            <div>
+                <h3 class="text-4xl font-black text-gray-800 dark:text-white mb-1">{{ pending_reservations|default:"0" }}</h3>
+                <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Réservations Salles</p>
+            </div>
+        </a>
+
+        <!-- Card 2: Messages -->
+        <a href="{% url 'contact_list' %}?status=pending" class="stat-card glass-card p-6 rounded-3xl border border-gray-100 dark:border-white/10 flex flex-col justify-between h-full bg-white dark:bg-zinc-800/50 group">
+            <div class="flex justify-between items-start mb-4">
+                <div class="stat-icon-wrapper w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-800/30">
+                    <i class="fas fa-envelope-open text-2xl"></i>
+                </div>
+                <div class="px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full text-[10px] font-black uppercase tracking-tighter">Nouveaux</div>
+            </div>
+            <div>
+                <h3 class="text-4xl font-black text-gray-800 dark:text-white mb-1">{{ pending_contacts|default:"0" }}</h3>
+                <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Messages Contact</p>
+            </div>
+        </a>
+
+        <!-- Card 3: Associations -->
+        <a href="{% url 'association_list' %}?status=pending" class="stat-card glass-card p-6 rounded-3xl border border-gray-100 dark:border-white/10 flex flex-col justify-between h-full bg-white dark:bg-zinc-800/50 group">
+            <div class="flex justify-between items-start mb-4">
+                <div class="stat-icon-wrapper w-14 h-14 bg-purple-50 dark:bg-purple-900/20 rounded-2xl flex items-center justify-center text-purple-600 dark:text-purple-400 shadow-sm border border-purple-100 dark:border-purple-800/30">
+                    <i class="fas fa-users text-2xl"></i>
+                </div>
+                <div class="px-3 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full text-[10px] font-black uppercase tracking-tighter">À Valider</div>
+            </div>
+            <div>
+                <h3 class="text-4xl font-black text-gray-800 dark:text-white mb-1">{{ pending_associations|default:"0" }}</h3>
+                <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Associations</p>
+            </div>
+        </a>
+
+        <!-- Card 4: Salles -->
+        <a href="{% url 'room_list' %}" class="stat-card glass-card p-6 rounded-3xl border border-gray-100 dark:border-white/10 flex flex-col justify-between h-full bg-white dark:bg-zinc-800/50 group">
+            <div class="flex justify-between items-start mb-4">
+                <div class="stat-icon-wrapper w-14 h-14 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm border border-emerald-100 dark:border-emerald-800/30">
+                    <i class="fas fa-door-open text-2xl"></i>
+                </div>
+                <div class="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-full text-[10px] font-black uppercase tracking-tighter">Actives</div>
+            </div>
+            <div>
+                <h3 class="text-4xl font-black text-gray-800 dark:text-white mb-1">{{ total_rooms|default:"0" }}</h3>
+                <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Salles Gérées</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="grid lg:grid-cols-12 gap-8 mb-10">
+        <!-- Quick Management -->
+        <div class="lg:col-span-12">
+            <div class="glass-card rounded-[32px] p-8 shadow-2xl border border-gray-100 dark:border-white/10 dark:bg-zinc-800/50">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-2xl font-black text-gray-800 dark:text-white flex items-center gap-3">
+                        <i class="fas fa-tools text-indigo-500"></i> Centre de Contrôle
+                    </h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <a href="{% url 'room_create' %}" class="group p-6 rounded-3xl border border-gray-100 dark:border-zinc-700 dark:bg-zinc-800 hover:border-indigo-500/30 hover:bg-indigo-50/10 dark:hover:bg-indigo-900/20 transition-all text-center">
+                        <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-plus-circle text-2xl"></i>
+                        </div>
+                        <span class="block text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Ajouter une Salle</span>
+                    </a>
+                    <a href="{% url 'program_create' %}" class="group p-6 rounded-3xl border border-gray-100 dark:border-zinc-700 dark:bg-zinc-800 hover:border-purple-500/30 hover:bg-purple-50/10 dark:hover:bg-purple-900/20 transition-all text-center">
+                        <div class="w-16 h-16 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-university text-2xl"></i>
+                        </div>
+                        <span class="block text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight group-hover:text-purple-600 dark:group-hover:text-purple-400">Nouvelle Filière</span>
+                    </a>
+                    <a href="{% url 'reservation_list' %}" class="group p-6 rounded-3xl border border-gray-100 dark:border-zinc-700 dark:bg-zinc-800 hover:border-amber-500/30 hover:bg-amber-50/10 dark:hover:bg-amber-900/20 transition-all text-center">
+                        <div class="w-16 h-16 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-calendar-check text-2xl"></i>
+                        </div>
+                        <span class="block text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight group-hover:text-amber-600 dark:group-hover:text-amber-400">Gérer Réservations</span>
+                    </a>
+                    <!-- Timetable Generator - Highlighted -->
+                    <a href="{% url 'timetable_create' %}" class="group p-6 rounded-3xl border-2 border-orange-300 dark:border-orange-500/50 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-yellow-900/20 hover:from-amber-100 hover:via-orange-100 hover:to-yellow-100 dark:hover:from-amber-900/30 dark:hover:via-orange-900/30 dark:hover:to-yellow-900/30 transition-all text-center shadow-lg shadow-orange-100 dark:shadow-none">
+                        <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-amber-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg">
+                            <i class="fas fa-magic text-2xl"></i>
+                        </div>
+                        <span class="block text-sm font-black text-orange-700 dark:text-orange-400 uppercase tracking-tight">Créer Emploi du Temps</span>
+                        <span class="block text-[10px] font-medium text-orange-500 dark:text-orange-300 mt-1">Génération Automatique</span>
+                    </a>
+
+                    
+                    <!-- Timetable List -->
+                    <a href="{% url 'timetable_list' %}" class="group p-6 rounded-3xl border border-gray-100 dark:border-zinc-700 dark:bg-zinc-800 hover:border-blue-500/30 hover:bg-blue-50/10 dark:hover:bg-blue-900/20 transition-all text-center">
+                        <div class="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-calendar-alt text-2xl"></i>
+                        </div>
+                        <span class="block text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">Voir Emplois du Temps</span>
+                    </a>
+                    
+                    <a href="{% url 'contact_list' %}" class="group p-6 rounded-3xl border border-gray-100 dark:border-zinc-700 dark:bg-zinc-800 hover:border-emerald-500/30 hover:bg-emerald-50/10 dark:hover:bg-emerald-900/20 transition-all text-center">
+                        <div class="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-headset text-2xl"></i>
+                        </div>
+                        <span class="block text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400">Assistance Client</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Graphics Section -->
+    <div class="glass-card rounded-[32px] p-8 shadow-2xl border border-gray-100 dark:border-white/10 dark:bg-zinc-800/50">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-black text-gray-800 dark:text-white flex items-center gap-3">
+                <i class="fas fa-chart-pie text-indigo-500"></i> Statistiques
+            </h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Chart 1: Reservations by Status -->
+            <div class="p-6 rounded-3xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700">
+                <h4 class="text-sm font-black text-gray-700 dark:text-gray-300 uppercase tracking-tight mb-4 text-center">
+                    <i class="fas fa-calendar-check text-amber-500 mr-2"></i>R&#233;servations
+                </h4>
+                <div class="relative" style="height: 220px;">
+                    <canvas id="chartReservations"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 2: Users by Role -->
+            <div class="p-6 rounded-3xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700">
+                <h4 class="text-sm font-black text-gray-700 dark:text-gray-300 uppercase tracking-tight mb-4 text-center">
+                    <i class="fas fa-users text-blue-500 mr-2"></i>Utilisateurs
+                </h4>
+                <div class="relative" style="height: 220px;">
+                    <canvas id="chartUsers"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 3: Rooms & Contacts -->
+            <div class="p-6 rounded-3xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700">
+                <h4 class="text-sm font-black text-gray-700 dark:text-gray-300 uppercase tracking-tight mb-4 text-center">
+                    <i class="fas fa-door-open text-emerald-500 mr-2"></i>Salles
+                </h4>
+                <div class="relative" style="height: 220px;">
+                    <canvas id="chartRooms"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+    // Clock
+    function updateClock() {
+        var now = new Date();
+        var time = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        var el = document.getElementById('current-time');
+        if (el) el.textContent = time;
+    }
+    updateClock();
+    setInterval(updateClock, 60000);
+
+    // Detect dark mode
+    var isDark = document.documentElement.classList.contains('dark');
+    var textColor = isDark ? '#d4d4d8' : '#3f3f46';
+    var gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+
+    // Chart 1: Reservations Doughnut
+    var ctxRes = document.getElementById('chartReservations');
+    if (ctxRes) {
+        new Chart(ctxRes, {
+            type: 'doughnut',
+            data: {
+                labels: ['En attente', 'Approuv\u00e9es', 'Rejet\u00e9es'],
+                datasets: [{
+                    data: [{{ res_pending|default:"0" }}, {{ res_approved|default:"0" }}, {{ res_rejected|default:"0" }}],
+                    backgroundColor: ['#f59e0b', '#10b981', '#ef4444'],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: textColor, font: { size: 11, weight: 'bold' }, padding: 12, usePointStyle: true, pointStyleWidth: 10 }
+                    }
+                }
+            }
+        });
+    }
+
+    // Chart 2: Users Bar
+    var ctxUsers = document.getElementById('chartUsers');
+    if (ctxUsers) {
+        new Chart(ctxUsers, {
+            type: 'bar',
+            data: {
+                labels: ['\u00c9tudiants', 'Enseignants', 'Associations', 'Admins'],
+                datasets: [{
+                    label: 'Nombre',
+                    data: [{{ count_students|default:"0" }}, {{ count_teachers|default:"0" }}, {{ count_associations|default:"0" }}, {{ count_admins|default:"0" }}],
+                    backgroundColor: ['#6366f1', '#3b82f6', '#8b5cf6', '#ec4899'],
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: textColor, font: { size: 10, weight: 'bold' }, stepSize: 1 },
+                        grid: { color: gridColor }
+                    },
+                    x: {
+                        ticks: { color: textColor, font: { size: 9, weight: 'bold' } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    // Chart 3: Rooms Doughnut
+    var ctxRooms = document.getElementById('chartRooms');
+    if (ctxRooms) {
+        new Chart(ctxRooms, {
+            type: 'doughnut',
+            data: {
+                labels: ['Actives', 'Inactives'],
+                datasets: [{
+                    data: [{{ rooms_active|default:"0" }}, {{ rooms_inactive|default:"0" }}],
+                    backgroundColor: ['#10b981', '#71717a'],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: textColor, font: { size: 11, weight: 'bold' }, padding: 12, usePointStyle: true, pointStyleWidth: 10 }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,470 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nos Filières - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+    
+    /* Page Header */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .header-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+    
+    .header-icon i {
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .header-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .header-subtitle {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin: 0;
+    }
+    
+    /* Filter Section */
+    .filter-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+    
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    @media (max-width: 1024px) {
+        .filter-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 640px) {
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .filter-group label {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6b7280;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    
+    .filter-group label i {
+        color: #8b5cf6;
+    }
+    
+    .filter-input, .filter-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        color: #374151;
+        transition: all 0.2s ease;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    
+    .filter-input:focus, .filter-select:focus {
+        outline: none;
+        border-color: #8b5cf6;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+    
+    .btn-filter {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-filter:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+    
+    /* Programs Grid */
+    .programs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .program-card {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        transition: all 0.2s ease;
+    }
+    
+    .program-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .card-header.master {
+        background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+    }
+    
+    .card-header.licence {
+        background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    }
+    
+    .card-header.doctorat {
+        background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    }
+    
+    .program-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .program-icon i {
+        font-size: 1.25rem;
+        color: white;
+    }
+    
+    .card-header-content {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .program-level-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.25rem 0.75rem;
+        background: rgba(255, 255, 255, 0.25);
+        border-radius: 2rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .program-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        line-height: 1.3;
+    }
+    
+    .program-dept {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        margin-top: 0.375rem;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .card-body {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .stats-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-item {
+        flex: 1;
+        text-align: center;
+        padding: 0.75rem;
+        background: #f9fafb;
+        border-radius: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    
+    .stat-value {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #374151;
+        margin-top: 0.125rem;
+    }
+    
+    .card-actions {
+        padding-top: 1rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    
+    .btn-view {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        text-align: center;
+        background: #eef2ff;
+        color: #4f46e5;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    
+    .btn-view:hover {
+        background: #e0e7ff;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+    
+    .empty-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .empty-icon i {
+        font-size: 2.5rem;
+        color: #8b5cf6;
+    }
+    
+    .empty-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-text {
+        color: #6b7280;
+    }
+    
+    .btn-create {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+        color: white;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        transition: all 0.2s ease;
+    }
+    
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <div class="header-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div>
+                <h1 class="header-title">Nos Filières</h1>
+                <p class="header-subtitle">{{ programs|length }} programme(s) académique(s)</p>
+            </div>
+        </div>
+        
+        {% if user.is_authenticated and user.role == 'admin' %}
+        <a href="{% url 'program_create' %}" class="btn-create">
+            <i class="fas fa-plus"></i>
+            Créer une Filière
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Filters -->
+    <div class="filter-card">
+        <form method="get" class="filter-grid">
+            <div class="filter-group">
+                <label><i class="fas fa-search"></i> Recherche</label>
+                <input type="text" name="q" value="{{ request.GET.q }}" 
+                       class="filter-input" placeholder="Nom ou code...">
+            </div>
+            <div class="filter-group">
+                <label><i class="fas fa-building"></i> Département</label>
+                <select name="dept" class="filter-select">
+                    <option value="">Tous les départements</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept }}" {% if request.GET.dept == dept %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label><i class="fas fa-layer-group"></i> Niveau</label>
+                <select name="level" class="filter-select">
+                    <option value="">Tous les niveaux</option>
+                    <option value="licence" {% if request.GET.level == 'licence' %}selected{% endif %}>Licence</option>
+                    <option value="master" {% if request.GET.level == 'master' %}selected{% endif %}>Master</option>
+                    <option value="doctorat" {% if request.GET.level == 'doctorat' %}selected{% endif %}>Doctorat</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn-filter">
+                    <i class="fas fa-filter"></i> Appliquer
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Programs Grid -->
+    {% if programs %}
+    <div class="programs-grid">
+        {% for program in programs %}
+        <div class="program-card">
+            <!-- Card Header -->
+            <div class="card-header {{ program.degree_level }}">
+                <div class="program-icon">
+                    <i class="fas fa-university"></i>
+                </div>
+                <div class="card-header-content">
+                    <h3 class="program-name">{{ program.name }}</h3>
+                    <div class="program-dept">
+                        <i class="fas fa-building"></i>
+                        {{ program.get_department_display|default:program.department|truncatewords:3 }}
+                    </div>
+                </div>
+                <span class="program-level-badge">{{ program.get_degree_level_display }}</span>
+            </div>
+            
+            <!-- Card Body -->
+            <div class="card-body">
+                <!-- Stats -->
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-label">Code</div>
+                        <div class="stat-value">{{ program.code }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Groupes</div>
+                        <div class="stat-value">{{ program.groups.count|default:"0" }}</div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="card-actions">
+                    <a href="{% url 'program_detail' program.pk %}" class="btn-view">
+                        <i class="fas fa-eye"></i> Consulter les détails
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h3 class="empty-title">Aucune filière trouvée</h3>
+            <p class="empty-text">
+                {% if request.GET.q or request.GET.dept or request.GET.level %}
+                Aucun résultat pour ces critères de recherche.
+                {% else %}
+                Il n'y a pas de programmes enregistrés.
+                {% endif %}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

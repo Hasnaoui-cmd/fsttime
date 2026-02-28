@@ -1,0 +1,161 @@
+{% load static %}
+{% load scheduling_filters %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ timetable.name }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+            @frame footer_frame {           /* Static Frame */
+                -pdf-frame-content: footer_content;
+                bottom: 1cm;
+                margin-left: 1cm;
+                margin-right: 1cm;
+                height: 1cm;
+            }
+        }
+        
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            color: #333;
+        }
+        
+        h1 {
+            color: #1a202c;
+            font-size: 18pt;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #4a5568;
+            font-size: 12pt;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: normal;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        
+        th {
+            background-color: #4c51bf;
+            color: white;
+            padding: 8px;
+            font-size: 9pt;
+            text-align: center;
+            border: 1px solid #4c51bf;
+        }
+        
+        td {
+            border: 1px solid #e2e8f0;
+            padding: 5px;
+            vertical-align: top;
+            font-size: 8pt;
+            height: 80px;
+        }
+        
+        .time-col {
+            background-color: #f7fafc;
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+            width: 80px;
+            font-size: 9pt;
+        }
+        
+        .session-card {
+            border-radius: 4px;
+            padding: 4px;
+            margin-bottom: 4px;
+        }
+        
+        .bg-cours { background-color: #ebf8ff; border-left: 3px solid #4299e1; }
+        .bg-td { background-color: #f0fff4; border-left: 3px solid #48bb78; }
+        .bg-tp { background-color: #fffff0; border-left: 3px solid #ecc94b; }
+        .bg-exam { background-color: #fff5f5; border-left: 3px solid #f56565; }
+        
+        .subject { font-weight: bold; display: block; margin-bottom: 2px; }
+        .detail { display: block; color: #4a5568; font-size: 7pt; }
+        .type-badge {
+            display: inline-block;
+            font-size: 6pt;
+            text-transform: uppercase;
+            padding: 1px 3px;
+            border-radius: 2px;
+            background: rgba(0,0,0,0.1);
+            margin-bottom: 2px;
+        }
+
+        #footer_content {
+            text-align: right;
+            font-size: 8pt;
+            color: #a0aec0;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ timetable.name }}</h1>
+    <h2>{{ timetable.program.name }} - {{ timetable.get_semester_display }} {% if timetable.academic_year %}({{ timetable.academic_year }}){% endif %}</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 80px; background-color: #5a67d8;">Horaire</th>
+                {% for day_code, day_name in days %}
+                <th>{{ day_name }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for slot in time_slots %}
+            <tr>
+                <td class="time-col">
+                    {{ slot.start_time|time:"H:i" }}<br>
+                    -<br>
+                    {{ slot.end_time|time:"H:i" }}
+                </td>
+                
+                {% for day_code, day_name in days %}
+                <td>
+                    {% with slot_entries=entry_dict|get_item:slot.id %}
+                        {% if slot_entries %}
+                            {% with entries=slot_entries|get_item:day_code %}
+                                {% if entries %}
+                                    {% for entry in entries %}
+                                    <div class="session-card bg-{{ entry.session_type }}">
+                                        <span class="type-badge">{% if entry.session_type == 'cours' %}CM{% elif entry.session_type == 'td' %}TD{% elif entry.session_type == 'tp' %}TP{% else %}{{ entry.session_type|upper }}{% endif %}</span>
+                                        <span class="subject">{{ entry.subject.code }}</span>
+                                        <span class="detail">{{ entry.subject.name|truncatechars:25 }}</span>
+                                        {% if entry.room %}
+                                        <span class="detail">Salle: {{ entry.room.name }}</span>
+                                        {% endif %}
+                                        {% if entry.teacher %}
+                                        <span class="detail">Prof: {{ entry.teacher.user.last_name }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    {% endwith %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="footer_content">
+        Genere par FSTTIME le {% now "d/m/Y H:i" %} | Page <pdf:pagenumber>
+    </div>
+</body>
+</html>

@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recherche de Salles - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+    .room-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .room-card:hover {
+        transform: translateY(-10px);
+    }
+    .pulse-green {
+        box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+        animation: pulse-green 2s infinite;
+    }
+    @keyframes pulse-green {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+    }
+    .pulse-red {
+        box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7);
+        animation: pulse-red 2s infinite;
+    }
+    @keyframes pulse-red {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(248, 113, 113, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    
+    <!-- Hero Header -->
+    <div class="glass-card rounded-[2.5rem] shadow-2xl overflow-hidden mb-10 animate-fadeIn relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10 opacity-30"></div>
+        <div class="bg-gradient-to-r from-indigo-700 via-purple-700 to-indigo-800 p-10 md:p-14 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="text-center md:text-left">
+                    <h1 class="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
+                        Trouvez Votre <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200">Salle Idéale</span>
+                    </h1>
+                    <p class="text-indigo-100/80 text-lg font-medium max-w-xl">
+                        Explorez toutes les salles de la faculté, vérifiez leur disponibilité en temps réel et réservez votre créneau en quelques clics.
+                    </p>
+                </div>
+                <div class="hidden lg:block">
+                    <div class="w-32 h-32 bg-white/10 backdrop-blur-2xl rounded-[2rem] border border-white/20 flex items-center justify-center text-white shadow-2xl animate-float">
+                        <i class="fas fa-search-location text-5xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search Filters Form -->
+        <div class="p-8 md:p-10 border-t border-white/10 dark:border-white/5">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <!-- Building -->
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Bâtiment</label>
+                    <div class="relative">
+                        <select name="building" class="w-full pl-10 pr-4 py-4 bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-bold text-gray-700 dark:text-gray-200 appearance-none">
+                            <option value="">Tous les bâtiments</option>
+                            {% for b in buildings %}
+                            <option value="{{ b }}" {% if current_building == b %}selected{% endif %}>{{ b }}</option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-building absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"></i>
+                        <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Type -->
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Type de Salle</label>
+                    <div class="relative">
+                        <select name="type" class="w-full pl-10 pr-4 py-4 bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-bold text-gray-700 dark:text-gray-200 appearance-none">
+                            <option value="">Tous les types</option>
+                            {% for value, label in room_types %}
+                            <option value="{{ value }}" {% if current_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-tags absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"></i>
+                        <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500 pointer-events-none text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Capacity -->
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Capacité Mini.</label>
+                    <div class="relative">
+                        <input type="number" name="min_capacity" value="{{ current_capacity }}" min="1" placeholder="Ex: 30"
+                               class="w-full pl-10 pr-4 py-4 bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-bold text-gray-700 dark:text-gray-200">
+                        <i class="fas fa-users absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-500"></i>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="flex items-end">
+                    <button type="submit" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-200 active:scale-95 flex items-center justify-center gap-3">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mb-12">
+        {% for room in rooms %}
+        <div class="room-card glass-card rounded-[2rem] shadow-xl overflow-hidden flex flex-col group animate-fadeIn" style="animation-delay: {{ forloop.counter0|add:1 }}00ms">
+            <!-- Card Header -->
+            <div class="p-6 pb-4 flex justify-between items-start">
+                <div>
+                    <h3 class="text-2xl font-black text-gray-800 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ room.name }}</h3>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5 mt-1">
+                        <i class="fas fa-map-marker-alt text-indigo-400"></i> {{ room.building }} • Étage {{ room.floor }}
+                    </p>
+                </div>
+                <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-indigo-100">
+                    {{ room.get_room_type_display }}
+                </span>
+            </div>
+
+            <!-- Status Banner -->
+            <div class="px-6 mb-6">
+                {% if room.status_available %}
+                <div class="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800/30 p-4 rounded-2xl flex items-center gap-4 transition-all group-hover:bg-emerald-100/50 dark:group-hover:bg-emerald-900/50">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center pulse-green shadow-sm">
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none mb-1">Disponible</p>
+                        {% if room.status_next %}
+                        <p class="text-xs font-bold text-emerald-800">Suivant: {{ room.status_next.start_datetime|time:"H:i" }}</p>
+                        {% else %}
+                        <p class="text-xs font-bold text-emerald-800">Libre aujourd'hui</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="bg-rose-50 dark:bg-rose-900/30 border border-rose-100 dark:border-rose-800/30 p-4 rounded-2xl flex items-center gap-4 transition-all group-hover:bg-rose-100/50 dark:group-hover:bg-rose-900/50">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center pulse-red shadow-sm">
+                        <div class="w-3 h-3 bg-rose-500 rounded-full"></div>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-rose-600 uppercase tracking-widest leading-none mb-1">Occupée</p>
+                        <p class="text-xs font-bold text-rose-800">Jusqu'à {{ room.status_current.end_datetime|time:"H:i" }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Specs Grid -->
+            <div class="px-6 grid grid-cols-2 gap-4 mb-6">
+                <div class="p-3 bg-gray-50/50 dark:bg-zinc-800/50 rounded-xl border border-gray-100 dark:border-zinc-700">
+                    <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Capacité</p>
+                    <p class="text-sm font-black text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                         <i class="fas fa-users text-gray-400"></i> {{ room.capacity }} Places
+                    </p>
+                </div>
+                <div class="p-3 bg-gray-50/50 dark:bg-zinc-800/50 rounded-xl border border-gray-100 dark:border-zinc-700">
+                    <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Identifiant</p>
+                    <p class="text-sm font-black text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                         <i class="fas fa-fingerprint text-gray-400"></i> #{{ room.id }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Equipments -->
+            <div class="px-6 mb-8 flex-1">
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3">Équipements</p>
+                <div class="flex flex-wrap gap-2">
+                    {% if room.equipment.exists %}
+                        {% for eq in room.equipment.all|slice:":4" %}
+                        <span class="px-2.5 py-1 bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-lg text-[10px] font-bold text-gray-500 dark:text-gray-400 shadow-sm flex items-center gap-1.5">
+                            <i class="fas fa-check-circle text-indigo-300 dark:text-indigo-500"></i> {{ eq.name }}
+                        </span>
+                        {% endfor %}
+                        {% if room.equipment.count > 4 %}
+                        <span class="px-2.5 py-1 bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-lg text-[10px] font-black text-gray-400">+{{ room.equipment.count|add:"-4" }}</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-[10px] text-gray-300 italic">Aucun équipement listé</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="p-6 bg-gray-50/80 dark:bg-zinc-800/80 border-t border-gray-100 dark:border-zinc-700 flex gap-3">
+                <a href="{% url 'room_detail' room.pk %}" class="flex-1 py-3 bg-white dark:bg-zinc-700 hover:bg-indigo-50 dark:hover:bg-zinc-600 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-black uppercase tracking-widest transition-all border border-gray-200 dark:border-zinc-600 shadow-sm text-center">
+                    Détails
+                </a>
+                {% if user.role == 'teacher' or user.role == 'association' %}
+                <a href="{% url 'reservation_create' %}?room={{ room.id }}" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-md shadow-indigo-200 dark:shadow-none text-center">
+                    Réserver
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full py-20 text-center glass-card rounded-[2.5rem]">
+            <div class="w-24 h-24 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300 dark:text-zinc-600 text-4xl">
+                <i class="fas fa-search-minus"></i>
+            </div>
+            <h3 class="text-2xl font-black text-gray-800 dark:text-gray-100 mb-2">Aucune salle trouvée</h3>
+            <p class="text-gray-500 font-medium">Réessayez avec des critères de filtrage différents.</p>
+            <a href="{% url 'public_room_search' %}" class="inline-block mt-8 text-indigo-600 dark:text-indigo-400 font-black uppercase text-xs tracking-widest hover:underline">Réinitialiser les filtres</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center items-center gap-3">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if current_building %}&building={{ current_building }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_capacity %}&min_capacity={{ current_capacity }}{% endif %}"
+           class="w-12 h-12 flex items-center justify-center bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 transition-all">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="w-12 h-12 flex items-center justify-center bg-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-200 cursor-default">
+                {{ num }}
+            </span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}{% if current_building %}&building={{ current_building }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_capacity %}&min_capacity={{ current_capacity }}{% endif %}"
+               class="w-12 h-12 flex items-center justify-center bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 transition-all font-black">
+                {{ num }}
+            </a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if current_building %}&building={{ current_building }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_capacity %}&min_capacity={{ current_capacity }}{% endif %}"
+           class="w-12 h-12 flex items-center justify-center bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 transition-all">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

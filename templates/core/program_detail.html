@@ -1,0 +1,663 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ program.name }} - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+    
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .breadcrumb a {
+        color: #6366f1;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+    
+    .breadcrumb span {
+        color: #9ca3af;
+    }
+    
+    .program-card {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        margin-bottom: 2rem;
+    }
+    
+    .card-header {
+        padding: 2rem;
+        position: relative;
+    }
+    
+    .card-header.master {
+        background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+    }
+    
+    .card-header.licence {
+        background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    }
+    
+    .card-header.doctorat {
+        background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    }
+    
+    .dept-badge {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2rem;
+        color: white;
+        font-weight: 600;
+        font-size: 0.8rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .level-badge {
+        display: inline-block;
+        padding: 0.375rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+    }
+    
+    .level-badge.master {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+    }
+    
+    .level-badge.licence {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+    }
+    
+    .level-badge.doctorat {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+    }
+    
+    .program-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: white;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .program-code {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    
+    .card-body {
+        padding: 2rem;
+    }
+    
+    .actions-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-action.edit {
+        background: #f5f3ff;
+        color: #7c3aed;
+    }
+    
+    .btn-action.edit:hover {
+        background: #ede9fe;
+    }
+    
+    .btn-action.delete {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+    
+    .btn-action.delete:hover {
+        background: #fee2e2;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    .stat-box {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        background: #f9fafb;
+        border-radius: 0.75rem;
+    }
+    
+    .stat-box i {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .stat-box.blue i { color: #3b82f6; }
+    .stat-box.purple i { color: #8b5cf6; }
+    .stat-box.green i { color: #10b981; }
+    .stat-box.yellow i { color: #f59e0b; }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1f2937;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+    
+    .groups-card {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+    
+    .groups-header {
+        padding: 1.25rem 1.5rem;
+        background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .groups-body {
+        padding: 1.5rem;
+    }
+    
+    .groups-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .group-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 0.75rem;
+        border: 1px solid #e5e7eb;
+        transition: all 0.15s ease;
+    }
+    
+    .group-item:hover {
+        background: #eef2ff;
+        border-color: #c7d2fe;
+    }
+    
+    .group-info h4 {
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .group-info p {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin: 0.25rem 0 0 0;
+    }
+    
+    .group-number {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+    
+    .empty-groups {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #9ca3af;
+    }
+    
+    .empty-groups i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Delete Modal */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+    }
+    
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal-box {
+        background: white;
+        border-radius: 1rem;
+        width: 100%;
+        max-width: 420px;
+        margin: 1rem;
+        transform: scale(0.9);
+        transition: transform 0.2s ease;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    }
+    
+    .modal-overlay.active .modal-box {
+        transform: scale(1);
+    }
+    
+    .modal-header {
+        padding: 1.5rem 1.5rem 0;
+        text-align: center;
+    }
+    
+    .modal-icon {
+        width: 64px;
+        height: 64px;
+        background: #fef2f2;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+    
+    .modal-icon i {
+        font-size: 1.75rem;
+        color: #dc2626;
+    }
+    
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .modal-message {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-warning {
+        background: #fef3c7;
+        border: 1px solid #fcd34d;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+        color: #92400e;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .modal-warning i {
+        margin-top: 2px;
+    }
+    
+    .modal-footer {
+        padding: 0 1.5rem 1.5rem;
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .modal-btn {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        border: none;
+        transition: all 0.15s ease;
+    }
+    
+    .modal-btn.cancel {
+        background: #f3f4f6;
+        color: #4b5563;
+    }
+    
+    .modal-btn.cancel:hover {
+        background: #e5e7eb;
+    }
+    
+    .modal-btn.confirm {
+        background: #dc2626;
+        color: white;
+    }
+    
+    .modal-btn.confirm:hover {
+        background: #b91c1c;
+    }
+    
+    /* Dark Mode Overrides */
+    .dark .program-card, .dark .groups-card {
+        background: rgba(39, 39, 42, 0.6);
+        border: 1px solid rgba(63, 63, 70, 0.5);
+    }
+    .dark .program-title {
+        color: #f4f4f5;
+    }
+    .dark .program-code {
+        color: #d4d4d8;
+    }
+    .dark .stat-box {
+        background: #18181b;
+        border: 1px solid rgba(63, 63, 70, 0.5);
+    }
+    .dark .stat-value {
+        color: #f4f4f5;
+    }
+    .dark .stat-label {
+        color: #a1a1aa;
+    }
+    .dark .groups-header {
+        border-bottom: 1px solid rgba(63, 63, 70, 0.5);
+    }
+    .dark .group-item {
+        background: #18181b;
+        border-color: rgba(63, 63, 70, 0.5);
+    }
+    .dark .group-item:hover {
+        background: #27272a;
+        border-color: #52525b;
+    }
+    .dark .group-info h4 {
+        color: #f4f4f5;
+    }
+    .dark .group-info p {
+        color: #a1a1aa;
+    }
+    
+    .dark .btn-action.edit {
+        background: rgba(124, 58, 237, 0.1);
+        color: #a78bfa;
+    }
+    .dark .btn-action.edit:hover {
+        background: rgba(124, 58, 237, 0.2);
+    }
+    
+    .dark .btn-action.delete {
+        background: rgba(220, 38, 38, 0.1);
+        color: #fca5a5;
+    }
+    .dark .btn-action.delete:hover {
+        background: rgba(220, 38, 38, 0.2);
+    }
+    
+    /* Modal */
+    .dark .modal-box {
+        background: #27272a;
+    }
+    .dark .modal-title {
+        color: #f4f4f5;
+    }
+    .dark .modal-message {
+        color: #d4d4d8;
+    }
+    .dark .modal-warning {
+        background: rgba(120, 53, 15, 0.2);
+        border-color: rgba(146, 64, 14, 0.3);
+        color: #fcd34d;
+    }
+    .dark .modal-icon {
+        background: rgba(220, 38, 38, 0.1);
+    }
+    .dark .modal-btn.cancel {
+        background: #3f3f46;
+        color: #d4d4d8;
+    }
+    .dark .modal-btn.cancel:hover {
+        background: #52525b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="{% url 'program_list' %}">
+            <i class="fas fa-graduation-cap"></i> Filières
+        </a>
+        <span>/</span>
+        <span>{{ program.name }}</span>
+    </nav>
+    
+    <!-- Program Card -->
+    <div class="program-card">
+        <!-- Header -->
+        <div class="card-header {{ program.degree_level }}">
+            <span class="dept-badge">{{ program.get_department_display }}</span>
+            <span class="level-badge {{ program.degree_level }}">{{ program.get_degree_level_display }}</span>
+            <h1 class="program-title">{{ program.name }}</h1>
+            <p class="program-code">Code: {{ program.code }}</p>
+        </div>
+        
+        <!-- Body -->
+        <div class="card-body">
+            <!-- Admin Actions -->
+            {% if user.role == 'admin' %}
+            <div class="actions-row">
+                <a href="{% url 'program_update' program.pk %}" class="btn-action edit">
+                    <i class="fas fa-edit"></i> Modifier
+                </a>
+                <button onclick="openDeleteModal()" class="btn-action delete">
+                    <i class="fas fa-trash"></i> Supprimer
+                </button>
+            </div>
+            {% endif %}
+            
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-box blue">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-value">{{ groups.count|default:"0" }}</div>
+                    <div class="stat-label">Groupes</div>
+                </div>
+                <div class="stat-box purple">
+                    <i class="fas fa-user-graduate"></i>
+                    <div class="stat-value">{{ program.capacity|default:"--" }}</div>
+                    <div class="stat-label">Capacité</div>
+                </div>
+                <div class="stat-box green">
+                    <i class="fas fa-building"></i>
+                    <div class="stat-value" style="font-size: 1rem;">{{ program.get_department_display|truncatewords:2 }}</div>
+                    <div class="stat-label">Département</div>
+                </div>
+                <div class="stat-box yellow">
+                    <i class="fas fa-user-tie"></i>
+                    <div class="stat-value" style="font-size: 0.9rem;">{{ program.program_head.user.get_full_name|default:"Non assigné"|truncatewords:2 }}</div>
+                    <div class="stat-label">Chef de Filière</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Groups Card -->
+    <div class="groups-card">
+        <div class="groups-header">
+            <i class="fas fa-layer-group"></i>
+            Groupes de la Filière
+        </div>
+        <div class="groups-body">
+            {% if groups %}
+            <div class="groups-grid">
+                {% for group in groups %}
+                <div class="group-item">
+                    <div class="group-info">
+                        <h4>{{ group.name }}</h4>
+                        <p>{{ group.size|default:"0" }} étudiants</p>
+                    </div>
+                    <div class="group-number">{{ forloop.counter }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-groups">
+                <i class="fas fa-users"></i>
+                <p>Aucun groupe dans cette filière</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-icon">
+                <i class="fas fa-trash-alt"></i>
+            </div>
+            <h3 class="modal-title">Supprimer la filière ?</h3>
+            <p class="modal-message">Cette action est irréversible et supprimera définitivement la filière <strong>{{ program.name }}</strong>.</p>
+        </div>
+        <div class="modal-body">
+            <div class="modal-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Tous les groupes associés ({{ groups.count }}) seront également supprimés.</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeDeleteModal()" class="modal-btn cancel">Annuler</button>
+            <button onclick="confirmDelete()" class="modal-btn confirm">
+                <i class="fas fa-trash"></i> Supprimer
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function openDeleteModal() {
+    document.getElementById('deleteModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function confirmDelete() {
+    fetch(`/core/api/programs/{{ program.pk }}/delete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '{% url "program_list" %}';
+        } else {
+            closeDeleteModal();
+            alert(data.error || 'Erreur lors de la suppression');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        closeDeleteModal();
+        alert('Erreur lors de la suppression');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Close modal on overlay click
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeDeleteModal();
+    }
+});
+</script>
+{% endblock %}

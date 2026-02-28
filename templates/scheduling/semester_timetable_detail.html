@@ -1,0 +1,608 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load scheduling_filters %}
+
+{% block title %}{{ timetable }} - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Grid: Days as ROWS, Hours as COLUMNS */
+.timetable-grid {
+    display: grid;
+    grid-template-columns: 120px repeat(var(--num-slots), minmax(90px, 1fr));
+    gap: 2px;
+    background: #e5e7eb;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.grid-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    padding: 0.75rem 0.5rem;
+    font-weight: 700;
+    text-align: center;
+    font-size: 0.75rem;
+}
+
+.grid-header-time {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.grid-header-time .start {
+    font-size: 0.75rem;
+}
+
+.grid-header-time .end {
+    font-size: 0.625rem;
+    opacity: 0.8;
+}
+
+.grid-day {
+    background: #f8fafc;
+    padding: 1rem 0.75rem;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.875rem;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-right: 2px solid #e5e7eb;
+}
+
+.grid-cell {
+    background: white;
+    padding: 0.375rem;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.cell-empty {
+    color: #d1d5db;
+    font-size: 1.25rem;
+}
+
+/* Entry Card (matching edit page style) */
+.entry-card {
+    width: 100%;
+    height: 100%;
+    min-height: 65px;
+    padding: 0.5rem;
+    border-radius: 0.625rem;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+}
+
+.entry-card:hover {
+    transform: scale(1.02);
+    z-index: 10;
+}
+
+/* Session Type Colors */
+.entry-card.type-cours, .entry-card.type-cm {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border: 2px solid #3b82f6;
+}
+
+.entry-card.type-td {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border: 2px solid #10b981;
+}
+
+.entry-card.type-tp {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+}
+
+.entry-card.type-exam {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 2px solid #ef4444;
+}
+
+/* One-off event modifier */
+.entry-card.event-one_off {
+    border-style: dashed;
+    position: relative;
+}
+
+.entry-card .event-badge {
+    position: absolute;
+    top: 0.2rem;
+    left: 0.2rem;
+    font-size: 0.4rem;
+    font-weight: 800;
+    padding: 0.1rem 0.25rem;
+    border-radius: 0.2rem;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.entry-card .event-badge.badge-exam {
+    background: #ef4444;
+}
+
+.entry-card .event-badge.badge-ponctuelle {
+    background: #8b5cf6;
+}
+.entry-card .subject-code {
+    font-weight: 800;
+    font-size: 0.7rem;
+    color: #1f2937;
+}
+
+.entry-card .subject-name {
+    font-size: 0.55rem;
+    color: #4b5563;
+    margin-top: 0.0625rem;
+    line-height: 1.2;
+}
+
+.entry-card .info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    margin-top: 0.375rem;
+}
+
+.entry-card .room-badge {
+    font-size: 0.5rem;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 0.125rem 0.3rem;
+    border-radius: 0.2rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+}
+
+.entry-card .room-badge i {
+    font-size: 0.45rem;
+    color: #9ca3af;
+}
+
+.entry-card .teacher-avatar {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.entry-card .teacher-avatar:hover {
+    transform: scale(1.15);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.entry-card .teacher-avatar .tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2937;
+    color: white;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.375rem;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 100;
+    font-weight: 500;
+}
+
+.entry-card .teacher-avatar .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1f2937;
+}
+
+.entry-card .teacher-avatar:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Type Badge in Corner */
+.entry-card .type-badge {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.2rem;
+    font-size: 0.45rem;
+    font-weight: 800;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.2rem;
+    color: white;
+}
+
+.type-cours .type-badge, .type-cm .type-badge { background: #3b82f6; }
+.type-td .type-badge { background: #10b981; }
+.type-tp .type-badge { background: #f59e0b; }
+.type-exam .type-badge { background: #ef4444; }
+
+/* Export Dropdown */
+.export-wrapper {
+    position: relative;
+    z-index: 1000;
+}
+
+.export-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    width: 200px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    z-index: 9999;
+}
+
+.export-dropdown a,
+.export-dropdown button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    background: white;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+
+.export-dropdown a:hover,
+.export-dropdown button:hover {
+    background: #f3f4f6;
+}
+
+.export-dropdown .divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 0.25rem 0;
+}
+
+/* Legend Styles */
+.legend-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1.25rem;
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-size: 0.85rem;
+    color: #4b5563;
+    font-weight: 600;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+}
+
+@media print {
+    .no-print { display: none !important; }
+    .timetable-grid { page-break-inside: avoid; }
+    .entry-card .teacher-avatar .tooltip { display: none; }
+}
+
+@media (max-width: 768px) {
+    .grid-header {
+        font-size: 0.65rem;
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .grid-day {
+        font-size: 0.75rem;
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .entry-card .subject-code {
+        font-size: 0.65rem;
+    }
+    
+    .entry-card .subject-name {
+        font-size: 0.5rem;
+    }
+}
+
+/* Dark Mode Overrides */
+.dark .bg-white {
+    background-color: #27272a !important;
+    border-color: rgba(63, 63, 70, 0.5) !important;
+}
+.dark .text-gray-800 {
+    color: #f4f4f5 !important;
+}
+.dark .text-gray-600 {
+    color: #a1a1aa !important;
+}
+.dark .text-gray-500 {
+    color: #71717a !important;
+}
+
+/* Grid Dark Mode */
+.dark .timetable-grid {
+    background: #3f3f46;
+}
+.dark .grid-day {
+    background: #18181b;
+    color: #d4d4d8;
+    border-right-color: #3f3f46;
+}
+.dark .grid-cell {
+    background: #27272a;
+}
+.dark .cell-empty {
+    color: #52525b;
+}
+
+/* Entry Card Dark Mode */
+.dark .entry-card .subject-code {
+    color: #1f2937;
+}
+.dark .entry-card .subject-name {
+    color: #4b5563;
+}
+.dark .entry-card .room-badge {
+    background: rgba(255, 255, 255, 0.9);
+    color: #4b5563;
+}
+
+/* Legend Dark Mode */
+.dark .legend-badge {
+    background: #27272a;
+    color: #d4d4d8;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Export Menu */
+.dark .export-dropdown {
+    background: #27272a;
+    border-color: #3f3f46;
+}
+.dark .export-dropdown a, 
+.dark .export-dropdown button {
+    background: #27272a;
+    color: #d4d4d8;
+}
+.dark .export-dropdown a:hover, 
+.dark .export-dropdown button:hover {
+    background: #3f3f46;
+}
+.dark .export-dropdown .divider {
+    background: #3f3f46;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 no-print">
+        <div>
+            <a href="{% url 'timetable_list' %}" class="text-indigo-600 hover:text-indigo-800 font-medium mb-2 inline-flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+            <h1 class="text-2xl font-black text-gray-800 mt-2">{{ timetable.program.code }} - {{ timetable.get_semester_display }}</h1>
+            <p class="text-gray-500">{{ timetable.program.name }} • {{ timetable.academic_year }}</p>
+        </div>
+        <div class="flex gap-3">
+            {% if user.role == 'admin' %}
+            <a href="{% url 'timetable_edit' timetable.pk %}" class="px-4 py-2 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600 transition-colors flex items-center gap-2">
+                <i class="fas fa-edit"></i>Modifier
+            </a>
+            {% endif %}
+            <div class="export-wrapper">
+                <button onclick="toggleExportMenu()" class="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-download"></i>Exporter
+                </button>
+                <div id="export-menu" class="export-dropdown hidden">
+                    <a href="{% url 'timetable_export' timetable.pk %}?format=pdf">
+                        <i class="fas fa-file-pdf" style="color: #ef4444;"></i> PDF
+                    </a>
+                    <a href="{% url 'timetable_export' timetable.pk %}?format=docx">
+                        <i class="fas fa-file-word" style="color: #3b82f6;"></i> Word (DOCX)
+                    </a>
+                    <button onclick="exportAsImage()">
+                        <i class="fas fa-image" style="color: #10b981;"></i> Image (PNG)
+                    </button>
+                    <div class="divider"></div>
+                    <button onclick="window.print()">
+                        <i class="fas fa-print" style="color: #6b7280;"></i> Imprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Info Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 no-print">
+        <div class="bg-white rounded-xl p-4 shadow">
+            <div class="text-2xl font-black text-indigo-600">{{ total_entries }}</div>
+            <div class="text-sm text-gray-500">Séances/semaine</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow">
+            <div class="text-2xl font-black text-purple-600">{{ timetable.get_semester_display }}</div>
+            <div class="text-sm text-gray-500">Semestre</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow">
+            <div class="text-lg font-black text-emerald-600">{{ timetable.academic_year }}</div>
+            <div class="text-sm text-gray-500">Année universitaire</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow">
+            {% if timetable.is_generated %}
+            <div class="text-lg font-black text-indigo-600"><i class="fas fa-magic"></i> Auto-généré</div>
+            {% elif timetable.is_published %}
+            <div class="text-lg font-black text-emerald-600"><i class="fas fa-check-circle"></i> Publié</div>
+            {% else %}
+            <div class="text-lg font-black text-amber-600"><i class="fas fa-edit"></i> Brouillon</div>
+            {% endif %}
+            <div class="text-sm text-gray-500">Statut</div>
+        </div>
+    </div>
+    
+    <!-- Timetable Grid: Days as ROWS, Hours as COLUMNS -->
+    <div class="bg-white rounded-2xl shadow-lg p-4 overflow-x-auto" id="timetable-container">
+        <div class="timetable-grid" style="--num-slots: {{ time_slots|length }}; min-width: {{ time_slots|length|add:1 }}00px;">
+            <!-- Header Row: Empty corner + Time Slots -->
+            <div class="grid-header"></div>
+            {% for slot in time_slots %}
+            <div class="grid-header">
+                <div class="grid-header-time">
+                    <span class="start">{{ slot.start_time|time:"H:i" }}</span>
+                    <span class="end">{{ slot.end_time|time:"H:i" }}</span>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Day Rows -->
+            {% for day_code, day_name in days %}
+            <div class="grid-day">{{ day_name }}</div>
+            
+            {% for slot in time_slots %}
+            <div class="grid-cell">
+                {% get_entry entry_dict day_code slot.slot_number as entries %}
+                {% if entries %}
+                    {% for entry in entries %}
+                    <div class="entry-card type-{{ entry.session_type }}{% if entry.event_type == 'one_off' %} event-one_off{% endif %}">
+                        {% if entry.is_exam %}
+                        <span class="event-badge badge-exam">EXAM</span>
+                        {% elif entry.event_type == 'one_off' %}
+                        <span class="event-badge badge-ponctuelle">⚡ Ponctuelle</span>
+                        {% endif %}
+                        <span class="type-badge">
+                            {% if entry.session_type == 'exam' %}EXAM{% elif entry.session_type == 'cours' %}CM{% elif entry.session_type == 'td' %}TD{% elif entry.session_type == 'tp' %}TP{% else %}{{ entry.session_type|upper }}{% endif %}
+                        </span>
+                        <div class="subject-code">{{ entry.subject.code }}</div>
+                        <div class="subject-name">{{ entry.subject.name|truncatechars:18 }}</div>
+                        <div class="info">
+                            {% if entry.room %}
+                            <span class="room-badge">
+                                <i class="fas fa-map-marker-alt"></i> {{ entry.room.name }}
+                            </span>
+                            {% endif %}
+                            {% if entry.teacher %}
+                            <span class="teacher-avatar" title="{{ entry.teacher.user.get_full_name }}">
+                                <i class="fas fa-user"></i>
+                                <span class="tooltip">{{ entry.teacher.user.get_full_name }}</span>
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <span class="cell-empty">—</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Legend -->
+    <div class="mt-6 flex flex-wrap justify-center gap-4 no-print">
+        <div class="legend-badge">
+            <div class="legend-color" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); border: 2px solid #3b82f6;"></div>
+            <span>CM — Cours Magistral</span>
+        </div>
+        <div class="legend-badge">
+            <div class="legend-color" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #10b981;"></div>
+            <span>TD — Travaux Dirigés</span>
+        </div>
+        <div class="legend-badge">
+            <div class="legend-color" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b;"></div>
+            <span>TP — Travaux Pratiques</span>
+        </div>
+        <div class="legend-badge">
+            <div class="legend-color" style="background: linear-gradient(135deg, #fee2e2, #fecaca); border: 2px solid #ef4444;"></div>
+            <span>Examen</span>
+        </div>
+        <div class="legend-badge">
+            <div class="legend-color" style="background: #f3f4f6; border: 2px dashed #8b5cf6;"></div>
+            <span>Ponctuelle</span>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+    function toggleExportMenu() {
+        const menu = document.getElementById('export-menu');
+        menu.classList.toggle('hidden');
+    }
+    
+    // Close export menu when clicking outside
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('export-menu');
+        const wrapper = document.querySelector('.export-wrapper');
+        
+        if (menu && wrapper && !wrapper.contains(e.target)) {
+            menu.classList.add('hidden');
+        }
+    });
+
+    function exportAsImage() {
+        const element = document.getElementById('timetable-container');
+        
+        document.body.style.cursor = 'wait';
+        
+        html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        }).then(canvas => {
+            document.body.style.cursor = 'default';
+            
+            const link = document.createElement('a');
+            link.download = '{{ timetable.program.code }}_{{ timetable.get_semester_display }}.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            // Close menu
+            document.getElementById('export-menu').classList.add('hidden');
+        }).catch(err => {
+            document.body.style.cursor = 'default';
+            console.error(err);
+            alert("Erreur lors de la génération de l'image.");
+        });
+    }
+</script>
+{% endblock %}

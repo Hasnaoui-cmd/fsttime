@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inscription - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<!-- Professional Typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================
+   HOMEPAGE - BIGGER & BOLDER TYPOGRAPHY
+   ============================================ */
+
+/* Global Typography */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Page Container */
+.homepage {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 50%, #f3e8ff 100%);
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+/* Top Badge */
+.role-badge {
+    display: inline-block;
+    background: white;
+    padding: 0.75rem 2rem;
+    border-radius: 2rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Main Hero Title - MUCH BIGGER */
+.hero-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 4.5rem;
+    font-weight: 900;
+    color: #1f2937;
+    margin: 0 0 1.5rem 0;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+}
+
+.hero-title .highlight {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Subtitle - BIGGER */
+.hero-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #6b7280;
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto 4rem auto;
+}
+
+/* Cards Container */
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto 4rem auto;
+    padding: 0 2rem;
+}
+
+/* Role Card - Enhanced */
+.role-card {
+    background: white;
+    border-radius: 2rem;
+    padding: 3rem 2rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.role-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* Icon Container */
+.card-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 2rem;
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.card-icon i {
+    font-size: 3rem;
+    color: white;
+}
+
+/* Card Colors */
+.role-card.student .card-icon {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.role-card.teacher .card-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.role-card.association .card-icon {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+}
+
+.role-card:hover .card-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Card Title - MUCH BIGGER & BOLDER */
+.card-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #1f2937;
+    margin: 0 0 1.5rem 0;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+}
+
+/* Card Description - BIGGER */
+.card-description {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #6b7280;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    min-height: 100px;
+}
+
+/* Card Button - BIGGER & BOLDER */
+.card-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 1.25rem 2.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: white;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: none;
+    border-radius: 1rem;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    transition: all 0.3s;
+}
+
+.role-card.student .card-button {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.role-card.teacher .card-button {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.role-card.association .card-button {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+}
+
+.card-button:hover {
+    transform: translateY(-3px);
+}
+
+.role-card.student .card-button:hover {
+    box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5);
+}
+
+.role-card.teacher .card-button:hover {
+    box-shadow: 0 12px 30px rgba(16, 185, 129, 0.5);
+}
+
+.role-card.association .card-button:hover {
+    box-shadow: 0 12px 30px rgba(139, 92, 246, 0.5);
+}
+
+.card-button i {
+    font-size: 1.25rem;
+}
+
+/* Bottom Section */
+.bottom-section {
+    text-align: center;
+    padding: 2rem;
+}
+
+.bottom-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #9ca3af;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.login-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    background: #1f2937;
+    border: none;
+    border-radius: 1rem;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.3s;
+}
+
+.login-button:hover {
+    background: #111827;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .hero-title {
+        font-size: 3.5rem;
+    }
+    
+    .cards-container {
+        grid-template-columns: 1fr;
+        max-width: 600px;
+        gap: 2rem;
+    }
+    
+    .card-title {
+        font-size: 1.75rem;
+    }
+    
+    .card-description {
+        font-size: 1.05rem;
+        min-height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.05rem;
+    }
+    
+    .cards-container {
+        padding: 0 1rem;
+    }
+    
+    .role-card {
+        padding: 2rem 1.5rem;
+    }
+    
+    .card-icon {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .card-icon i {
+        font-size: 2.5rem;
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+    }
+    
+    .card-description {
+        font-size: 1rem;
+    }
+    
+    .card-button {
+        font-size: 1rem;
+        padding: 1rem 2rem;
+    }
+    .card-button {
+        font-size: 1rem;
+        padding: 1rem 2rem;
+    }
+}
+
+/* ==========================================
+   DARK MODE SUPPORT
+   ========================================== */
+.dark .homepage {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+}
+
+.dark .role-badge {
+    background: rgba(30, 41, 59, 0.8);
+    color: #e2e8f0;
+}
+
+.dark .hero-title {
+    color: #f8fafc;
+}
+
+.dark .hero-subtitle {
+    color: #cbd5e1;
+}
+
+.dark .role-card {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.dark .card-title {
+    color: #f1f5f9;
+}
+
+.dark .card-description {
+    color: #94a3b8;
+}
+
+.dark .bottom-text {
+    color: #cbd5e1;
+}
+
+.dark .login-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .login-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="homepage">
+    
+    <!-- Top Badge -->
+    <div class="role-badge">
+        <i class="fas fa-sparkles" style="color: #f59e0b; margin-right: 0.5rem;"></i>
+        Choisissez Votre Rôle
+    </div>
+    
+    <!-- Hero Section -->
+    <h1 class="hero-title">
+        Prêt à nous <span class="highlight">Rejoindre</span> ?
+    </h1>
+    
+    <p class="hero-subtitle">
+        Créez votre compte en quelques secondes et commencez à<br>
+        optimiser votre temps.
+    </p>
+    
+    <!-- Role Cards -->
+    <div class="cards-container">
+        
+        <!-- Student Card -->
+        <div class="role-card student">
+            <div class="card-icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <h2 class="card-title">Étudiant</h2>
+            <p class="card-description">
+                Accédez à vos cours, examens et notifications en temps réel pour ne plus rien manquer.
+            </p>
+            <a href="{% url 'register_student' %}" class="card-button">
+                <span>S'inscrire</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <!-- Teacher Card -->
+        <div class="role-card teacher">
+            <div class="card-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h2 class="card-title">Enseignant</h2>
+            <p class="card-description">
+                Gérez vos séances, visualisez votre charge horaire et réservez vos salles en un clic.
+            </p>
+            <a href="{% url 'register_teacher' %}" class="card-button">
+                <span>S'inscrire</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <!-- Association Card -->
+        <div class="role-card association">
+            <div class="card-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h2 class="card-title">Association</h2>
+            <p class="card-description">
+                Organisez vos événements et réservez les espaces nécessaires pour faire vivre votre club.
+            </p>
+            <a href="{% url 'register_association' %}" class="card-button">
+                <span>S'inscrire</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+    </div>
+    
+    <!-- Bottom Login Section -->
+    <div class="bottom-section">
+        <p class="bottom-text">Déjà inscrit ?</p>
+        <a href="{% url 'login' %}" class="login-button">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Se Connecter</span>
+        </a>
+    </div>
+    
+</div>
+{% endblock %}

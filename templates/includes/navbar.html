@@ -1,0 +1,801 @@
+<!-- Navigation Bar -->
+<nav class="navbar" id="mainNavbar" role="navigation" aria-label="Navigation principale">
+    <div class="navbar-container">
+        <!-- Logo -->
+        <a href="{% url 'home' %}" class="navbar-logo" aria-label="FSTTIME - Accueil">
+            <span class="logo-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+            </span>
+            <span class="logo-text">FST<span class="logo-accent">TIME</span></span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <div class="navbar-menu" id="navbarMenu">
+            <ul class="navbar-nav">
+                <!-- Accueil - All Users -->
+                <li class="nav-item">
+                    <a href="{% url 'home' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                        <i class="fas fa-home"></i>
+                        <span>Accueil</span>
+                    </a>
+                </li>
+
+                {% if user.is_authenticated %}
+                    <!-- Dashboard - All Authenticated Users -->
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard' %}" class="nav-link {% if 'dashboard' in request.path %}active{% endif %}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Tableau de Bord</span>
+                        </a>
+                    </li>
+
+                    {% if user.role == 'admin' %}
+                    <!-- ========== ADMIN NAVBAR ========== -->
+                    <!-- Emplois du Temps Dropdown -->
+                    <li class="nav-item has-dropdown">
+                        <button class="nav-link dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Emplois du Temps</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li role="menuitem">
+                                <a href="{% url 'timetable_list' %}" class="dropdown-link">
+                                    <i class="fas fa-list"></i>
+                                    <span>Tous les Emplois</span>
+                                </a>
+                            </li>
+                            <li role="menuitem">
+                                <a href="{% url 'admin_teacher_timetable' %}" class="dropdown-link">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                    <span>Emploi par Enseignant</span>
+                                </a>
+                            </li>
+                            <li role="menuitem">
+                                <a href="{% url 'timetable_create' %}" class="dropdown-link">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>Créer un Emploi</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Association Reservations -->
+                    <li class="nav-item">
+                        <a href="{% url 'association_list' %}" class="nav-link {% if 'associations' in request.path %}active{% endif %}">
+                            <i class="fas fa-users"></i>
+                            <span>Associations</span>
+                        </a>
+                    </li>
+
+                    <!-- Réservations Dropdown -->
+                    <li class="nav-item has-dropdown">
+                        <button class="nav-link dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-bookmark"></i>
+                            <span>Réservations</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li role="menuitem">
+                                <a href="{% url 'reservation_list' %}" class="dropdown-link">
+                                    <i class="fas fa-tasks"></i>
+                                    <span>Toutes les Réservations</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Salles -->
+                    <li class="nav-item">
+                        <a href="{% url 'room_list' %}" class="nav-link {% if 'rooms' in request.path %}active{% endif %}">
+                            <i class="fas fa-door-open"></i>
+                            <span>Salles</span>
+                        </a>
+                    </li>
+
+                    <!-- Filières -->
+                    <li class="nav-item">
+                        <a href="{% url 'program_list' %}" class="nav-link {% if 'programs' in request.path %}active{% endif %}">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Filières</span>
+                        </a>
+                    </li>
+
+                    {% elif user.role == 'student' %}
+                    <!-- ========== STUDENT NAVBAR ========== -->
+                    <!-- Mon Emploi du Temps -->
+                    <li class="nav-item">
+                        <a href="{% url 'my_timetable' %}" class="nav-link {% if 'my-timetable' in request.path %}active{% endif %}">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Mon Emploi du Temps</span>
+                        </a>
+                    </li>
+
+                    <!-- Salles -->
+                    <li class="nav-item">
+                        <a href="{% url 'room_list' %}" class="nav-link {% if 'rooms' in request.path %}active{% endif %}">
+                            <i class="fas fa-door-open"></i>
+                            <span>Salles</span>
+                        </a>
+                    </li>
+
+                    <!-- Filières -->
+                    <li class="nav-item">
+                        <a href="{% url 'program_list' %}" class="nav-link {% if 'programs' in request.path %}active{% endif %}">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Filières</span>
+                        </a>
+                    </li>
+
+                    {% elif user.role == 'teacher' %}
+                    <!-- ========== TEACHER NAVBAR ========== -->
+                    <!-- Emplois du Temps Dropdown -->
+                    <li class="nav-item has-dropdown">
+                        <button class="nav-link dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Emplois du Temps</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li role="menuitem">
+                                <a href="{% url 'my_timetable' %}" class="dropdown-link">
+                                    <i class="fas fa-user-clock"></i>
+                                    <span>Mon Emploi du Temps</span>
+                                </a>
+                            </li>
+                            <li role="menuitem">
+                                <a href="{% url 'timetable_list' %}" class="dropdown-link">
+                                    <i class="fas fa-list"></i>
+                                    <span>Tous les Emplois</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Mes Réservations Dropdown -->
+                    <li class="nav-item has-dropdown">
+                        <button class="nav-link dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-bookmark"></i>
+                            <span>Mes Réservations</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li role="menuitem">
+                                <a href="{% url 'reservation_list' %}" class="dropdown-link">
+                                    <i class="fas fa-list-alt"></i>
+                                    <span>Mes Réservations</span>
+                                </a>
+                            </li>
+                            <li role="menuitem">
+                                <a href="{% url 'teacher_reservation_create' %}" class="dropdown-link">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>Nouvelle Réservation</span>
+                                </a>
+                            </li>
+                            <li role="menuitem">
+                                <a href="{% url 'unavailability_list' %}" class="dropdown-link">
+                                    <i class="fas fa-calendar-times"></i>
+                                    <span>Mes Indisponibilités</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Salles -->
+                    <li class="nav-item">
+                        <a href="{% url 'room_list' %}" class="nav-link {% if 'rooms' in request.path %}active{% endif %}">
+                            <i class="fas fa-door-open"></i>
+                            <span>Salles</span>
+                        </a>
+                    </li>
+
+                    <!-- Filières -->
+                    <li class="nav-item">
+                        <a href="{% url 'program_list' %}" class="nav-link {% if 'programs' in request.path %}active{% endif %}">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Filières</span>
+                        </a>
+                    </li>
+
+                    {% elif user.role == 'association' %}
+                    <!-- ========== ASSOCIATION NAVBAR ========== -->
+                    <!-- Emplois du Temps Dropdown -->
+                    <li class="nav-item has-dropdown">
+                        <button class="nav-link dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Emplois du Temps</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li role="menuitem">
+                                <a href="{% url 'timetable_list' %}" class="dropdown-link">
+                                    <i class="fas fa-list"></i>
+                                    <span>Tous les Emplois</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Mes Réservations Dropdown -->
+                    <li class="nav-item has-dropdown">
+                        <button class="nav-link dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-bookmark"></i>
+                            <span>Mes Réservations</span>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li role="menuitem">
+                                <a href="{% url 'reservation_list' %}" class="dropdown-link">
+                                    <i class="fas fa-list-alt"></i>
+                                    <span>Mes Réservations</span>
+                                </a>
+                            </li>
+                            <li role="menuitem">
+                                <a href="{% url 'reservation_create' %}" class="dropdown-link">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>Nouvelle Réservation</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Salles -->
+                    <li class="nav-item">
+                        <a href="{% url 'room_list' %}" class="nav-link {% if 'rooms' in request.path %}active{% endif %}">
+                            <i class="fas fa-door-open"></i>
+                            <span>Salles</span>
+                        </a>
+                    </li>
+
+                    <!-- Filières -->
+                    <li class="nav-item">
+                        <a href="{% url 'program_list' %}" class="nav-link {% if 'programs' in request.path %}active{% endif %}">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Filières</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                {% else %}
+                <!-- ========== NON-AUTHENTICATED USER ========== -->
+                <!-- Emplois du Temps -->
+                <li class="nav-item">
+                    <a href="{% url 'timetable_list' %}" class="nav-link {% if 'timetables' in request.path %}active{% endif %}">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Emplois du Temps</span>
+                    </a>
+                </li>
+
+                <!-- Salles -->
+                <li class="nav-item">
+                    <a href="{% url 'room_list' %}" class="nav-link {% if 'rooms' in request.path %}active{% endif %}">
+                        <i class="fas fa-door-open"></i>
+                        <span>Salles</span>
+                    </a>
+                </li>
+
+                <!-- Filières -->
+                <li class="nav-item">
+                    <a href="{% url 'program_list' %}" class="nav-link {% if 'programs' in request.path %}active{% endif %}">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Filières</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Right Side: User Menu & Mobile Toggle -->
+        <div class="navbar-actions">
+            {% if user.is_authenticated %}
+            <!-- Theme Toggle Button -->
+            <button id="themeToggle" class="nav-icon-btn theme-toggle-btn" aria-label="Toggle Dark Mode" title="Changer le thème">
+                <i class="fas fa-sun theme-icon-light"></i>
+                <i class="fas fa-moon theme-icon-dark"></i>
+            </button>
+            
+            <!-- Notification Bell -->
+            <a href="{% url 'notification_list' %}" class="notification-bell nav-icon-btn" id="notificationBell" aria-label="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+            </a>
+            
+            <!-- User Profile Dropdown -->
+            <div class="nav-item has-dropdown user-dropdown">
+                <button class="user-menu-btn" aria-expanded="false" aria-haspopup="true">
+                    <div class="user-avatar">
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                        {% else %}
+                        <span class="avatar-initials">{{ user.username|slice:":1"|upper }}</span>
+                        {% endif %}
+                    </div>
+                    <span class="user-name">{{ user.username }}</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                    <li class="dropdown-user-info">
+                        <span class="dropdown-user-name">{{ user.get_full_name|default:user.username }}</span>
+                        <span class="dropdown-user-role">{{ user.get_role_display }}</span>
+                    </li>
+                    <li class="dropdown-divider" role="separator"></li>
+                    <li role="menuitem">
+                        <a href="{% url 'dashboard' %}" class="dropdown-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Tableau de Bord</span>
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <a href="{% url 'profile' %}" class="dropdown-link">
+                            <i class="fas fa-user"></i>
+                            <span>Mon Profil</span>
+                        </a>
+                    </li>
+                    <li class="dropdown-divider" role="separator"></li>
+                    <li role="menuitem">
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-link dropdown-link-danger" style="width: 100%; border: none; background: transparent; cursor: pointer; text-align: left;">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Déconnexion</span>
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            {% else %}
+            <!-- Theme Toggle Button (for guests) -->
+            <button id="themeToggleGuest" class="nav-icon-btn theme-toggle-btn" aria-label="Toggle Dark Mode" title="Changer le thème">
+                <i class="fas fa-sun theme-icon-light"></i>
+                <i class="fas fa-moon theme-icon-dark"></i>
+            </button>
+            
+            <!-- Login/Register Buttons -->
+            <div class="auth-buttons">
+                <a href="{% url 'login' %}" class="btn btn-ghost">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Connexion</span>
+                </a>
+                <a href="{% url 'register' %}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Inscription</span>
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Drawer -->
+    <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+        <div class="mobile-menu-overlay" id="mobileOverlay"></div>
+        <div class="mobile-menu-drawer">
+            <div class="mobile-menu-header">
+                <span class="logo-text">FST<span class="logo-accent">TIME</span></span>
+                <button class="mobile-close" id="mobileClose" aria-label="Fermer le menu">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <nav class="mobile-nav">
+                <ul class="mobile-nav-list">
+                    <!-- Accueil - All Users -->
+                    <li class="mobile-nav-item">
+                        <a href="{% url 'home' %}" class="mobile-nav-link {% if request.path == '/' %}active{% endif %}">
+                            <i class="fas fa-home"></i>
+                            <span>Accueil</span>
+                        </a>
+                    </li>
+
+                    {% if user.is_authenticated %}
+                        <!-- Dashboard - All Authenticated Users -->
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'dashboard' %}" class="mobile-nav-link {% if 'dashboard' in request.path %}active{% endif %}">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Tableau de Bord</span>
+                            </a>
+                        </li>
+
+                        {% if user.role == 'admin' %}
+                        <!-- ========== ADMIN MOBILE MENU ========== -->
+                        <li class="mobile-nav-item has-submenu">
+                            <button class="mobile-nav-link mobile-submenu-toggle">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Emplois du Temps</span>
+                                <i class="fas fa-chevron-right submenu-arrow"></i>
+                            </button>
+                            <ul class="mobile-submenu">
+                                <li><a href="{% url 'timetable_list' %}"><i class="fas fa-list"></i> Tous les Emplois</a></li>
+                                <li><a href="{% url 'admin_teacher_timetable' %}"><i class="fas fa-chalkboard-teacher"></i> Emploi par Enseignant</a></li>
+                                <li><a href="{% url 'timetable_create' %}"><i class="fas fa-plus-circle"></i> Créer</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'association_list' %}" class="mobile-nav-link">
+                                <i class="fas fa-users"></i>
+                                <span>Associations</span>
+                            </a>
+                        </li>
+
+                        <li class="mobile-nav-item has-submenu">
+                            <button class="mobile-nav-link mobile-submenu-toggle">
+                                <i class="fas fa-bookmark"></i>
+                                <span>Réservations</span>
+                                <i class="fas fa-chevron-right submenu-arrow"></i>
+                            </button>
+                            <ul class="mobile-submenu">
+                                <li><a href="{% url 'reservation_list' %}"><i class="fas fa-tasks"></i> Toutes</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'room_list' %}" class="mobile-nav-link">
+                                <i class="fas fa-door-open"></i>
+                                <span>Salles</span>
+                            </a>
+                        </li>
+
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'program_list' %}" class="mobile-nav-link">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>Filières</span>
+                            </a>
+                        </li>
+
+                        {% elif user.role == 'student' %}
+                        <!-- ========== STUDENT MOBILE MENU ========== -->
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'my_timetable' %}" class="mobile-nav-link">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Mon Emploi du Temps</span>
+                            </a>
+                        </li>
+
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'room_list' %}" class="mobile-nav-link">
+                                <i class="fas fa-door-open"></i>
+                                <span>Salles</span>
+                            </a>
+                        </li>
+
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'program_list' %}" class="mobile-nav-link">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>Filières</span>
+                            </a>
+                        </li>
+
+                        {% elif user.role == 'teacher' %}
+                        <!-- ========== TEACHER MOBILE MENU ========== -->
+                        <li class="mobile-nav-item has-submenu">
+                            <button class="mobile-nav-link mobile-submenu-toggle">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Emplois du Temps</span>
+                                <i class="fas fa-chevron-right submenu-arrow"></i>
+                            </button>
+                            <ul class="mobile-submenu">
+                                <li><a href="{% url 'my_timetable' %}"><i class="fas fa-user-clock"></i> Mon Emploi</a></li>
+                                <li><a href="{% url 'timetable_list' %}"><i class="fas fa-list"></i> Tous</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="mobile-nav-item has-submenu">
+                            <button class="mobile-nav-link mobile-submenu-toggle">
+                                <i class="fas fa-bookmark"></i>
+                                <span>Mes Réservations</span>
+                                <i class="fas fa-chevron-right submenu-arrow"></i>
+                            </button>
+                            <ul class="mobile-submenu">
+                                <li><a href="{% url 'reservation_list' %}"><i class="fas fa-list-alt"></i> Mes Réservations</a></li>
+                                <li><a href="{% url 'teacher_reservation_create' %}"><i class="fas fa-plus-circle"></i> Nouvelle</a></li>
+                                <li><a href="{% url 'unavailability_list' %}"><i class="fas fa-calendar-times"></i> Indisponibilités</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'room_list' %}" class="mobile-nav-link">
+                                <i class="fas fa-door-open"></i>
+                                <span>Salles</span>
+                            </a>
+                        </li>
+
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'program_list' %}" class="mobile-nav-link">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>Filières</span>
+                            </a>
+                        </li>
+
+                        {% elif user.role == 'association' %}
+                        <!-- ========== ASSOCIATION MOBILE MENU ========== -->
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'timetable_list' %}" class="mobile-nav-link">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Emplois du Temps</span>
+                            </a>
+                        </li>
+
+                        <li class="mobile-nav-item has-submenu">
+                            <button class="mobile-nav-link mobile-submenu-toggle">
+                                <i class="fas fa-bookmark"></i>
+                                <span>Mes Réservations</span>
+                                <i class="fas fa-chevron-right submenu-arrow"></i>
+                            </button>
+                            <ul class="mobile-submenu">
+                                <li><a href="{% url 'reservation_list' %}"><i class="fas fa-list-alt"></i> Mes Réservations</a></li>
+                                <li><a href="{% url 'reservation_create' %}"><i class="fas fa-plus-circle"></i> Nouvelle</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'room_list' %}" class="mobile-nav-link">
+                                <i class="fas fa-door-open"></i>
+                                <span>Salles</span>
+                            </a>
+                        </li>
+
+                        <li class="mobile-nav-item">
+                            <a href="{% url 'program_list' %}" class="mobile-nav-link">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>Filières</span>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                    {% else %}
+                    <!-- ========== NON-AUTHENTICATED MOBILE MENU ========== -->
+                    <li class="mobile-nav-item">
+                        <a href="{% url 'timetable_list' %}" class="mobile-nav-link">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Emplois du Temps</span>
+                        </a>
+                    </li>
+
+                    <li class="mobile-nav-item">
+                        <a href="{% url 'room_list' %}" class="mobile-nav-link">
+                            <i class="fas fa-door-open"></i>
+                            <span>Salles</span>
+                        </a>
+                    </li>
+
+                    <li class="mobile-nav-item">
+                        <a href="{% url 'program_list' %}" class="mobile-nav-link">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Filières</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                {% if user.is_authenticated %}
+                <div class="mobile-user-section">
+                    <div class="mobile-user-info">
+                        <div class="user-avatar">
+                            {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                            {% else %}
+                            <span class="avatar-initials">{{ user.username|slice:":1"|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="mobile-user-details">
+                            <span class="mobile-user-name">{{ user.username }}</span>
+                            <span class="mobile-user-role">{{ user.get_role_display }}</span>
+                        </div>
+                    </div>
+                    <div class="mobile-user-actions">
+                        <a href="{% url 'profile' %}" class="mobile-action-link">
+                            <i class="fas fa-user"></i> Profil
+                        </a>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="mobile-action-link mobile-action-danger" style="width: 100%; border: none; background: transparent; cursor: pointer; text-align: left;">
+                                <i class="fas fa-sign-out-alt"></i> Déconnexion
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="mobile-auth-buttons">
+                    <a href="{% url 'login' %}" class="btn btn-ghost btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Connexion
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-primary btn-block">
+                        <i class="fas fa-user-plus"></i> Inscription
+                    </a>
+                </div>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+</nav>
+
+<!-- Navbar JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ===== Mobile Menu Toggle =====
+    const mobileToggle = document.getElementById('mobileToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileClose = document.getElementById('mobileClose');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const body = document.body;
+
+    function openMobileMenu() {
+        mobileMenu.classList.add('active');
+        mobileToggle.setAttribute('aria-expanded', 'true');
+        mobileMenu.setAttribute('aria-hidden', 'false');
+        body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    function closeMobileMenu() {
+        mobileMenu.classList.remove('active');
+        mobileToggle.setAttribute('aria-expanded', 'false');
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        body.style.overflow = ''; // Restore scrolling
+    }
+
+    // Toggle mobile menu
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', function() {
+            if (mobileMenu.classList.contains('active')) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        });
+    }
+
+    // Close button
+    if (mobileClose) {
+        mobileClose.addEventListener('click', closeMobileMenu);
+    }
+
+    // Close when clicking overlay
+    if (mobileOverlay) {
+        mobileOverlay.addEventListener('click', closeMobileMenu);
+    }
+
+    // Close menu when clicking a link
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link, .mobile-action-link');
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            // Delay to allow navigation
+            setTimeout(closeMobileMenu, 200);
+        });
+    });
+
+    // ===== Desktop Dropdown Menus =====
+    const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+    
+    dropdownToggles.forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const parent = this.closest('.has-dropdown');
+            const isOpen = parent.classList.contains('active');
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.has-dropdown.active').forEach(item => {
+                if (item !== parent) {
+                    item.classList.remove('active');
+                    item.querySelector('.dropdown-toggle').setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Toggle current dropdown
+            if (isOpen) {
+                parent.classList.remove('active');
+                this.setAttribute('aria-expanded', 'false');
+            } else {
+                parent.classList.add('active');
+                this.setAttribute('aria-expanded', 'true');
+            }
+        });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.has-dropdown')) {
+            document.querySelectorAll('.has-dropdown.active').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.dropdown-toggle').setAttribute('aria-expanded', 'false');
+            });
+        }
+    });
+
+    // ===== Mobile Dropdown Accordions =====
+    const mobileDropdownToggles = document.querySelectorAll('.mobile-dropdown-toggle');
+    
+    mobileDropdownToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const parent = this.closest('.mobile-nav-item');
+            const content = parent.querySelector('.mobile-dropdown-content');
+            const isOpen = parent.classList.contains('active');
+            
+            // Toggle current dropdown
+            if (isOpen) {
+                parent.classList.remove('active');
+                this.setAttribute('aria-expanded', 'false');
+                content.style.maxHeight = null;
+            } else {
+                parent.classList.add('active');
+                this.setAttribute('aria-expanded', 'true');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        });
+    });
+
+    // ===== Close mobile menu on window resize =====
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            if (window.innerWidth > 1024) {
+                closeMobileMenu();
+            }
+        }, 250);
+    });
+
+    // ===== Escape key to close menus =====
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeMobileMenu();
+            // Close desktop dropdowns
+            document.querySelectorAll('.has-dropdown.active').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.dropdown-toggle').setAttribute('aria-expanded', 'false');
+            });
+        }
+    });
+
+    // ===== Notification Badge Update (if notifications exist) =====
+    const notificationBadge = document.getElementById('notificationBadge');
+    if (notificationBadge) {
+        // Fetch unread notification count
+        fetch('/notifications/api/unread-count/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.count > 0) {
+                    notificationBadge.textContent = data.count > 99 ? '99+' : data.count;
+                    notificationBadge.style.display = 'flex';
+                } else {
+                    notificationBadge.style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error fetching notification count:', error));
+    }
+
+    // ===== Theme Toggle Logic =====
+    const themeToggle = document.getElementById('themeToggle');
+    const themeToggleGuest = document.getElementById('themeToggleGuest');
+    
+    function toggleTheme() {
+        const html = document.documentElement;
+        const isDark = html.classList.contains('dark');
+        
+        if (isDark) {
+            html.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        } else {
+            html.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+    
+    // Attach event listeners to both toggle buttons (authenticated and guest)
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+    if (themeToggleGuest) {
+        themeToggleGuest.addEventListener('click', toggleTheme);
+    }
+});
+</script>
+

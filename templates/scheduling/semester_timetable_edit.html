@@ -1,0 +1,1380 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load scheduling_filters %}
+
+{% block title %}Modifier - {{ timetable }} - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ================================ */
+    /* DRAG-DROP TIMETABLE EDITOR      */
+    /* ================================ */
+
+    .editor-container {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 1.5rem;
+        min-height: calc(100vh - 200px);
+    }
+
+    /* Subject Sidebar */
+    .subject-sidebar {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 1.25rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+
+    .sidebar-title {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #6b7280;
+        margin-bottom: 1rem;
+    }
+
+    .subject-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+        max-height: 65vh;
+        overflow-y: auto;
+    }
+
+    .subject-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 0.875rem;
+        padding: 0.875rem;
+        cursor: grab;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+    }
+
+    .subject-card:hover {
+        border-color: #818cf8;
+        box-shadow: 0 4px 12px rgba(129, 140, 248, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .subject-card:active {
+        cursor: grabbing;
+        transform: scale(0.98);
+    }
+
+    .subject-card.dragging {
+        opacity: 0.5;
+        transform: scale(0.95);
+    }
+
+    .subject-card .code {
+        font-weight: 800;
+        font-size: 0.8rem;
+        color: #4f46e5;
+        margin-bottom: 0.125rem;
+    }
+
+    .subject-card .name {
+        font-size: 0.65rem;
+        color: #64748b;
+        line-height: 1.3;
+    }
+
+    .subject-card .meta {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        margin-top: 0.375rem;
+    }
+
+    /* Timetable Grid */
+    .timetable-area {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 1.25rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow-x: auto;
+    }
+
+    /* Grid: Days as ROWS, Hours as COLUMNS */
+    .grid-container {
+        display: grid;
+        grid-template-columns: 100px repeat(var(--num-slots), minmax(85px, 1fr));
+        gap: 2px;
+        background: #e5e7eb;
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .grid-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        padding: 0.625rem 0.375rem;
+        font-weight: 700;
+        text-align: center;
+        font-size: 0.7rem;
+    }
+
+    .grid-header-time {
+        display: flex;
+        flex-direction: column;
+        gap: 0.0625rem;
+    }
+
+    .grid-header-time .start {
+        font-size: 0.7rem;
+    }
+
+    .grid-header-time .end {
+        font-size: 0.6rem;
+        opacity: 0.8;
+    }
+
+    .grid-day {
+        background: #f8fafc;
+        padding: 0.875rem 0.5rem;
+        text-align: center;
+        font-weight: 800;
+        font-size: 0.8rem;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        border-right: 2px solid #e5e7eb;
+    }
+
+    .grid-cell {
+        background: white;
+        min-height: 70px;
+        padding: 0.375rem;
+        position: relative;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .grid-cell.drop-zone {
+        background: rgba(129, 140, 248, 0.1);
+        border: 2px dashed #818cf8;
+    }
+
+    .grid-cell.drop-zone-active {
+        background: rgba(129, 140, 248, 0.2);
+        border-color: #4f46e5;
+    }
+
+    .grid-cell.occupied {
+        padding: 0;
+    }
+
+    /* Entry Card (in grid) */
+    .entry-card {
+        width: 100%;
+        height: 100%;
+        min-height: 65px;
+        padding: 0.5rem;
+        border-radius: 0.625rem;
+        cursor: grab;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        position: relative;
+    }
+
+    .entry-card:hover {
+        transform: scale(1.02);
+        z-index: 10;
+    }
+
+    .entry-card:active {
+        cursor: grabbing;
+    }
+
+    .entry-card.dragging {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+
+    /* Session Type Colors */
+    .entry-card.type-cours,
+    .entry-card.type-cm {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border: 2px solid #3b82f6;
+    }
+
+    .entry-card.type-td {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border: 2px solid #10b981;
+    }
+
+    .entry-card.type-tp {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #f59e0b;
+    }
+
+    .entry-card .subject-code {
+        font-weight: 800;
+        font-size: 0.7rem;
+        color: #1f2937;
+    }
+
+    .entry-card .subject-name {
+        font-size: 0.55rem;
+        color: #4b5563;
+        margin-top: 0.0625rem;
+        line-height: 1.2;
+    }
+
+    .entry-card .info {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.375rem;
+        margin-top: 0.375rem;
+    }
+
+    .entry-card .room-badge {
+        font-size: 0.5rem;
+        background: white;
+        padding: 0.125rem 0.3rem;
+        border-radius: 0.2rem;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 0.125rem;
+    }
+
+    .entry-card .teacher-avatar {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-size: 0.45rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .entry-card .type-badge {
+        position: absolute;
+        top: 0.2rem;
+        right: 0.2rem;
+        font-size: 0.45rem;
+        font-weight: 800;
+        padding: 0.1rem 0.3rem;
+        border-radius: 0.2rem;
+        color: white;
+    }
+
+    .type-cours .type-badge,
+    .type-cm .type-badge {
+        background: #3b82f6;
+    }
+
+    .type-td .type-badge {
+        background: #10b981;
+    }
+
+    .type-tp .type-badge {
+        background: #f59e0b;
+    }
+
+    /* Delete button */
+    .entry-card .delete-btn {
+        position: absolute;
+        top: 0.2rem;
+        left: 0.2rem;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        font-size: 0.5rem;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+    }
+
+    .entry-card:hover .delete-btn {
+        display: flex;
+    }
+
+    .delete-btn:hover {
+        background: #dc2626;
+        transform: scale(1.1);
+    }
+
+    /* Empty cell placeholder */
+    .empty-placeholder {
+        color: #d1d5db;
+        font-size: 1.25rem;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-backdrop.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        width: 90%;
+        max-width: 420px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        animation: modalIn 0.3s ease;
+    }
+
+    @keyframes modalIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #374151;
+        background: white;
+        transition: border-color 0.2s;
+    }
+
+    .form-group select:focus {
+        outline: none;
+        border-color: #818cf8;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        font-size: 0.875rem;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #4b5563;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Delete Modal Specific */
+    .delete-modal-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    .delete-modal-icon i {
+        font-size: 1.75rem;
+        color: #ef4444;
+    }
+
+    .delete-modal-text {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .delete-modal-text h3 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    .delete-modal-text p {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+
+    .delete-entry-info {
+        background: #f9fafb;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .delete-entry-info .code {
+        font-weight: 800;
+        color: #4f46e5;
+        font-size: 1rem;
+    }
+
+    .delete-entry-info .name {
+        color: #6b7280;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Toast notifications */
+    .toast-container {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .toast {
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: toastIn 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    @keyframes toastIn {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .toast.success {
+        background: #10b981;
+        color: white;
+    }
+
+    .toast.error {
+        background: #ef4444;
+        color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .editor-container {
+            grid-template-columns: 1fr;
+        }
+
+        .subject-sidebar {
+            position: static;
+        }
+
+        .subject-list {
+            flex-direction: row;
+            flex-wrap: wrap;
+            max-height: none;
+        }
+
+        .subject-card {
+            flex: 0 0 auto;
+            width: 130px;
+        }
+    }
+
+    /* Dark Mode Overrides */
+    .dark .subject-sidebar,
+    .dark .timetable-area {
+        background: #18181b;
+        border: 1px solid rgba(63, 63, 70, 0.5);
+    }
+
+    .dark .sidebar-title {
+        color: #a1a1aa;
+    }
+
+    /* Subject Card */
+    .dark .subject-card {
+        background: #27272a;
+        border-color: #3f3f46;
+    }
+
+    .dark .subject-card:hover {
+        border-color: #818cf8;
+        background: #3f3f46;
+    }
+
+    .dark .subject-card .code {
+        color: #818cf8;
+    }
+
+    .dark .subject-card .name {
+        color: #d4d4d8;
+    }
+
+    /* Grid Dark Mode */
+    .dark .grid-container {
+        background: #3f3f46;
+    }
+
+    .dark .grid-day {
+        background: #18181b;
+        color: #d4d4d8;
+        border-right-color: #3f3f46;
+    }
+
+    .dark .grid-cell {
+        background: #27272a;
+    }
+
+    .dark .grid-cell.drop-zone {
+        background: rgba(129, 140, 248, 0.1);
+        border-color: #818cf8;
+    }
+
+    .dark .empty-placeholder {
+        color: #52525b;
+    }
+
+    /* Entry Card Dark Mode */
+    .dark .entry-card .subject-code {
+        color: #1f2937;
+        /* Keep dark text for legibility on pastel backgrounds */
+    }
+
+    .dark .entry-card .subject-name {
+        color: #4b5563;
+    }
+
+    .dark .entry-card .room-badge {
+        background: rgba(255, 255, 255, 0.9);
+        color: #4b5563;
+    }
+
+    /* Modal Dark Mode */
+    .dark .modal-content {
+        background: #27272a;
+        border: 1px solid #3f3f46;
+    }
+
+    .dark .modal-title {
+        color: #f4f4f5;
+    }
+
+    .dark .form-group label {
+        color: #a1a1aa;
+    }
+
+    .dark .form-group select {
+        background: #3f3f46;
+        border-color: #52525b;
+        color: #f4f4f5;
+    }
+
+    .dark .delete-entry-info {
+        background: #3f3f46;
+    }
+
+    .dark .delete-entry-info .name {
+        color: #d4d4d8;
+    }
+
+    .dark .delete-modal-text h3 {
+        color: #f4f4f5;
+    }
+
+    .dark .delete-modal-text p {
+        color: #a1a1aa;
+    }
+
+    /* Base Typo & Buttons */
+    .dark .text-gray-800 {
+        color: #f4f4f5 !important;
+    }
+
+    .dark .text-gray-500 {
+        color: #a1a1aa !important;
+    }
+
+    .dark .text-gray-400 {
+        color: #71717a !important;
+    }
+
+    .dark .bg-gray-100 {
+        background-color: #3f3f46 !important;
+        color: #d4d4d8 !important;
+    }
+
+    .dark .bg-gray-100:hover {
+        background-color: #52525b !important;
+    }
+
+    .dark .btn-secondary {
+        background: #3f3f46;
+        color: #d4d4d8;
+    }
+
+    .dark .btn-secondary:hover {
+        background: #52525b;
+    }
+
+    /* ============================== */
+    /* CONFLICT MODAL                 */
+    /* ============================== */
+    .conflict-modal-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.25rem;
+    }
+
+    .conflict-modal-icon i {
+        font-size: 1.75rem;
+        color: #d97706;
+    }
+
+    .conflict-modal-text {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .conflict-modal-text h3 {
+        font-size: 1.125rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    .conflict-modal-text p {
+        color: #6b7280;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .conflict-detail-box {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 0.75rem;
+        padding: 0.875rem;
+        margin-bottom: 1.25rem;
+        text-align: center;
+        font-size: 0.8rem;
+        color: #92400e;
+        font-weight: 600;
+        line-height: 1.6;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
+    /* Conflict Modal Dark Mode */
+    .dark .conflict-modal-text h3 {
+        color: #f4f4f5;
+    }
+
+    .dark .conflict-modal-text p {
+        color: #a1a1aa;
+    }
+
+    .dark .conflict-detail-box {
+        background: #3f3f46;
+        border-color: #52525b;
+        color: #fcd34d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6 max-w-full">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div>
+            <a href="{% url 'timetable_list' %}"
+                class="text-indigo-600 hover:text-indigo-800 font-medium mb-2 inline-flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+            <h1 class="text-2xl font-black text-gray-800 mt-2">{{ timetable.program.code }} - {{
+                timetable.get_semester_display }}</h1>
+            <p class="text-gray-500">{{ timetable.program.name }} • {{ timetable.academic_year }}</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'timetable_detail' timetable.pk %}"
+                class="px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-colors">
+                <i class="fas fa-eye mr-2"></i>Aperçu
+            </a>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-4 mb-6">
+        <div class="flex flex-wrap items-center gap-6 text-sm">
+            <span class="font-bold text-indigo-700"><i class="fas fa-magic mr-2"></i>Glisser-Déposer</span>
+            <span class="text-indigo-600"><i class="fas fa-hand-pointer mr-1"></i> Glissez une matière vers la
+                grille</span>
+            <span class="text-indigo-600"><i class="fas fa-arrows-alt mr-1"></i> Déplacez les séances dans la
+                grille</span>
+            <span class="text-indigo-600"><i class="fas fa-trash-alt mr-1"></i> Cliquez sur <span
+                    class="text-red-500">×</span> pour supprimer</span>
+        </div>
+    </div>
+
+    <!-- Main Editor -->
+    <div class="editor-container">
+
+        <!-- Subject Sidebar -->
+        <div class="subject-sidebar">
+            <div class="sidebar-title">
+                <i class="fas fa-book-open mr-2"></i>Matières disponibles
+            </div>
+            <div class="subject-list">
+                {% for subject in subjects %}
+                <div class="subject-card" draggable="true" data-subject-id="{{ subject.id }}"
+                    data-subject-code="{{ subject.code }}" data-subject-name="{{ subject.name }}"
+                    data-teacher-id="{{ subject.teacher.id|default:'' }}"
+                    data-session-type="{{ subject.session_type }}">
+                    <div class="code">{{ subject.code }}</div>
+                    <div class="name">{{ subject.name|truncatechars:25 }}</div>
+                    <div class="meta">
+                        <span class="text-xs px-1.5 py-0.5 rounded-full font-bold
+                            {% if subject.session_type == 'cours' %}bg-blue-100 text-blue-700
+                            {% elif subject.session_type == 'td' %}bg-green-100 text-green-700
+                            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {% if subject.session_type == 'cours' %}CM{% elif subject.session_type == 'td' %}TD{% else
+                            %}TP{% endif %}
+                        </span>
+                        {% if subject.teacher %}
+                        <span class="text-xs text-gray-500">{{ subject.teacher.user.last_name }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-400 text-sm">Aucune matière configurée</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Timetable Grid: Days as ROWS, Hours as COLUMNS -->
+        <div class="timetable-area">
+            <div class="grid-container" id="timetableGrid"
+                style="--num-slots: {{ time_slots|length }}; min-width: calc(var(--num-slots) * 100px + 100px);">
+                <!-- Header Row: Empty corner + Time Slots -->
+                <div class="grid-header"></div>
+                {% for slot in time_slots %}
+                <div class="grid-header">
+                    <div class="grid-header-time">
+                        <span class="start">{{ slot.start_time|time:"H:i" }}</span>
+                        <span class="end">{{ slot.end_time|time:"H:i" }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Day Rows -->
+                {% for day_code, day_name in days %}
+                <div class="grid-day">{{ day_name }}</div>
+
+                {% for slot in time_slots %}
+                {% with day_code|add_str:"_"|add_str:slot.slot_number as cell_key %}
+                {% with entry_dict|get_item:cell_key as entry %}
+                <div class="grid-cell {% if entry %}occupied{% endif %}" data-day="{{ day_code }}"
+                    data-slot="{{ slot.slot_number }}" id="cell-{{ day_code }}-{{ slot.slot_number }}">
+
+                    {% if entry %}
+                    <div class="entry-card type-{{ entry.session_type }}" draggable="true"
+                        data-entry-id="{{ entry.id }}" data-subject-code="{{ entry.subject.code }}"
+                        data-subject-name="{{ entry.subject.name }}" data-teacher-id="{{ entry.teacher.id|default:'' }}"
+                        data-room-id="{{ entry.room.id|default:'' }}"
+                        data-group-id="{{ entry.study_group.id|default:'' }}"
+                        data-session-type="{{ entry.session_type }}">
+                        <button class="delete-btn" data-entry-id="{{ entry.id }}"
+                            data-subject-code="{{ entry.subject.code }}" data-subject-name="{{ entry.subject.name }}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <span class="type-badge">
+                            {% if entry.session_type == 'cours' %}CM{% elif entry.session_type == 'td' %}TD{% else
+                            %}TP{% endif %}
+                        </span>
+                        <div class="subject-code">{{ entry.subject.code }}</div>
+                        <div class="subject-name">{{ entry.subject.name|truncatechars:18 }}</div>
+                        <div class="info">
+                            {% if entry.room %}
+                            <span class="room-badge">
+                                <i class="fas fa-map-marker-alt"></i> {{ entry.room.name }}
+                            </span>
+                            {% endif %}
+                            {% if entry.teacher %}
+                            <span class="teacher-avatar" title="{{ entry.teacher.user.get_full_name }}">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <span class="empty-placeholder">—</span>
+                    {% endif %}
+                </div>
+                {% endwith %}
+                {% endwith %}
+                {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Entry Modal -->
+<div class="modal-backdrop" id="createModal">
+    <div class="modal-content">
+        <div class="modal-title">
+            <i class="fas fa-plus-circle text-indigo-500"></i>
+            Ajouter une séance
+        </div>
+        <input type="hidden" id="modal-subject-id">
+        <input type="hidden" id="modal-day">
+        <input type="hidden" id="modal-slot">
+
+        <div class="form-group">
+            <label>Matière</label>
+            <div id="modal-subject-display" class="font-bold text-indigo-600 text-lg"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Enseignant</label>
+            <select id="modal-teacher">
+                <option value="">— Sélectionner —</option>
+                {% for teacher in teachers %}
+                <option value="{{ teacher.id }}">{{ teacher.user.get_full_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Salle</label>
+            <select id="modal-room">
+                <option value="">— Sélectionner —</option>
+                {% for room in rooms %}
+                <option value="{{ room.id }}">{{ room.name }} ({{ room.capacity }} places)</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Type de séance</label>
+            <select id="modal-type">
+                <option value="cours">CM - Cours Magistral</option>
+                <option value="td">TD - Travaux Dirigés</option>
+                <option value="tp">TP - Travaux Pratiques</option>
+            </select>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+            <button type="button" class="btn btn-primary" onclick="confirmCreate()">
+                <i class="fas fa-check"></i>Ajouter
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-backdrop" id="deleteModal">
+    <div class="modal-content">
+        <div class="delete-modal-icon">
+            <i class="fas fa-trash-alt"></i>
+        </div>
+        <div class="delete-modal-text">
+            <h3>Supprimer cette séance ?</h3>
+            <p>Cette action est irréversible.</p>
+        </div>
+        <div class="delete-entry-info">
+            <div class="code" id="delete-entry-code"></div>
+            <div class="name" id="delete-entry-name"></div>
+        </div>
+        <input type="hidden" id="delete-entry-id">
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">
+                <i class="fas fa-times"></i>Annuler
+            </button>
+            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                <i class="fas fa-trash-alt"></i>Supprimer
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Conflict Detection Modal -->
+<div class="modal-backdrop" id="conflictModal">
+    <div class="modal-content">
+        <div class="conflict-modal-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="conflict-modal-text">
+            <h3>⚠️ Conflit détecté !</h3>
+            <p id="conflictMessage"></p>
+        </div>
+        <div class="conflict-detail-box" id="conflictDetailBox"></div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="cancelMove()">
+                <i class="fas fa-times"></i> Annuler
+            </button>
+            <button type="button" class="btn btn-warning" onclick="forceMove()">
+                <i class="fas fa-exclamation-triangle"></i> Continuer quand même
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+    const TIMETABLE_ID = Number("{{ timetable.id|default:'0' }}");
+    const CSRF_TOKEN = '{{ csrf_token }}';
+
+    // Toast notification
+    window.showToast = function (message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>${message}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Create Modal functions
+    window.openModal = function (subjectId, subjectCode, subjectName, teacherId, sessionType, day, slot) {
+        document.getElementById('modal-subject-id').value = subjectId;
+        document.getElementById('modal-day').value = day;
+        document.getElementById('modal-slot').value = slot;
+        document.getElementById('modal-subject-display').textContent = `${subjectCode} - ${subjectName}`;
+
+        if (teacherId) document.getElementById('modal-teacher').value = teacherId;
+        if (sessionType) document.getElementById('modal-type').value = sessionType;
+
+        document.getElementById('createModal').classList.add('active');
+    }
+
+    window.closeModal = function () {
+        document.getElementById('createModal').classList.remove('active');
+        document.getElementById('modal-teacher').value = '';
+        document.getElementById('modal-room').value = '';
+        document.getElementById('modal-type').value = 'cours';
+    }
+
+    window.confirmCreate = async function () {
+        const data = {
+            timetable_id: TIMETABLE_ID,
+            subject_id: document.getElementById('modal-subject-id').value,
+            day: document.getElementById('modal-day').value,
+            slot_number: parseInt(document.getElementById('modal-slot').value),
+            teacher_id: document.getElementById('modal-teacher').value || null,
+            room_id: document.getElementById('modal-room').value || null,
+            session_type: document.getElementById('modal-type').value
+        };
+
+        try {
+            const response = await fetch('{% url "timetable_entry_create_api" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showToast('Séance ajoutée avec succès');
+                closeModal();
+                location.reload();
+            } else {
+                showToast(result.error || 'Erreur lors de l\'ajout', 'error');
+            }
+        } catch (error) {
+            showToast('Erreur de connexion', 'error');
+        }
+    }
+
+    // Delete Modal functions
+    window.showDeleteModal = function (entryId, subjectCode, subjectName) {
+        document.getElementById('delete-entry-id').value = entryId;
+        document.getElementById('delete-entry-code').textContent = subjectCode;
+        document.getElementById('delete-entry-name').textContent = subjectName;
+        document.getElementById('deleteModal').classList.add('active');
+    }
+
+    window.closeDeleteModal = function () {
+        document.getElementById('deleteModal').classList.remove('active');
+    }
+
+    window.confirmDelete = async function () {
+        const entryIdStr = document.getElementById('delete-entry-id').value;
+        const entryId = parseInt(entryIdStr);
+
+        console.log(`Attempting to delete entry ID: ${entryIdStr} (Parsed: ${entryId})`);
+
+        if (!entryId || isNaN(entryId)) {
+            showToast('Erreur: ID de séance invalide', 'error');
+            return;
+        }
+
+        // Disable button to prevent double clicks
+        const btn = document.querySelector('#deleteModal .btn-danger');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Suppression...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('{% url "timetable_entry_delete_api" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN
+                },
+                body: JSON.stringify({ entry_id: entryId })
+            });
+
+            const result = await response.json();
+            console.log('Delete result:', result);
+
+            if (result.success) {
+                showToast('Séance supprimée');
+                closeDeleteModal();
+                location.reload();
+            } else {
+                showToast(result.error || 'Erreur lors de la suppression', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            showToast('Erreur de connexion', 'error');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // Pending move state used by the conflict modal
+    let _pendingMove = null;
+
+    // Internal: actually execute the move API call
+    async function _doMove(entryId, newDay, newSlot) {
+        try {
+            const response = await fetch('{% url "timetable_entry_move_api" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN
+                },
+                body: JSON.stringify({
+                    entry_id: entryId,
+                    new_day: newDay,
+                    new_slot_number: parseInt(newSlot)
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showToast('Séance déplacée');
+                location.reload();
+            } else {
+                showToast(result.error || 'Erreur lors du déplacement', 'error');
+            }
+        } catch (error) {
+            showToast('Erreur de connexion', 'error');
+        }
+    }
+
+    // Public: pre-flight conflict check before moving
+    window.moveEntry = async function (entryId, newDay, newSlot) {
+        // Read dragged card attributes for the conflict payload
+        const card = document.querySelector(`.entry-card[data-entry-id="${entryId}"]`);
+        const roomId = card ? card.dataset.roomId : null;
+        const teacherId = card ? card.dataset.teacherId : null;
+        const groupId = card ? card.dataset.groupId : null;
+
+        // Pre-flight check
+        try {
+            const checkResp = await fetch('{% url "check_conflict_api" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN
+                },
+                body: JSON.stringify({
+                    timetable_id: TIMETABLE_ID,
+                    day_of_week: newDay,
+                    time_slot_id: parseInt(newSlot),
+                    room_id: roomId ? parseInt(roomId) : null,
+                    teacher_id: teacherId ? parseInt(teacherId) : null,
+                    group_id: groupId ? parseInt(groupId) : null,
+                    exclude_entry_id: parseInt(entryId)
+                })
+            });
+
+            const check = await checkResp.json();
+
+            if (check.has_conflict) {
+                // Store pending move for the modal buttons
+                _pendingMove = { entryId, newDay, newSlot };
+
+                document.getElementById('conflictMessage').textContent = check.message;
+                document.getElementById('conflictDetailBox').style.display = 'none';
+
+                document.getElementById('conflictModal').classList.add('active');
+                return; // User must choose via modal buttons
+            }
+        } catch (e) {
+            // Network error — fail open and proceed with move
+        }
+
+        await _doMove(entryId, newDay, newSlot);
+    };
+
+    // Called by modal « Annuler »
+    window.cancelMove = function () {
+        _pendingMove = null;
+        document.getElementById('conflictModal').classList.remove('active');
+    };
+
+    // Called by modal « Continuer quand même »
+    window.forceMove = async function () {
+        document.getElementById('conflictModal').classList.remove('active');
+        if (_pendingMove) {
+            const { entryId, newDay, newSlot } = _pendingMove;
+            _pendingMove = null;
+            await _doMove(entryId, newDay, newSlot);
+        }
+    };
+
+    // Setup event listeners when DOM is ready
+    document.addEventListener('DOMContentLoaded', function () {
+        // Delete buttons
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                const entryId = this.dataset.entryId;
+                const subjectCode = this.dataset.subjectCode;
+                const subjectName = this.dataset.subjectName;
+                showDeleteModal(entryId, subjectCode, subjectName);
+            });
+        });
+
+        // Close modals backdrop
+        document.querySelectorAll('.modal-backdrop').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Drag and Drop
+        let draggedElement = null;
+        let dragType = null;
+
+        // Subject cards (sidebar)
+        document.querySelectorAll('.subject-card').forEach(card => {
+            card.addEventListener('dragstart', (e) => {
+                draggedElement = card;
+                dragType = 'subject';
+                card.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+
+            card.addEventListener('dragend', () => {
+                card.classList.remove('dragging');
+                draggedElement = null;
+                dragType = null;
+                document.querySelectorAll('.drop-zone, .drop-zone-active').forEach(el => {
+                    el.classList.remove('drop-zone', 'drop-zone-active');
+                });
+            });
+        });
+
+        // Entry cards (in grid)
+        document.querySelectorAll('.entry-card').forEach(card => {
+            card.addEventListener('dragstart', (e) => {
+                draggedElement = card;
+                dragType = 'entry';
+                card.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            card.addEventListener('dragend', () => {
+                card.classList.remove('dragging');
+                draggedElement = null;
+                dragType = null;
+                document.querySelectorAll('.drop-zone, .drop-zone-active').forEach(el => {
+                    el.classList.remove('drop-zone', 'drop-zone-active');
+                });
+            });
+        });
+
+        // Grid cells
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            cell.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const isOccupied = cell.classList.contains('occupied');
+                const isSameCell = dragType === 'entry' && cell.contains(draggedElement);
+
+                // Allow entry cards to drop anywhere (the conflict check handles occupied cells)
+                // Only block subject-sidebar drags on occupied cells
+                if (!isSameCell && (!isOccupied || dragType === 'entry')) {
+                    cell.classList.add('drop-zone');
+                }
+            });
+
+            cell.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                const isOccupied = cell.classList.contains('occupied');
+                const isSameCell = dragType === 'entry' && cell.contains(draggedElement);
+
+                if (!isSameCell && (!isOccupied || dragType === 'entry')) {
+                    cell.classList.add('drop-zone-active');
+                }
+            });
+
+            cell.addEventListener('dragleave', () => {
+                cell.classList.remove('drop-zone', 'drop-zone-active');
+            });
+
+            cell.addEventListener('drop', (e) => {
+                e.preventDefault();
+                cell.classList.remove('drop-zone', 'drop-zone-active');
+
+                const day = cell.dataset.day;
+                const slot = cell.dataset.slot;
+                const isOccupied = cell.classList.contains('occupied');
+                const isSameCell = dragType === 'entry' && cell.contains(draggedElement);
+
+                if (isSameCell) return;
+
+                if (dragType === 'subject' && !isOccupied) {
+                    const subjectId = draggedElement.dataset.subjectId;
+                    const subjectCode = draggedElement.dataset.subjectCode;
+                    const subjectName = draggedElement.dataset.subjectName;
+                    const teacherId = draggedElement.dataset.teacherId;
+                    const sessionType = draggedElement.dataset.sessionType;
+
+                    openModal(subjectId, subjectCode, subjectName, teacherId, sessionType, day, slot);
+                } else if (dragType === 'entry') {
+                    // Always call moveEntry — it does the conflict pre-flight check
+                    // and will block or prompt if the destination is conflicting
+                    const entryId = draggedElement.dataset.entryId;
+                    moveEntry(entryId, day, slot);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,501 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Liste des Séances - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+    
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .header-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+    
+    .header-icon i {
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .header-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .header-subtitle {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin: 0;
+    }
+    
+    .btn-create {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        transition: all 0.2s ease;
+    }
+    
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+    
+    .sessions-card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+    }
+    
+    .sessions-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .sessions-table thead {
+        background: #f8fafc;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .sessions-table th {
+        padding: 1rem 1.25rem;
+        text-align: left;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .sessions-table td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .sessions-table tbody tr {
+        transition: background 0.15s ease;
+    }
+    
+    .sessions-table tbody tr:hover {
+        background: #f8fafc;
+    }
+    
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    
+    .badge-cours {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+    }
+    
+    .badge-td {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .badge-tp {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    
+    .badge-exam {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    
+    .subject-name {
+        font-weight: 700;
+        color: #1f2937;
+        font-size: 0.9rem;
+    }
+    
+    .teacher-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .teacher-avatar {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #4f46e5;
+    }
+    
+    .teacher-name {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+    }
+    
+    .room-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 0.5rem;
+        color: #0369a1;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    
+    .room-badge.no-room {
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
+    }
+    
+    .date-cell {
+        text-align: center;
+    }
+    
+    .date-day {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    
+    .date-time {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-top: 0.125rem;
+    }
+    
+    .group-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+    }
+    
+    .group-tag {
+        padding: 0.25rem 0.5rem;
+        background: #f3f4f6;
+        border-radius: 0.375rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #4b5563;
+    }
+    
+    .actions-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        background: white;
+        color: #6b7280;
+        transition: all 0.15s ease;
+        text-decoration: none;
+    }
+    
+    .btn-action:hover {
+        border-color: #6366f1;
+        color: #6366f1;
+        background: #eef2ff;
+    }
+    
+    .btn-action.delete:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: #fef2f2;
+    }
+    
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .pagination-btn {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        background: white;
+        color: #6b7280;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    
+    .pagination-btn:hover {
+        border-color: #6366f1;
+        color: #6366f1;
+        background: #eef2ff;
+    }
+    
+    .pagination-info {
+        padding: 0.5rem 1rem;
+        background: #f3f4f6;
+        border-radius: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #4b5563;
+    }
+    
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+    
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        background: #f3f4f6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .empty-icon i {
+        font-size: 2rem;
+        color: #9ca3af;
+    }
+    
+    .empty-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-text {
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 1024px) {
+        .sessions-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <div class="header-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div>
+                <h1 class="header-title">Gestion des Séances</h1>
+                <p class="header-subtitle">{{ sessions|length }} séance(s) planifiée(s)</p>
+            </div>
+        </div>
+
+        {% if request.user.role == 'admin' %}
+        <a href="{% url 'session_create' %}" class="btn-create">
+            <i class="fas fa-plus"></i>
+            Nouvelle Séance
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Sessions Card -->
+    <div class="sessions-card">
+        {% if sessions %}
+        <table class="sessions-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Matière</th>
+                    <th>Enseignant</th>
+                    <th>Salle</th>
+                    <th>Date & Heure</th>
+                    <th>Groupes</th>
+                    {% if request.user.role == 'admin' %}
+                    <th style="text-align: center;">Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <!-- Type -->
+                    <td>
+                        <span class="badge badge-{{ session.session_type }}">
+                            {% if session.session_type == 'cours' %}CM
+                            {% elif session.session_type == 'td' %}TD
+                            {% elif session.session_type == 'tp' %}TP
+                            {% else %}{{ session.get_session_type_display }}
+                            {% endif %}
+                        </span>
+                        {% if session.is_exam %}
+                        <span class="badge badge-exam" style="margin-left: 0.25rem;">Exam</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Subject -->
+                    <td>
+                        <span class="subject-name">{{ session.subject }}</span>
+                    </td>
+
+                    <!-- Teacher -->
+                    <td>
+                        <div class="teacher-cell">
+                            <div class="teacher-avatar">
+                                {{ session.teacher.user.first_name|first|upper }}{{ session.teacher.user.last_name|first|upper }}
+                            </div>
+                            <span class="teacher-name">{{ session.teacher.user.get_full_name }}</span>
+                        </div>
+                    </td>
+
+                    <!-- Room -->
+                    <td>
+                        {% if session.room %}
+                        <span class="room-badge">
+                            <i class="fas fa-door-open"></i>
+                            {{ session.room.name }}
+                        </span>
+                        {% else %}
+                        <span class="room-badge no-room">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Non défini
+                        </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Date/Time -->
+                    <td>
+                        <div class="date-cell">
+                            <div class="date-day">{{ session.start_datetime|date:"d M Y" }}</div>
+                            <div class="date-time">{{ session.start_datetime|time:"H:i" }} - {{ session.end_datetime|time:"H:i" }}</div>
+                        </div>
+                    </td>
+
+                    <!-- Groups -->
+                    <td>
+                        <div class="group-tags">
+                            {% for group in session.groups.all %}
+                            <span class="group-tag">{{ group.name }}</span>
+                            {% empty %}
+                            <span class="group-tag" style="background: #fef3c7; color: #92400e;">Aucun</span>
+                            {% endfor %}
+                        </div>
+                    </td>
+
+                    <!-- Actions -->
+                    {% if request.user.role == 'admin' %}
+                    <td>
+                        <div class="actions-cell">
+                            <a href="{% url 'session_update' session.pk %}" class="btn-action" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'session_delete' session.pk %}" class="btn-action delete" title="Supprimer">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="pagination-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+
+            <span class="pagination-info">
+                Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="pagination-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-calendar-times"></i>
+            </div>
+            <h3 class="empty-title">Aucune séance planifiée</h3>
+            <p class="empty-text">Commencez par créer votre première séance de cours.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

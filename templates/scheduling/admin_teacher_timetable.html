@@ -1,0 +1,571 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load scheduling_filters %}
+
+{% block title %}Emploi du Temps Enseignant - Admin - FSTTIME{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Modern Admin Teacher Timetable Styles - Based on Student View */
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8f0fe 100%);
+}
+
+.timetable-page {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+/* Header Section */
+.page-header-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+.page-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    font-size: 1rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Teacher Selector */
+.teacher-selector-card {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+}
+
+.teacher-select {
+    width: 100%;
+    max-width: 400px;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: 12px;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.teacher-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+}
+
+/* Timetable Grid Container */
+.timetable-card {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+}
+
+/* Grid: Days as ROWS (Y-axis), Hours as COLUMNS (X-axis) */
+.my-timetable-grid {
+    display: grid;
+    /* Columns will be set dynamically via inline style */
+    gap: 3px;
+    background: rgba(226, 232, 240, 0.5);
+    border-radius: 16px;
+    overflow: hidden;
+    min-width: 950px;
+}
+
+.grid-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.875rem 0.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    text-align: center;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+}
+
+.grid-header-time {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.grid-header-time .start {
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.grid-header-time .end {
+    font-size: 0.65rem;
+    opacity: 0.8;
+}
+
+.grid-day {
+    background: rgba(248, 250, 252, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 1rem 0.75rem;
+    text-align: center;
+    font-weight: 800;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.875rem;
+    color: #374151;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-right: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.grid-cell {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 0.5rem;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.cell-empty {
+    color: #d1d5db;
+    font-size: 1.25rem;
+}
+
+/* Session Card Styling */
+.cell-content {
+    text-align: center;
+    width: 100%;
+    padding: 0.625rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.cell-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+/* Session Types */
+.type-cours { 
+    background: linear-gradient(135deg, #dbeafe 0%, #c7d2fe 100%);
+    border-left: 4px solid #3b82f6;
+}
+.type-td { 
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-left: 4px solid #10b981;
+}
+.type-tp { 
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    border-left: 4px solid #f59e0b;
+}
+.type-exam { 
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-left: 4px solid #ef4444;
+}
+
+/* Event Types */
+.event-one_off {
+    border-style: dashed;
+    border-width: 2px;
+}
+
+.cell-content .subject-code {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: #1f2937;
+    margin-bottom: 0.125rem;
+}
+
+.cell-content .subject-name {
+    font-size: 0.625rem;
+    color: #6b7280;
+    margin-top: 0.125rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.cell-content .room-name {
+    font-size: 0.625rem;
+    color: #4b5563;
+    margin-top: 0.25rem;
+    font-weight: 600;
+}
+
+.cell-content .extra-info {
+    font-size: 0.6rem;
+    color: #6b7280;
+    margin-top: 0.2rem;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding-top: 0.2rem;
+}
+
+.session-badge {
+    display: inline-block;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.5rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-cours { background: #3b82f6; color: white; }
+.badge-td { background: #10b981; color: white; }
+.badge-tp { background: #f59e0b; color: white; }
+.badge-exam { background: #ef4444; color: white; }
+.badge-ponctuelle { background: #8b5cf6; color: white; }
+
+.edit-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.cell-content:hover .edit-btn {
+    opacity: 1;
+}
+
+.edit-btn i {
+    font-size: 10px;
+    color: #667eea;
+}
+
+/* Empty State */
+.empty-state-card {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 24px;
+    padding: 4rem 2rem;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+}
+
+.empty-icon i { color: #9ca3af; font-size: 2.5rem; }
+.empty-title { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 700; color: #1f2937; margin-bottom: 0.75rem; }
+.empty-description { color: #6b7280; font-size: 1rem; line-height: 1.6; max-width: 500px; margin: 0 auto; }
+
+/* Modal */
+.modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px); z-index: 1000;
+    display: none; align-items: center; justify-content: center;
+}
+.modal-backdrop.active { display: flex; }
+.modal-content {
+    background: white; border-radius: 20px; padding: 2rem;
+    width: 90%; max-width: 450px;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2);
+}
+.modal-title { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 700; color: #1f2937; margin-bottom: 1.5rem; }
+.form-group { margin-bottom: 1.25rem; }
+.form-label { display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem; font-size: 0.9rem; }
+.form-control { width: 100%; padding: 0.875rem 1rem; font-size: 0.95rem; border: 2px solid #e5e7eb; border-radius: 10px; }
+.modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+.btn-save { flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem; border-radius: 10px; font-weight: 700; cursor: pointer; }
+.btn-cancel { flex: 1; background: #f3f4f6; color: #374151; border: none; padding: 1rem; border-radius: 10px; font-weight: 700; cursor: pointer; }
+
+@media (max-width: 768px) {
+    .page-title { font-size: 1.75rem; }
+    .timetable-card { padding: 1rem; }
+    .teacher-select { max-width: 100%; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl timetable-page">
+    
+    <!-- Header -->
+    <div class="page-header-card">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="page-title"><i class="fas fa-chalkboard-teacher mr-3"></i>Emploi du Temps Enseignant</h1>
+                <p class="page-subtitle">Vue d'ensemble par semestre (Format Etudiant)</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Teacher Selector -->
+    <div class="teacher-selector-card">
+        <form method="get" class="flex flex-wrap items-center gap-4">
+            <select name="teacher" id="teacher-select" class="teacher-select" onchange="this.form.submit()">
+                <option value="">-- Sélectionner un enseignant --</option>
+                {% for teacher in teachers %}
+                <option value="{{ teacher.id }}" {% if selected_teacher and selected_teacher.id == teacher.id %}selected{% endif %}>
+                    {{ teacher.user.get_full_name }} ({{ teacher.get_department_display }})
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    
+    {% if selected_teacher %}
+    
+    <!-- Timetable Grid: Semester View -->
+    <div class="timetable-card">
+        <div class="my-timetable-grid" style="grid-template-columns: 120px repeat({{ time_slots|length }}, minmax(160px, 1fr));">
+            <!-- Header Row -->
+            <div class="grid-header"></div>
+            {% for slot in time_slots %}
+            <div class="grid-header">
+                <div class="grid-header-time">
+                    <span class="start">{{ slot.start_time|time:"H:i" }}</span>
+                    <span class="end">{{ slot.end_time|time:"H:i" }}</span>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Day Rows -->
+            {% for day_code, day_name in days %}
+            <div class="grid-day">
+                {{ day_name }}
+            </div>
+            
+            {% for slot in time_slots %}
+            <div class="grid-cell">
+                {% get_entry entry_dict day_code slot.slot_number as entries %}
+                
+                {% if entries %}
+                    {% for entry in entries %}
+                    <div class="cell-content type-{{ entry.session_type }} {% if entry.is_exam %}type-exam{% endif %} {% if entry.event_type == 'one_off' %}event-one_off{% endif %}"
+                         data-entry-id="{{ entry.id }}"
+                         data-subject="{{ entry.subject.name }}"
+                         data-subject-code="{{ entry.subject.code }}"
+                         data-room-id="{{ entry.room.id }}"
+                         data-session-type="{{ entry.session_type }}"
+                         onclick="openEditModal(this)">
+                        
+                        <button class="edit-btn" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        
+                        <div class="subject-code">{{ entry.subject.code }}</div>
+                        <div class="subject-name">{{ entry.subject.name }}</div>
+                        
+                        {% if entry.room %}
+                        <div class="room-name">📍 {{ entry.room.name }}</div>
+                        {% endif %}
+                        
+                        {% if entry.program_groups %}
+                        <div class="extra-info">{{ entry.program_groups|join:", " }}</div>
+                        {% elif entry.timetable.program %}
+                        <div class="extra-info">{{ entry.timetable.program.name|truncatechars:18 }}</div>
+                        {% endif %}
+                        
+                        <div class="badges">
+                            {% if entry.is_exam %}
+                            <span class="session-badge badge-exam">EXAM</span>
+                            {% elif entry.event_type == 'one_off' %}
+                            <span class="session-badge badge-ponctuelle">PONCTUELLE</span>
+                            {% else %}
+                            <span class="session-badge badge-{{ entry.session_type }}">{{ entry.session_type|upper }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <span class="cell-empty">—</span>
+                {% endif %}
+            </div>
+            {% endfor %} <!-- End time slots -->
+            {% endfor %} <!-- End days -->
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state-card">
+        <div class="empty-icon">
+            <i class="fas fa-chalkboard-teacher"></i>
+        </div>
+        <h3 class="empty-title">Aucun enseignant sélectionné</h3>
+        <p class="empty-description">
+            Veuillez sélectionner un enseignant pour afficher son planning complet.
+        </p>
+    </div>
+    {% endif %}
+    
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-backdrop" id="edit-modal">
+    <div class="modal-content">
+        <h3 class="modal-title"><i class="fas fa-edit mr-2"></i>Modifier la séance</h3>
+        <form id="edit-form">
+            <input type="hidden" id="edit-entry-id">
+            
+            <div class="form-group">
+                <label class="form-label">Matière</label>
+                <input type="text" id="edit-subject" class="form-control" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Salle</label>
+                <select id="edit-room" class="form-control">
+                    <option value="">-- Sélectionner une salle --</option>
+                    {% for room in rooms %}
+                    <option value="{{ room.id }}">{{ room.name }} ({{ room.get_room_type_display }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Type</label>
+                <select id="edit-type" class="form-control">
+                    <option value="cours">Cours</option>
+                    <option value="td">TD</option>
+                    <option value="tp">TP</option>
+                </select>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeEditModal()">Annuler</button>
+                <button type="submit" class="btn-save">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('edit-modal');
+    const form = document.getElementById('edit-form');
+    
+    function openEditModal(element) {
+        // Find the closest cell-content if click was on a child
+        const target = element.closest('.cell-content') || element;
+        
+        const entryId = target.dataset.entryId;
+        const subject = target.dataset.subjectCode + ' - ' + target.dataset.subject;
+        const roomId = target.dataset.roomId;
+        const type = target.dataset.sessionType;
+        
+        console.log('Opening modal for entry:', entryId);
+        
+        document.getElementById('edit-entry-id').value = entryId;
+        document.getElementById('edit-subject').value = subject;
+        document.getElementById('edit-room').value = roomId || '';
+        document.getElementById('edit-type').value = type;
+        
+        modal.classList.add('active');
+        // Prevent event bubbling if necessary, though direct onclick on div is safer
+        if (event) event.stopPropagation();
+    }
+    
+    function closeEditModal() {
+        modal.classList.remove('active');
+    }
+    
+    // Close on click outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeEditModal();
+    });
+    
+    // Submit form
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const entryId = document.getElementById('edit-entry-id').value;
+        const roomId = document.getElementById('edit-room').value;
+        const type = document.getElementById('edit-type').value;
+        
+        try {
+            const response = await fetch('/scheduling/api/timetable/entry/update/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    entry_id: entryId,
+                    room_id: roomId,
+                    session_type: type
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Reload page to reflect changes
+                window.location.reload();
+            } else {
+                alert('Erreur: ' + (data.error || 'Une erreur est survenue'));
+            }
+        } catch (error) {
+            alert('Erreur de connexion');
+            console.error(error);
+        }
+    });
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

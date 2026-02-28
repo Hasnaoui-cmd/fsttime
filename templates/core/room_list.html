@@ -1,0 +1,1253 @@
+{% extends 'base.html' %}
+
+{% block title %}Liste des Salles{% endblock %}
+
+{% block extra_css %}
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================
+   ROOM LIST PAGE - EQUIPMENT CHECKBOX FILTER
+   ============================================ */
+
+.rooms-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 50%, #f3e8ff 100%);
+    padding: 2rem 1rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Header Section */
+.rooms-header {
+    max-width: 1400px;
+    margin: 0 auto 2rem;
+    background: white;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.header-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.header-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.header-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+}
+
+.header-info {
+    font-size: 1rem;
+    color: #6b7280;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.badge {
+    background: #e0e7ff;
+    color: #6366f1;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-primary {
+    padding: 0.875rem 1.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-secondary {
+    padding: 0.875rem 1.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: white;
+    color: #6366f1;
+    border: 2px solid #e0e7ff;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+    border-color: #6366f1;
+    background: #f5f3ff;
+}
+
+/* Filter Section */
+.filter-section {
+    max-width: 1400px;
+    margin: 0 auto 2rem;
+    background: white;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* First Row - 3 Filters */
+.filter-row-1 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-label {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-label i {
+    font-size: 1.125rem;
+    color: #6366f1;
+}
+
+.filter-select,
+.filter-input {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background: #f9fafb;
+    color: #1f2937;
+    transition: all 0.3s;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+    border-color: #6366f1;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    outline: none;
+}
+
+/* Equipment Filter Row - Checkboxes */
+.filter-row-2 {
+    width: 100%;
+}
+
+.equipment-filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.equipment-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 0.75rem;
+    border: 2px solid #e5e7eb;
+}
+
+/* Custom Checkbox */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.checkbox-label:hover {
+    border-color: #6366f1;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+}
+
+.checkbox-input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.checkbox-custom {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #d1d5db;
+    border-radius: 0.375rem;
+    transition: all 0.3s;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.checkbox-input:checked ~ .checkbox-custom {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-color: #6366f1;
+}
+
+.checkbox-input:checked ~ .checkbox-custom::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    color: white;
+    font-size: 0.75rem;
+}
+
+.checkbox-input:checked + .checkbox-custom + .checkbox-icon {
+    color: #6366f1;
+}
+
+.checkbox-input:checked ~ .checkbox-text {
+    color: #1f2937;
+    font-weight: 700;
+}
+
+.checkbox-icon {
+    font-size: 1.125rem;
+    color: #9ca3af;
+    transition: all 0.3s;
+}
+
+.checkbox-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #6b7280;
+    transition: all 0.3s;
+}
+
+/* Filter Actions */
+.filter-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn-filter {
+    padding: 1rem 2.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.btn-filter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-reset {
+    padding: 1rem 2rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    background: #f3f4f6;
+    color: #6b7280;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.btn-reset:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Rooms Grid */
+.rooms-grid {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 2rem;
+}
+
+/* Room Card */
+.room-card {
+    background: white;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.room-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.room-card-header {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.room-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    margin: 0;
+}
+
+.room-building {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 0.25rem;
+}
+
+.room-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+/* Status Badge */
+.room-status-section {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    border-left: 4px solid;
+}
+
+.status-badge.available {
+    background: #d1fae5;
+    border-color: #10b981;
+}
+
+.status-badge.occupied {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+.status-badge i {
+    font-size: 1.25rem;
+}
+
+.status-badge.available i {
+    color: #10b981;
+}
+
+.status-badge.occupied i {
+    color: #ef4444;
+}
+
+.status-content {
+    flex: 1;
+}
+
+.status-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.status-badge.available .status-title {
+    color: #065f46;
+}
+
+.status-badge.occupied .status-title {
+    color: #991b1b;
+}
+
+.status-subtitle {
+    font-size: 0.875rem;
+}
+
+.status-badge.available .status-subtitle {
+    color: #047857;
+}
+
+.status-badge.occupied .status-subtitle {
+    color: #b91c1c;
+}
+
+/* Room Details */
+.room-body {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.room-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.detail-item i {
+    font-size: 1.5rem;
+    color: #6366f1;
+}
+
+.detail-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.detail-value {
+    display: block;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+/* Equipment Tags */
+.equipment-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 0.75rem;
+    min-height: 60px;
+}
+
+.equipment-tags.empty {
+    justify-content: center;
+    align-items: center;
+}
+
+.empty-message {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.equipment-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.equipment-tag i {
+    font-size: 0.875rem;
+    color: #10b981;
+}
+
+.equipment-more {
+    background: #e5e7eb;
+    color: #6b7280;
+}
+
+/* Actions */
+.room-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+}
+
+.btn-details {
+    flex: 1;
+    padding: 0.75rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: #eff6ff;
+    color: #3b82f6;
+    border: none;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.btn-details:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-edit {
+    flex: 1;
+    padding: 0.75rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: #f5f3ff;
+    color: #8b5cf6;
+    border: none;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.btn-edit:hover {
+    background: #8b5cf6;
+    color: white;
+}
+
+.btn-delete {
+    padding: 0.75rem 1rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: #fef2f2;
+    color: #ef4444;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.btn-delete:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* No Results */
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 1.5rem;
+}
+
+.no-results i {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.no-results h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #6b7280;
+    margin: 0 0 0.5rem 0;
+}
+
+.no-results p {
+    color: #9ca3af;
+    margin-bottom: 1.5rem;
+}
+
+.btn-reset-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    transition: all 0.3s;
+}
+
+.btn-reset-all:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+/* Pagination */
+.pagination-container {
+    max-width: 1400px;
+    margin: 2rem auto 0;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination {
+    display: flex;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.75rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.pagination a,
+.pagination span {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.pagination a {
+    color: #6b7280;
+}
+
+.pagination a:hover {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.pagination .active {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .filter-row-1 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .equipment-checkboxes {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .rooms-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .header-left {
+        flex-direction: column;
+    }
+    
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .filter-row-1 {
+        grid-template-columns: 1fr;
+    }
+    
+    .equipment-checkboxes {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-actions {
+        flex-direction: column;
+    }
+    
+    .btn-filter,
+    .btn-reset {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .rooms-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .room-details {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+    /* ==========================================
+       DARK MODE SUPPORT
+       ========================================== */
+    .dark .rooms-page {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+    }
+
+    .dark .rooms-header,
+    .dark .filter-section,
+    .dark .room-card,
+    .dark .pagination {
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .dark .header-title,
+    .dark .room-name,
+    .dark .detail-value {
+        color: #f1f5f9;
+    }
+
+    .dark .header-info,
+    .dark .filter-label,
+    .dark .checkbox-text,
+    .dark .detail-label,
+    .dark .no-results p {
+        color: #cbd5e1;
+    }
+
+    .dark .badge {
+        background: rgba(99, 102, 241, 0.2);
+        color: #a5b4fc;
+    }
+
+    .dark .btn-secondary {
+        background: transparent;
+        border-color: rgba(99, 102, 241, 0.5);
+        color: #a5b4fc;
+    }
+
+    .dark .btn-secondary:hover {
+        background: rgba(99, 102, 241, 0.1);
+        border-color: #818cf8;
+    }
+
+    .dark .filter-select,
+    .dark .filter-input,
+    .dark .equipment-checkboxes {
+        background: #1e293b;
+        border-color: #334155;
+        color: #f8fafc;
+    }
+
+    .dark .checkbox-label {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    .dark .checkbox-label:hover {
+        border-color: #818cf8;
+    }
+
+    .dark .btn-reset {
+        background: #334155;
+        color: #cbd5e1;
+    }
+
+    .dark .btn-reset:hover {
+        background: #475569;
+        color: #f1f5f9;
+        text-decoration: none;
+    }
+
+    .dark .room-status-section {
+        border-bottom-color: #334155;
+    }
+    
+    .dark .equipment-tags {
+        background: #1e293b;
+    }
+
+    .dark .equipment-tag {
+        background: #0f172a;
+        border-color: #334155;
+        color: #cbd5e1;
+    }
+
+    .dark .equipment-more {
+        background: #334155;
+        color: #cbd5e1;
+    }
+
+    .dark .btn-details {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+    }
+
+    .dark .btn-details:hover {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .dark .btn-edit {
+        background: rgba(139, 92, 246, 0.15);
+        color: #a78bfa;
+    }
+
+    .dark .btn-edit:hover {
+        background: #8b5cf6;
+        color: white;
+    }
+
+    .dark .btn-delete {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+    }
+
+    .dark .btn-delete:hover {
+        background: #ef4444;
+        color: white;
+    }
+
+    .dark .no-results {
+        background: rgba(30, 41, 59, 0.8);
+    }
+    
+    .dark .pagination a {
+        color: #cbd5e1;
+    }
+    
+    .dark .pagination a:hover {
+        background: #334155;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rooms-page">
+    
+    <!-- Header Section -->
+    <div class="rooms-header">
+        <div class="header-left">
+            <div class="header-icon">
+                <i class="fas fa-door-open"></i>
+            </div>
+            <div class="header-content">
+                <h1 class="header-title">Gestion des Salles</h1>
+                <p class="header-info">
+                    <span class="badge">{{ rooms|length }} salle(s) trouvée(s)</span>
+                    <span>• Mis à jour: {% now "H:i" %}</span>
+                </p>
+            </div>
+        </div>
+        {% if user.role == 'admin' %}
+        <div class="header-actions">
+            <a href="{% url 'room_create' %}" class="btn-primary">
+                <i class="fas fa-plus"></i>
+                Nouvelle Salle
+            </a>
+            <a href="{% url 'bulk_room_create' %}" class="btn-secondary">
+                <i class="fas fa-layer-group"></i>
+                Création en Masse
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Filter Section with Equipment Checkboxes -->
+    <div class="filter-section">
+        <form method="GET" action="{% url 'room_list' %}" class="filter-form" id="filter-form">
+            
+            <div class="filter-row-1">
+                <!-- Building Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-building"></i>
+                        Bâtiment
+                    </label>
+                    <select class="filter-select" name="building">
+                        <option value="">Tous les bâtiments</option>
+                        {% for b in buildings %}
+                            <option value="{{ b }}" {% if request.GET.building == b %}selected{% endif %}>
+                                {{ b }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Type Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-layer-group"></i>
+                        Type
+                    </label>
+                    <select class="filter-select" name="type">
+                        <option value="">Tous les types</option>
+                        {% for type_code, type_name in room_types %}
+                            <option value="{{ type_code }}" {% if request.GET.type == type_code %}selected{% endif %}>
+                                {{ type_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Capacity Filter -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-users"></i>
+                        Capacité min.
+                    </label>
+                    <input type="number" 
+                           class="filter-input" 
+                           name="min_capacity" 
+                           placeholder="Ex: 30"
+                           value="{{ request.GET.min_capacity }}"
+                           min="1">
+                </div>
+            </div>
+            
+            <!-- Equipment Filter with Checkboxes -->
+            {% if equipments %}
+            <div class="filter-row-2">
+                <div class="equipment-filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-tools"></i>
+                        Équipements disponibles
+                    </label>
+                    <div class="equipment-checkboxes">
+                        {% for equipment in equipments %}
+                            <label class="checkbox-label">
+                                <input type="checkbox" 
+                                       name="equipment" 
+                                       value="{{ equipment.id }}"
+                                       class="checkbox-input"
+                                       {% if equipment.id in selected_equipments %}checked{% endif %}>
+                                <span class="checkbox-custom"></span>
+                                <i class="{{ equipment.icon }} checkbox-icon"></i>
+                                <span class="checkbox-text">{{ equipment.name }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Filter Actions -->
+            <div class="filter-actions">
+                <a href="{% url 'room_list' %}" class="btn-reset">
+                    <i class="fas fa-redo"></i>
+                    Réinitialiser
+                </a>
+                <button type="submit" class="btn-filter">
+                    <i class="fas fa-search"></i>
+                    Filtrer
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Rooms Grid -->
+    <div class="rooms-grid">
+        {% for room in rooms %}
+            <div class="room-card" data-room-id="{{ room.id }}">
+                <!-- Card Header -->
+                <div class="room-card-header">
+                    <div>
+                        <h3 class="room-name">{{ room.name }}</h3>
+                        <p class="room-building">{{ room.building }}</p>
+                    </div>
+                    <span class="room-badge">
+                        {{ room.get_room_type_display }}
+                    </span>
+                </div>
+                
+                <!-- Status Badge -->
+                <div class="room-status-section">
+                    {% if room.status_available %}
+                    <div class="status-badge available">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="status-content">
+                            <span class="status-title">Disponible</span>
+                            <span class="status-subtitle">Libre actuellement</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="status-badge occupied">
+                        <i class="fas fa-times-circle"></i>
+                        <div class="status-content">
+                            <span class="status-title">Occupée</span>
+                            <span class="status-subtitle">En cours d'utilisation</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Room Details -->
+                <div class="room-body">
+                    <div class="room-details">
+                        <div class="detail-item">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <span class="detail-label">Capacité</span>
+                                <strong class="detail-value">{{ room.capacity }}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <i class="fas fa-building"></i>
+                            <div>
+                                <span class="detail-label">Étage</span>
+                                <strong class="detail-value">{{ room.floor|default:"RDC" }}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <i class="fas fa-tools"></i>
+                            <div>
+                                <span class="detail-label">Équipements</span>
+                                <strong class="detail-value">{{ room.equipment.count }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Equipment Tags -->
+                    {% if room.equipment.all %}
+                        <div class="equipment-tags">
+                            {% for eq in room.equipment.all|slice:":4" %}
+                                <span class="equipment-tag">
+                                    <i class="{{ eq.icon }}"></i>
+                                    {{ eq.name }}
+                                </span>
+                            {% endfor %}
+                            {% if room.equipment.count > 4 %}
+                                <span class="equipment-tag equipment-more">
+                                    +{{ room.equipment.count|add:"-4" }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="equipment-tags empty">
+                            <span class="empty-message">Aucun équipement</span>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Actions -->
+                    <div class="room-actions">
+                        <a href="{% url 'room_detail' room.pk %}" class="btn-details">
+                            <i class="fas fa-eye"></i>
+                            Détails
+                        </a>
+                        {% if user.role == 'admin' %}
+                        <a href="{% url 'room_update' room.pk %}" class="btn-edit">
+                            <i class="fas fa-edit"></i>
+                            Modifier
+                        </a>
+                        <button onclick="deleteRoom({{ room.pk }}, '{{ room.name }}', '{{ room.building }}')" class="btn-delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <h3>Aucune salle trouvée</h3>
+                <p>Essayez de modifier vos critères de recherche</p>
+                <a href="{% url 'room_list' %}" class="btn-reset-all">
+                    <i class="fas fa-redo"></i>
+                    Réinitialiser les filtres
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination-container">
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="active">{{ num }}</span>
+                {% else %}
+                <a href="?page={{ num }}&{{ request.GET.urlencode }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+</div>
+
+<script>
+// Delete room function with modal
+function deleteRoom(roomId, roomName, building) {
+    if (typeof DeleteModal !== 'undefined') {
+        DeleteModal.show({
+            message: 'Êtes-vous sûr de vouloir supprimer cette salle ?',
+            itemHtml: `
+                <p><i class="fas fa-door-open" style="color: #3b82f6; margin-right: 0.5rem;"></i><strong>${roomName || 'Cette salle'}</strong></p>
+                ${building ? `<p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;"><i class="fas fa-building" style="margin-right: 0.5rem;"></i>${building}</p>` : ''}
+            `,
+            onConfirm: () => performDelete(roomId)
+        });
+    } else {
+        if (confirm(`Êtes-vous sûr de vouloir supprimer la salle "${roomName}" ?`)) {
+            performDelete(roomId);
+        }
+    }
+}
+
+function performDelete(roomId) {
+    fetch(`/core/api/rooms/${roomId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (typeof showToast === 'function') {
+                showToast('Salle supprimée avec succès!', 'success');
+            }
+            const card = document.querySelector(`[data-room-id="${roomId}"]`);
+            if (card) {
+                card.style.transition = 'all 0.3s ease';
+                card.style.transform = 'scale(0.9)';
+                card.style.opacity = '0';
+                setTimeout(() => card.remove(), 300);
+            } else {
+                setTimeout(() => location.reload(), 1000);
+            }
+        } else {
+            if (typeof showToast === 'function') {
+                showToast(data.error || 'Erreur lors de la suppression', 'error');
+            } else {
+                alert(data.error || 'Erreur lors de la suppression');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (typeof showToast === 'function') {
+            showToast('Erreur lors de la suppression', 'error');
+        } else {
+            alert('Erreur lors de la suppression');
+        }
+    });
+}
+
+// Get CSRF token from cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

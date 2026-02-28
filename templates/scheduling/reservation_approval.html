@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Traiter la Demande - FSTTIME{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-16 max-w-4xl relative">
+    
+    <!-- Navigation Back -->
+    <div class="mb-10 animate-fadeIn">
+        <a href="{% url 'reservation_list' %}" class="inline-flex items-center gap-2 px-6 py-2 bg-white/60 backdrop-blur-md border border-white/40 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm">
+            <i class="fas fa-arrow-left"></i> Liste des Demandes
+        </a>
+    </div>
+
+    <!-- Main Card -->
+    <div class="glass-card rounded-[4rem] shadow-2xl overflow-hidden animate-fadeInUp border border-white/60 bg-white/40 backdrop-blur-3xl">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-br from-slate-800 to-indigo-950 p-14 text-center relative overflow-hidden" 
+             style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+            
+            <div class="relative z-10">
+                <div class="w-24 h-24 bg-white/10 backdrop-blur-2xl rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 border border-white/20 shadow-2xl">
+                    <i class="fas fa-clipboard-check text-indigo-200 text-4xl"></i>
+                </div>
+                <h1 class="text-3xl font-black text-white uppercase tracking-tight">Traitement Administratif</h1>
+                <p class="text-slate-400 font-bold text-xs uppercase tracking-widest mt-2 px-4 py-1.5 bg-white/5 inline-block rounded-full border border-white/10">
+                    ID Requête: <span class="text-white">#{{ object.id|stringformat:"04d" }}</span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Form Content -->
+        <div class="p-10 lg:p-16">
+            
+            <!-- Contextual Data Summary -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
+                <!-- User/Source -->
+                <div class="bg-slate-50/50 border border-slate-100 p-8 rounded-[2.5rem] flex items-start gap-6">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-slate-600 shadow-sm shrink-0">
+                        <i class="fas fa-user-shield text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-900/40 uppercase tracking-widest mb-1">Identité Demandeur</p>
+                        <p class="text-sm font-black text-slate-900 leading-tight">
+                            {% if object.teacher %}
+                                {{ object.teacher.user.get_full_name }}
+                            {% else %}
+                                {{ object.association.name }}
+                            {% endif %}
+                        </p>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                            Role: {% if object.teacher %}Enseignant{% else %}Association{% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Logistics -->
+                <div class="bg-indigo-50/50 border border-indigo-100 p-8 rounded-[2.5rem] flex items-start gap-6">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
+                        <i class="fas fa-map-marker-alt text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-indigo-900/40 uppercase tracking-widest mb-1">Détails Logistiques</p>
+                        <p class="text-sm font-black text-indigo-900 leading-tight">{{ object.room.name }}</p>
+                        <p class="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mt-1">
+                            {{ object.requested_datetime|date:"d M Y" }} @ {{ object.requested_datetime|date:"H:i" }} ({{ object.duration }}h)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Reason Block -->
+            <div class="mb-16 space-y-4">
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Objectif Déclaré</label>
+                <div class="bg-white/60 border border-gray-100 p-8 rounded-[2.5rem] text-sm font-bold text-gray-600 leading-relaxed italic">
+                    "{{ object.reason }}"
+                </div>
+            </div>
+            
+            <form method="post" novalidate class="space-y-12">
+                {% csrf_token %}
+                
+                <!-- Decision Controls -->
+                <div class="space-y-6">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Décision Finale</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Approve -->
+                        <label class="relative group cursor-pointer">
+                            <input type="radio" name="action" value="approve" class="sr-only peer" required>
+                            <div class="p-8 rounded-[2.5rem] border-2 border-gray-100 bg-white/40 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 flex items-center gap-6 group-hover:scale-[1.02]">
+                                <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-emerald-500 shadow-sm peer-checked:shadow-emerald-200">
+                                    <i class="fas fa-check-circle text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Approuver</p>
+                                    <p class="text-[9px] font-bold text-gray-400 uppercase">Valider le créneau</p>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Reject -->
+                        <label class="relative group cursor-pointer">
+                            <input type="radio" name="action" value="reject" class="sr-only peer">
+                            <div class="p-8 rounded-[2.5rem] border-2 border-gray-100 bg-white/40 transition-all peer-checked:border-rose-500 peer-checked:bg-rose-50 flex items-center gap-6 group-hover:scale-[1.02]">
+                                <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-rose-500 shadow-sm peer-checked:shadow-rose-200">
+                                    <i class="fas fa-times-circle text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-rose-600 uppercase tracking-widest">Rejeter</p>
+                                    <p class="text-[9px] font-bold text-gray-400 uppercase">Refuser l'accès</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Admin Notes -->
+                <div class="space-y-4">
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Observations Administratives</label>
+                    <textarea name="admin_notes" id="admin_notes" rows="4" 
+                              class="w-full px-8 py-6 bg-white/60 border border-gray-100 rounded-[2.5rem] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-bold text-gray-700 resize-none" 
+                              placeholder="Indiquez ici le motif du rejet ou vos instructions..."></textarea>
+                    <p class="text-[9px] font-bold text-gray-300 uppercase tracking-widest ml-1 animate-pulse">
+                        * Note obligatoire en cas de rejet
+                    </p>
+                </div>
+                
+                <!-- Errors -->
+                {% if form.errors %}
+                <div class="p-6 bg-rose-50 border border-rose-100 rounded-3xl animate-shake">
+                    {% for error in form.non_field_errors %}
+                    <div class="flex items-center gap-3 text-rose-600 text-[10px] font-black uppercase tracking-widest">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>{{ error }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Actions -->
+                <div class="pt-8 flex flex-col sm:flex-row gap-6">
+                    <button type="submit" class="flex-[3] py-6 bg-gradient-to-r from-slate-800 via-indigo-900 to-slate-950 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-indigo-200 hover:scale-[1.02] active:scale-95 transition-all">
+                        Enregistrer la Décision <i class="fas fa-save ml-2"></i>
+                    </button>
+                    <a href="{% url 'reservation_list' %}" class="flex-[1] py-6 bg-white border border-gray-100 text-gray-400 rounded-[2rem] font-black uppercase tracking-widest text-[10px] text-center hover:bg-gray-50 transition-all">
+                        Plus tard
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple logic to focus notes if reject is selected
+    document.querySelectorAll('input[name="action"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'reject') {
+                document.getElementById('admin_notes').focus();
+            }
+        });
+    });
+</script>
+{% endblock %}

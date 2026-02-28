@@ -1,0 +1,474 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Demandes de Réservation - FSTTIME{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    
+    <!-- Header Card -->
+    <div class="glass-card rounded-2xl shadow-xl overflow-hidden mb-8 animate-fadeIn">
+        <!-- Gradient Header -->
+        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-white flex items-center">
+                        <i class="fas fa-calendar-check mr-3"></i>
+                        Demandes de Réservation
+                    </h1>
+                    <p class="text-indigo-100 mt-1">
+                        <span class="font-semibold">{{ pending_count|default:reservations.count }}</span> demande(s) en attente
+                    </p>
+                </div>
+                
+                <!-- Search -->
+                <div class="relative w-full lg:w-80">
+                    <input type="text" id="searchInput" placeholder="Rechercher une réservation..."
+                           class="w-full pl-10 pr-4 py-3 bg-white/20 backdrop-blur-sm text-white placeholder-white/70 rounded-xl border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-white/70"></i>
+                </div>
+            </div>
+            
+            <!-- Filter Tabs -->
+            <div class="flex flex-wrap gap-2 mt-4">
+                <a href="{% url 'reservation_list' %}" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all
+                   {% if not request.GET.status %}bg-white text-indigo-600{% else %}bg-white/20 text-white hover:bg-white/30{% endif %}">
+                    <i class="fas fa-list mr-1"></i>Toutes
+                </a>
+                <a href="?status=pending" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all
+                   {% if request.GET.status == 'pending' %}bg-yellow-400 text-yellow-900{% else %}bg-white/20 text-white hover:bg-white/30{% endif %}">
+                    <i class="fas fa-clock mr-1"></i>En attente
+                </a>
+                <a href="?status=approved" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all
+                   {% if request.GET.status == 'approved' %}bg-green-400 text-green-900{% else %}bg-white/20 text-white hover:bg-white/30{% endif %}">
+                    <i class="fas fa-check mr-1"></i>Approuvées
+                </a>
+                <a href="?status=rejected" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all
+                   {% if request.GET.status == 'rejected' %}bg-red-400 text-red-900{% else %}bg-white/20 text-white hover:bg-white/30{% endif %}">
+                    <i class="fas fa-times mr-1"></i>Rejetées
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reservations Table -->
+    {% if reservations %}
+    <div class="glass-card rounded-2xl shadow-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Salle</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Date/Heure</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Durée</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Demandeur</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Motif</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Statut</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for reservation in reservations %}
+                    <tr class="hover:bg-blue-50 transition-colors">
+                        <!-- Room -->
+                        <td class="px-6 py-4">
+                            <div class="inline-flex items-center px-3 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-mono font-bold text-sm shadow">
+                                <i class="fas fa-door-open mr-2"></i>
+                                {{ reservation.room.name }}
+                            </div>
+                        </td>
+                        
+                        <!-- Date/Time -->
+                        <td class="px-6 py-4">
+                            <div class="text-gray-900 font-medium">
+                                <i class="fas fa-calendar text-indigo-500 mr-1"></i>
+                                {{ reservation.start_datetime|date:"d/m/Y" }}
+                            </div>
+                            <div class="text-gray-500 text-sm">
+                                <i class="fas fa-clock text-gray-400 mr-1"></i>
+                                {{ reservation.start_datetime|time:"H:i" }} - {{ reservation.end_datetime|time:"H:i" }}
+                            </div>
+                        </td>
+                        
+                        <!-- Duration -->
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                                <i class="fas fa-hourglass-half text-gray-500 mr-1"></i>
+                                {% widthratio reservation.end_datetime|timeuntil:reservation.start_datetime 1 1 %}
+                            </span>
+                        </td>
+                        
+                        <!-- Requester -->
+                        <td class="px-6 py-4">
+                            <div class="font-semibold text-gray-900">
+                                {% if reservation.teacher %}
+                                    {{ reservation.teacher.user.get_full_name }}
+                                {% elif reservation.association %}
+                                    {{ reservation.association.name }}
+                                {% else %}
+                                    {{ reservation.requester.get_full_name|default:reservation.requester.username }}
+                                {% endif %}
+                            </div>
+                            <div class="mt-1">
+                                {% if reservation.teacher %}
+                                <span class="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                    <i class="fas fa-chalkboard-teacher mr-1"></i>Enseignant
+                                </span>
+                                {% elif reservation.association %}
+                                <span class="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                                    <i class="fas fa-users mr-1"></i>Association
+                                </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        
+                        <!-- Reason -->
+                        <td class="px-6 py-4">
+                            <p class="text-gray-600 text-sm max-w-xs truncate" title="{{ reservation.reason }}">
+                                {{ reservation.reason|default:reservation.subject|truncatewords:8 }}
+                            </p>
+                        </td>
+                        
+                        <!-- Status -->
+                        <td class="px-6 py-4 text-center">
+                            {% if reservation.status == 'pending' %}
+                            <span class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">
+                                <i class="fas fa-clock mr-1"></i>En attente
+                            </span>
+                            {% elif reservation.status == 'approved' %}
+                            <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+                                <i class="fas fa-check-circle mr-1"></i>Approuvée
+                            </span>
+                            {% elif reservation.status == 'rejected' %}
+                            <span class="inline-flex items-center px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
+                                <i class="fas fa-times-circle mr-1"></i>Rejetée
+                            </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Actions -->
+                        <td class="px-6 py-4">
+                            <div class="flex items-center justify-center gap-2">
+                                {% if reservation.status == 'pending' and is_admin %}
+                                <button onclick="approveReservation({{ reservation.id }}, '{{ reservation.room.name|escapejs }}', '{% if reservation.teacher %}{{ reservation.teacher.user.get_full_name|escapejs }}{% elif reservation.association %}{{ reservation.association.name|escapejs }}{% else %}{{ reservation.requester.get_full_name|escapejs|default:reservation.requester.username }}{% endif %}')" 
+                                        class="p-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                                        title="Approuver">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button onclick="rejectReservation({{ reservation.id }}, '{{ reservation.room.name|escapejs }}', '{% if reservation.teacher %}{{ reservation.teacher.user.get_full_name|escapejs }}{% elif reservation.association %}{{ reservation.association.name|escapejs }}{% else %}{{ reservation.requester.get_full_name|escapejs|default:reservation.requester.username }}{% endif %}')" 
+                                        class="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                                        title="Rejeter">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% endif %}
+                                <a href="{% url 'reservation_detail' reservation.pk %}" 
+                                   class="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                                   title="Voir détails">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="flex justify-center p-6 border-t border-gray-100">
+            <div class="flex items-center space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}" 
+                   class="px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-4 py-2 btn-gradient text-white rounded-lg font-medium">{{ num }}</span>
+                {% else %}
+                <a href="?page={{ num }}&{{ request.GET.urlencode }}" 
+                   class="px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors">{{ num }}</a>
+                {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}" 
+                   class="px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition-colors">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-16 glass-card rounded-2xl shadow-lg">
+        <div class="w-24 h-24 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-calendar-check text-indigo-500 text-4xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Aucune demande</h3>
+        <p class="text-gray-600">Aucune demande de réservation pour les filtres sélectionnés</p>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+// Approve Reservation Function
+function approveReservation(reservationId, roomName, requesterName) {
+    showConfirmActionModal({
+        type: 'approve',
+        title: '✅ Approuver la Réservation',
+        message: 'Êtes-vous sûr de vouloir approuver cette demande de réservation ?',
+        details: `
+            <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                <p style="margin: 0.5rem 0;"><strong>🚪 Salle:</strong> ${roomName}</p>
+                <p style="margin: 0.5rem 0;"><strong>👤 Demandeur:</strong> ${requesterName}</p>
+            </div>
+        `,
+        confirmText: '✅ Oui, Approuver',
+        confirmClass: 'bg-emerald-500 hover:bg-emerald-600',
+        onConfirm: () => {
+            fetch(`/scheduling/api/reservations/${reservationId}/approve/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('✅ Réservation approuvée avec succès !', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast('❌ Erreur: ' + (data.message || 'Impossible d\'approuver'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('❌ Erreur réseau', 'error');
+            });
+        }
+    });
+}
+
+// Reject Reservation Function
+function rejectReservation(reservationId, roomName, requesterName) {
+    showConfirmActionModal({
+        type: 'reject',
+        title: '❌ Rejeter la Réservation',
+        message: 'Êtes-vous sûr de vouloir rejeter cette demande de réservation ?',
+        details: `
+            <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;">
+                <p style="margin: 0.5rem 0;"><strong>🚪 Salle:</strong> ${roomName}</p>
+                <p style="margin: 0.5rem 0;"><strong>👤 Demandeur:</strong> ${requesterName}</p>
+            </div>
+        `,
+        confirmText: '❌ Oui, Rejeter',
+        confirmClass: 'bg-rose-500 hover:bg-rose-600',
+        showNotes: true,
+        onConfirm: (reason) => {
+            fetch(`/scheduling/api/reservations/${reservationId}/reject/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ reason: reason })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('✅ Réservation rejetée', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast('❌ Erreur: ' + (data.message || 'Impossible de rejeter'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('❌ Erreur réseau', 'error');
+            });
+        }
+    });
+}
+
+// Generic Confirm Modal
+function showConfirmActionModal(config) {
+    let modal = document.getElementById('confirmActionModal');
+    if (!modal) {
+        modal = createConfirmActionModal();
+    }
+    
+    const header = modal.querySelector('#modalHeader');
+    const title = modal.querySelector('#modalTitle');
+    const message = modal.querySelector('#modalMessage');
+    const details = modal.querySelector('#modalDetails');
+    const confirmBtn = modal.querySelector('#modalConfirmBtn');
+    const notesContainer = modal.querySelector('#rejectionNotesContainer');
+    const notesInput = modal.querySelector('#rejectionNotes');
+    
+    // Reset state
+    notesInput.value = '';
+    
+    if (config.type === 'approve') {
+        header.className = 'p-6 bg-emerald-500 text-white text-center rounded-t-3xl';
+        title.innerHTML = '<i class="fas fa-check-circle mr-2"></i> ' + config.title;
+        notesContainer.classList.add('hidden');
+    } else {
+        header.className = 'p-6 bg-rose-500 text-white text-center rounded-t-3xl';
+        title.innerHTML = '<i class="fas fa-times-circle mr-2"></i> ' + config.title;
+        if (config.showNotes) notesContainer.classList.remove('hidden');
+    }
+    
+    message.textContent = config.message;
+    details.innerHTML = config.details;
+    confirmBtn.textContent = config.confirmText;
+    confirmBtn.className = `flex-1 py-4 text-white rounded-2xl font-black transition-all shadow-lg hover:scale-105 active:scale-95 ${config.confirmClass}`;
+    
+    confirmBtn.onclick = () => {
+        const reason = notesInput.value;
+        config.onConfirm(reason);
+        closeConfirmActionModal();
+    };
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function createConfirmActionModal() {
+    const html = `
+        <div id="confirmActionModal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+            <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeConfirmActionModal()"></div>
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md relative animate-popIn overflow-hidden">
+                <div id="modalHeader">
+                    <h3 id="modalTitle" class="text-xl font-black"></h3>
+                </div>
+                <div class="p-8">
+                    <p id="modalMessage" class="text-gray-600 mb-6 font-medium text-center"></p>
+                    <div id="modalDetails" class="mb-8"></div>
+                    
+                    <div id="rejectionNotesContainer" class="hidden mb-6">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Motif du rejet (Optionnel)</label>
+                        <textarea id="rejectionNotes" class="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-indigo-500 outline-none transition-all placeholder:text-gray-300" 
+                                  placeholder="Expliquez pourquoi la demande est rejetée..."></textarea>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button id="modalConfirmBtn" class="flex-1 py-4 text-white rounded-2xl font-black transition-all shadow-lg hover:scale-105 active:scale-95">
+                            CONFIRMER
+                        </button>
+                        <button onclick="closeConfirmActionModal()" class="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-black hover:bg-gray-200 transition-all">
+                            ANNULER
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+    return document.getElementById('confirmActionModal');
+}
+
+function closeConfirmActionModal() {
+    const modal = document.getElementById('confirmActionModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+}
+</script>
+
+<style>
+    @keyframes popIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .animate-popIn {
+        animation: popIn 0.3s ease-out forwards;
+    }
+    
+    /* Dark Mode Overrides */
+    .dark .glass-card {
+        background: rgba(39, 39, 42, 0.6) !important;
+        border: 1px solid rgba(63, 63, 70, 0.5) !important;
+    }
+    .dark .text-gray-800, .dark .text-gray-900 {
+        color: #f4f4f5 !important;
+    }
+    .dark .text-gray-600, .dark .text-gray-700 {
+        color: #d4d4d8 !important;
+    }
+    .dark .text-gray-500 {
+        color: #a1a1aa !important;
+    }
+    .dark thead {
+        background: linear-gradient(to right, #3f3f46, #52525b) !important;
+    }
+    .dark th {
+        color: #e4e4e7 !important;
+    }
+    .dark tbody tr:hover {
+        background-color: rgba(63, 63, 70, 0.4) !important;
+    }
+    .dark tbody tr {
+        border-color: rgba(63, 63, 70, 0.3) !important;
+    }
+    .dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+        border-color: rgba(63, 63, 70, 0.3) !important;
+    }
+    
+    /* Input Search */
+    .dark input#searchInput {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+        color: white !important;
+    }
+    
+    /* Modals */
+    .dark #confirmActionModal > div:nth-child(2) {
+        background-color: #27272a !important;
+        color: #f4f4f5 !important;
+    }
+    .dark textarea {
+        background-color: #3f3f46 !important;
+        border-color: #52525b !important;
+        color: #f4f4f5 !important;
+    }
+    .dark .bg-gray-100 {
+        background-color: #3f3f46 !important;
+        color: #d4d4d8 !important;
+    }
+    
+    /* Pagination */
+    .dark a.text-gray-700:hover {
+        background-color: #3f3f46 !important;
+        color: #f4f4f5 !important;
+    }
+    .dark a.text-gray-700 {
+        color: #d4d4d8 !important;
+    }
+</style>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Demande de Réservation - FSTTIME{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-16 max-w-4xl relative">
+    
+    <!-- Navigation Back -->
+    <div class="mb-8 animate-fadeIn">
+        <a href="{% url 'dashboard' %}" class="inline-flex items-center gap-2 px-6 py-2 bg-white/60 backdrop-blur-md border border-white/40 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm">
+            <i class="fas fa-arrow-left"></i> Retour au Tableau de bord
+        </a>
+    </div>
+
+    <!-- Main Card -->
+    <div class="glass-card rounded-[3.5rem] shadow-2xl overflow-hidden animate-fadeInUp border border-white/60 bg-white/40 backdrop-blur-3xl dark:bg-zinc-900/60 dark:border-zinc-800">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-br from-blue-600 via-indigo-700 to-blue-900 p-12 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+            
+            <div class="relative z-10">
+                <div class="w-20 h-20 bg-white/10 backdrop-blur-2xl rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/20 shadow-xl">
+                    <i class="fas fa-calendar-plus text-white text-3xl"></i>
+                </div>
+                <h1 class="text-3xl font-black text-white uppercase tracking-tight">Demande de Réservation</h1>
+                <p class="text-blue-100/70 font-bold text-xs uppercase tracking-widest mt-2 px-4 py-1 bg-white/5 inline-block rounded-full border border-white/10">
+                    Identification: <span class="text-white">{{ user.username }}</span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Form Content -->
+        <div class="p-10 lg:p-14">
+            
+            <!-- Alert Info -->
+            <div class="bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-6 rounded-3xl mb-12 flex items-start gap-5">
+                <div class="w-12 h-12 bg-white dark:bg-zinc-800 rounded-2xl flex items-center justify-center text-blue-600 shadow-sm shrink-0">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-blue-900/40 dark:text-blue-300/40 uppercase tracking-widest mb-1">Procédure Administrative</p>
+                    <p class="text-xs font-bold text-blue-900/70 dark:text-blue-300/70 leading-relaxed">
+                        Chaque demande est soumise à validation. Vous recevrez une notification immédiate dès que l'administrateur aura statué sur votre requête.
+                    </p>
+                </div>
+            </div>
+            
+            <form method="post" novalidate class="space-y-10">
+                {% csrf_token %}
+                
+                <!-- Room Selection -->
+                <div class="space-y-3">
+                    <label class="block text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Salle souhaitée</label>
+                    <div class="relative group">
+                        <i class="fas fa-door-open absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 group-focus-within:text-blue-500 transition-colors"></i>
+                        <select name="room" id="{{ form.room.id_for_label }}" class="w-full pl-12 pr-10 py-4 bg-white/60 dark:bg-zinc-800/60 border border-gray-100 dark:border-zinc-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-gray-700 dark:text-gray-300 appearance-none cursor-pointer" required>
+                            <option value="" class="dark:bg-zinc-800">Sélectionner une salle...</option>
+                            {% for choice in form.room.field.queryset %}
+                                <option value="{{ choice.id }}" class="dark:bg-zinc-800" {% if form.room.value|stringformat:"s" == choice.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ choice.name }} ({% if choice.type == 'amphi' %}Amphi{% elif choice.type == 'td' %}TD{% else %}TP{% endif %}) - Cap: {{ choice.capacity }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 pointer-events-none group-focus-within:text-blue-500 transition-colors"></i>
+                    </div>
+                </div>
+                
+                <!-- Date & Duration Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Date et Heure de début</label>
+                        <div class="relative group">
+                            <i class="fas fa-calendar-alt absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 group-focus-within:text-blue-500 transition-colors"></i>
+                            <input type="datetime-local" name="requested_datetime" id="{{ form.requested_datetime.id_for_label }}" 
+                                   class="w-full pl-12 pr-5 py-4 bg-white/60 dark:bg-zinc-800/60 border border-gray-100 dark:border-zinc-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-gray-700 dark:text-gray-300" 
+                                   value="{{ form.requested_datetime.value|default:'' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Durée Prévue (Heures)</label>
+                        <div class="relative group">
+                            <i class="fas fa-hourglass-half absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 group-focus-within:text-blue-500 transition-colors"></i>
+                            <input type="number" name="duration" id="{{ form.duration.id_for_label }}" step="0.5" min="0.5" 
+                                   class="w-full pl-12 pr-5 py-4 bg-white/60 dark:bg-zinc-800/60 border border-gray-100 dark:border-zinc-700 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-gray-700 dark:text-gray-300" 
+                                   value="{{ form.duration.value|default:1 }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reason -->
+                <div class="space-y-3">
+                    <label class="block text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-[0.2em] ml-1">Motif du projet</label>
+                    <div class="relative group">
+                        <i class="fas fa-align-left absolute left-5 top-6 text-gray-300 dark:text-gray-600 group-focus-within:text-blue-500 transition-colors"></i>
+                        <textarea name="reason" id="{{ form.reason.id_for_label }}" rows="4" 
+                                  class="w-full pl-12 pr-5 py-4 bg-white/60 dark:bg-zinc-800/60 border border-gray-100 dark:border-zinc-700 rounded-3xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-bold text-gray-700 dark:text-gray-300 resize-none" 
+                                  placeholder="Décrivez l'objet de votre demande..." required>{{ form.reason.value|default:'' }}</textarea>
+                    </div>
+                </div>
+                
+                <!-- Exam Checkbox -->
+                <div class="p-6 bg-blue-50/30 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30 rounded-3xl flex items-center justify-between group hover:bg-white dark:hover:bg-zinc-800 transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-white dark:bg-zinc-800 rounded-xl shadow-sm flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-800 dark:text-gray-300 uppercase tracking-widest">Type: Évaluation</p>
+                            <p class="text-[9px] font-bold text-gray-400 uppercase">Cochez si c'est un examen</p>
+                        </div>
+                    </div>
+                    <div class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="is_exam" id="{{ form.is_exam.id_for_label }}" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </div>
+                </div>
+                
+                <!-- Errors -->
+                {% if form.errors %}
+                <div class="p-6 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-3xl space-y-2 animate-shake">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                        <div class="flex items-center gap-3 text-red-600 dark:text-red-400 text-[10px] font-black uppercase tracking-widest">
+                            <i class="fas fa-times-circle"></i>
+                            <span>{{ field.label }}: {{ error }}</span>
+                        </div>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                    <div class="flex items-center gap-3 text-red-600 dark:text-red-400 text-[10px] font-black uppercase tracking-widest">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>{{ error }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Actions -->
+                <div class="pt-10 flex flex-col sm:flex-row gap-6">
+                    <button type="submit" class="flex-[3] py-5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-blue-200 dark:shadow-blue-900/30 hover:scale-[1.02] active:scale-95 transition-all">
+                        Transmettre ma Demande <i class="fas fa-paper-plane ml-2"></i>
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="flex-[1] py-5 bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 text-gray-400 dark:text-gray-500 rounded-2xl font-black uppercase tracking-widest text-[9px] text-center hover:bg-gray-50 dark:hover:bg-zinc-700 transition-all">
+                        Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

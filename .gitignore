@@ -1,0 +1,74 @@
+# ===========================================
+# FSTTIME .gitignore
+# ===========================================
+
+# Environment variables - NEVER COMMIT!
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+*.manifest
+*.spec
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+.env.bak/
+
+Lib/
+Scripts/
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+*.sqlite3
+media/
+staticfiles/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*~
+
+# Scripts (temporary)
+update_student_programs.py
